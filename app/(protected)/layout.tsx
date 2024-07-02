@@ -8,9 +8,11 @@ interface ProtectedLayoutProps {
 
 const layout = ({ children }: ProtectedLayoutProps) => {
   return (
-    <div className="h-[100h] w-full flex flex-col gap-y-4 items-center justify-center bg-sky-500">
+    <div className="min-h-[100vh] w-full flex items-center justify-center bg-gray-500">
+    <div className="w-[600px] max-w-[100%] flex flex-col space-y-4 pb-10 mx-4">
     <Navbar/>
-      {children}
+    {children}
+    </div>
     </div>
   );
 };
