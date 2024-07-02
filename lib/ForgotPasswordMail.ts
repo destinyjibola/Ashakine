@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+const domain = process.env.NEXT_PUBLIC_APP_URL
 
 export const sendForgotPasswordMail  = async (email: string, token: string) => {
   try {
@@ -12,7 +13,7 @@ export const sendForgotPasswordMail  = async (email: string, token: string) => {
       },
     });
 
-    const resetLink = `http://localhost:3000/auth/new-password?token=${token}`
+    const resetLink = `${domain}/auth/new-password?token=${token}`
 
 
     const mailOptions = {

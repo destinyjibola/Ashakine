@@ -19,7 +19,7 @@ import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
 import { prisma } from "@/lib/db";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 
-export const login = async (values: z.infer<typeof LoginSchema>) => {
+export const login = async (values: z.infer<typeof LoginSchema>,callbackUrl:string | null) => {
   const validatedFields = LoginSchema.safeParse(values);
   if (!validatedFields.success) {
     return { error: "invalid fields" };
@@ -98,7 +98,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "http://localhost:3000/settings",
+      redirectTo: callbackUrl || "http://localhost:3000/settings",
     });
   } catch (error) {
     if (error instanceof AuthError) {

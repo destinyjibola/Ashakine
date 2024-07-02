@@ -1,55 +1,222 @@
-import { auth, signOut } from "@/auth";
+"use client";
+import { settings } from "@/actions/settings";
+import FormError from "@/components/FormError";
+import FormSuccess from "@/components/FormSuccess";
+// import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { SettingsSchema } from "@/schemas/route";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UserRole } from "@prisma/client";
+import { SelectValue } from "@radix-ui/react-select";
+import { useSession } from "next-auth/react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
-const page = async () => {
-  const session = await auth();
-  const {name,email, role} = session?.user
+const SettingsPage = () => {
+  const user = useCurrentUser();
 
+  const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>();
+  const [isPending, startTransition] = useTransition();
+  const { update } = useSession();
+
+  const form = useForm<z.infer<typeof SettingsSchema>>({
+    resolver: zodResolver(SettingsSchema),
+    defaultValues: {
+      name: user.name || undefined,
+      email: user.email || undefined,
+      password: undefined,
+      newPassword: undefined,
+      role: user.role || undefined,
+      isTwoFactorEnabled: user.isTwoFactorEnabled || undefined,
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof SettingsSchema>) => {
+    startTransition(() => {
+      settings(values)
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+          }
+
+          if (data.success) {
+            update();
+            setSuccess(data.success);
+          }
+        })
+        .catch(() => {
+          setError("Something went wrong");
+        });
+    });
+  };
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-center mb-4">
-        Welcome, {name}
-      </h1>
+    <Card className="w-[600px] mb-10">
+      <CardHeader>
+        <p className="text-2xl font-semibold text-center">Settings</p>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="John Doe"
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {user.isOAuth === false && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="JohnDoe@gmail.com"
+                            disabled={isPending}
+                            type="email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-      <div className="overflow-x-auto mb-10">
-        <table className="table-auto w-full border-collapse border border-gray-300">
-          <thead>
-            <tr>
-              <th className="px-4 py-2 bg-gray-200 border border-gray-300">
-                Name
-              </th>
-              <th className="px-4 py-2 bg-gray-200 border border-gray-300">
-                Email
-              </th>
-              <th className="px-4 py-2 bg-gray-200 border border-gray-300">
-                Role
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="px-4 py-2 border text-center border-gray-300">
-                {name}
-              </td>
-              <td className="px-4 py-2 border text-center border-gray-300">
-               {email}
-              </td>
-              <td className="px-4 py-2 border text-center border-gray-300">{role}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="*******"
+                            disabled={isPending}
+                            type="password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-      <form
-        action={async () => {
-          "use server";
-          await signOut();
-        }}
-      >
-        <Button variant="default">Log out</Button>
-      </form>
-    </div>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="*******"
+                            disabled={isPending}
+                            type="password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select
+                      disabled={isPending}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+
+                        <SelectItem value={UserRole.USER}>User</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {user.isOAuth === false && (
+                <FormField
+                  control={form.control}
+                  name="isTwoFactorEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Two Factor Authentication</FormLabel>
+                        <FormDescription>
+                          {" "}
+                          Enable two factor authenticaton for your account
+                        </FormDescription>
+                        <FormControl>
+                          <Switch
+                            disabled={isPending}
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+            <FormError message={error} />
+            <FormSuccess message={success} />
+            <Button type="submit">Save</Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 
-export default page;
+export default SettingsPage;

@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 
+const domain = process.env.NEXT_PUBLIC_APP_URL
+
 export const sendVerification = async (email: string, token: string) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -12,7 +14,7 @@ export const sendVerification = async (email: string, token: string) => {
       },
     });
 
-    const confirmLink = `http://localhost:3000/auth/new-verification?token=${token}`
+    const confirmLink = `${domain}/auth/new-verification?token=${token}`
 
 
     const mailOptions = {
