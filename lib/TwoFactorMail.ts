@@ -13,7 +13,7 @@ export const sendTwoFactorTokenMail  = async (email: string, token: string) => {
       },
     });
 
-    const resetLink = `${domain }/auth/new-password?token=${token}`
+    const resetLink = `${domain    }/auth/new-password?token=${token}`
 
 
     const mailOptions = {
