@@ -211,7 +211,10 @@ const SettingsPage = () => {
             </div>
             <FormError message={error} />
             <FormSuccess message={success} />
-            <Button type="submit">Update</Button>
+            <Button disabled={isPending} type="submit">
+              {isPending ? "Updating...." : "Updating"}
+              {isPending && <div className="lds-hourglass ms-3"></div>}
+            </Button>
           </form>
         </Form>
       </CardContent>
