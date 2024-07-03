@@ -10,9 +10,9 @@ const Navbar = () => {
   return (
     <nav
       className="bg-secondary flex justify-between
-  items-center p-4 rounded-xl w-[100%] shadow-sm"
+  items-center sm:p-4 p-3 gap-x-0.5 rounded-xl w-[100%] shadow-sm"
     >
-      <div className="flex gap-x-2">
+      <div className="flex gap-x-1.5 flex-row">
         <Button
           asChild
           variant={pathname === "/client" ? "default" : "outline"}
