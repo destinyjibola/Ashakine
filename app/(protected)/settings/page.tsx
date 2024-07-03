@@ -73,7 +73,7 @@ const SettingsPage = () => {
   return (
     <Card className="w-[100%] mb-10 ">
       <CardHeader>
-        <p className="text-2xl font-semibold text-center">Settings</p>
+        <p className="text-2xl font-semibold text-center">⚙️ Settings</p>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -211,7 +211,7 @@ const SettingsPage = () => {
             </div>
             <FormError message={error} />
             <FormSuccess message={success} />
-            <Button type="submit">Save</Button>
+            <Button type="submit">Update</Button>
           </form>
         </Form>
       </CardContent>

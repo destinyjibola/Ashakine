@@ -6,7 +6,7 @@ import React from 'react'
 const page = async () => {
     const user = await currentUser();
   return (
-    <UserInfo label='Server component' user={user} />
+    <UserInfo label='🌍 Server component' user={user} />
   )
 }
 
