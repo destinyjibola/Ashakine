@@ -119,7 +119,7 @@ const SettingsPage = () => {
 
                   <FormField
                     control={form.control}
-                    name="name"
+                    name="password"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
@@ -138,7 +138,7 @@ const SettingsPage = () => {
 
                   <FormField
                     control={form.control}
-                    name="name"
+                    name="newPassword"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>New Password</FormLabel>
