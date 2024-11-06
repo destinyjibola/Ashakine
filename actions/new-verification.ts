@@ -1,12 +1,14 @@
 "use server"
 
+import { currentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db"
 import { getVerificationByToken } from "@/lib/verification-token"
 import { getUserByEmail } from "@/user";
-import { error } from "console";
 
 
 export const Verification = async (token:string) =>{
+    const isloggedin = await currentUser();
+
     const existingToken = await getVerificationByToken(token);
 
     if (!existingToken) {
@@ -20,6 +22,11 @@ export const Verification = async (token:string) =>{
     }
 
     const existingUser = await getUserByEmail(existingToken.email);
+
+
+    if (!isloggedin) {
+        
+    }
 
     if (!existingUser) {
         return {error: "Email does not exist"}
