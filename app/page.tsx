@@ -1,6 +1,9 @@
 
 import { Poppins } from "next/font/google";
 import { cn } from "@/lib/utils";
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import WhatWeDo from "@/components/WhatWeDo";
 
 
 const font = Poppins({
@@ -10,8 +13,10 @@ const font = Poppins({
 
 export default function Home() {
   return (
-    <div>
-      <h2>Home page</h2>
-    </div>
+    <>
+    <Navbar/>
+    <Hero/>
+    <WhatWeDo/>
+    </>
  );
 }
