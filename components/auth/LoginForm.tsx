@@ -18,22 +18,16 @@ import FormError from "../FormError";
 import FormSuccess from "../FormSuccess";
 // import { login } from "@/actions/login";
 import { useState, useTransition } from "react";
-import { useSearchParams } from "next/navigation";
+
 import Link from "next/link";
 import heroimage from "../../assets/crowdfund/hero-image.svg";
 
 const LoginForm = () => {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use with diffrent provider!"
-      : "";
+
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const [showTwoFactor, setShowTwoFactor] = useState(false);
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -163,7 +157,7 @@ const LoginForm = () => {
               {/* </> */}
               {/* )} */}
             </div>
-            <FormError message={error || urlError} />
+            <FormError message={error} />
             <FormSuccess message={success} />
             {/* {!showTwoFactor && ( */}
             <Button
