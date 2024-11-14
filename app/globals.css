@@ -147,6 +147,18 @@ html {
     @apply font-medium  text-lg lg:text-xl;
   }
 
+  .paragraph-7 {
+    @apply font-medium  text-lg lg:text-2xl;
+  }
+
+
+  .paragraph-8 {
+    @apply font-semibold text-xl;
+  }
+
+  .paragraph-9 {
+    @apply font-medium text-base;
+  }
   .secondaryheading-2 {
     @apply font-medium text-xl tracking-tight first:mt-0 scroll-m-20;
   }
@@ -161,6 +173,10 @@ html {
 
   .secondaryheading-4 {
     @apply font-bold text-2xl tracking-tight first:mt-0 scroll-m-20;
+  }
+
+  .secondaryheading-5{
+    @apply font-bold text-xl tracking-tight first:mt-0 scroll-m-20;
   }
   .topheading {
     @apply scroll-m-20 text-[45px] lg:text-[64px] font-semibold tracking-tight first:mt-0 leading-[65px] md:leading-[72px];
@@ -183,6 +199,6 @@ html {
   }
 
   .container-spacing {
-    @apply px-2 md:px-[6rem] lg:px-[8rem];
+    @apply px-2 md:px-[6rem] lg:px-[12rem];
   }
 }

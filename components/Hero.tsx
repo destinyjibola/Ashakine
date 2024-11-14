@@ -11,7 +11,7 @@ const Hero = () => {
       style={{
         backgroundImage: `url(${heroimage.src})`,
         backgroundSize: "cover",
-        position: "relative", // Ensure children can use absolute positioning
+        position: "relative", 
       }}
       id="hero-section"
       role="banner"
