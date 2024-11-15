@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { Progress } from "@/components/ui/progress"; // Importing the Shadcn Progress component
+import { Button } from "@/components/ui/button"; // Importing the Shadcn Button component
 
 interface Column {
   label: string;
@@ -25,11 +26,15 @@ const DynamicTable: React.FC<TableProps> = ({ columns, data }) => {
             {columns.map((col) => (
               <th
                 key={col.accessor}
-                className="px-4 py-2 border-b dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="px-6 py-4 border-b dark:border-gray-700 text-left text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 {col.label}
               </th>
             ))}
+            {/* Adding an extra header for the "View" button column */}
+            <th className="px-6 py-4 border-b dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -41,9 +46,8 @@ const DynamicTable: React.FC<TableProps> = ({ columns, data }) => {
               {columns.map((col) => (
                 <td
                   key={col.accessor}
-                  className="px-4 py-2 text-sm text-gray-800 dark:text-gray-200"
+                  className="px-6 py-4 text-sm text-gray-800 dark:text-gray-200"
                 >
-                  {/* Conditionally render the progress bar for the "Progress" column */}
                   {col.accessor === "progress" ? (
                     <div className="flex items-center">
                       <span className="mr-2">{row[col.accessor]}%</span>
@@ -54,6 +58,12 @@ const DynamicTable: React.FC<TableProps> = ({ columns, data }) => {
                   )}
                 </td>
               ))}
+              {/* Adding a new cell for the "View" button */}
+              <td className="px-6 py-4">
+                <Button onClick={() => alert(`Viewing: ${row[columns[0].accessor]}`)}>
+                  View
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>

@@ -2,7 +2,6 @@
 import DynamicTable from "@/components/dashboard/Table";
 import React from "react";
 
-
 const Page = () => {
   const columns = [
     { label: "ID", accessor: "id" },
