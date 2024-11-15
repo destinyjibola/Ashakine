@@ -19,7 +19,7 @@ const UserButton = () => {
       <DropdownMenuTrigger>
         <Avatar>
           {/* <AvatarImage src={user?.image || ""} alt="@shadcn" /> */}
-          <AvatarFallback className="bg-gray-900 text-white">CN</AvatarFallback>
+          <AvatarFallback className="bg-primary-color-150 text-white">CN</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
