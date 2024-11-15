@@ -26,13 +26,17 @@ const config = {
         "secondary-color": "#812C8180",
         "primary-color-50": "#A787A7",
         "primary-color-100": "#561D56",
+        "primary-color-150": "#A937A9", 
+
         "custom-gray": "#808081",
+        'bordercolor': "#ECECEC", 
         // "custom-gray-20": "#212124",
         // "custom-gray-50": "#777575",
         // "custom-gray-100": "#99A7B1",
         // "custom-gray-150": "#9F9FA8",
         // "custom-gray-200": "#433643",
         "custom-gray-250": "#222222",
+        "custom-gray-300": "#98989D",
         // "custom-gray-300": "#F5F5F5",
 
         // "custom-bg-gray": "#F9FAFF",

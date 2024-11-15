@@ -132,7 +132,7 @@ html {
   }
 
   .paragraph-3 {
-    @apply font-normal text-xs;
+    @apply font-semibold text-xs;
   }
 
   .paragraph-4 {
@@ -147,8 +147,12 @@ html {
     @apply font-medium  text-lg lg:text-xl;
   }
 
+  .paragraph-9 {
+    @apply font-semibold  text-lg;
+  }
+
   .paragraph-7 {
-    @apply font-medium  text-lg lg:text-2xl;
+    @apply font-medium  text-2xl;
   }
 
 
