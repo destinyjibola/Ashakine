@@ -60,7 +60,7 @@ const DynamicTable: React.FC<TableProps> = ({ columns, data }) => {
               ))}
               {/* Adding a new cell for the "View" button */}
               <td className="px-6 py-4">
-                <Button onClick={() => alert(`Viewing: ${row[columns[0].accessor]}`)}>
+                <Button className="bg-black text-white" onClick={() => alert(`Viewing: ${row[columns[0].accessor]}`)}>
                   View
                 </Button>
               </td>

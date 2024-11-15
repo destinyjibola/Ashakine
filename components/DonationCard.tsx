@@ -42,6 +42,7 @@ const DonationCard: React.FC<ServiceCardProps> = ({
             <p>$20,487 raised</p>
             <p>77%  completed</p>
         </div>
+
       </div>
     </div>
   );
