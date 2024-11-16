@@ -42,7 +42,7 @@ const SupporterCard: React.FC<SupporterCardProps> = ({
   }, [raisedAmount, completionPercentage]);
 
   return (
-    <div className="border-bordercolor bg-slate-50 rounded-xl shadow-lg p-6 border-2 cursor-pointer transform hover:bg-gray-100 hover:scale-105 hover:shadow-xl hover:shadow-gray-400/50 transition-all">
+    <div className="border-bordercolor bg-slate-50 rounded-xl shadow-lg p-4 border-2 cursor-pointer transform hover:bg-gray-100 hover:scale-105 hover:shadow-xl hover:shadow-gray-400/50 transition-all">
       <div className="mb-4">
         <h2 className="font-semibold">{title}</h2>
       </div>

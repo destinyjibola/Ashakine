@@ -7,7 +7,7 @@ const ProjectOverview = () => {
     <div className="bg-white p-4 rounded-lg">
       <h2 className="paragraph-9 mb-4">Projects</h2>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid md:grid-cols-3 grid-cols-1 gap-6 md:gap-2">
         <ProjectOverviewCard />
         <ProjectOverviewCard />
         <ProjectOverviewCard />

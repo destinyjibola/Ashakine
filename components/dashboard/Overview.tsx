@@ -8,7 +8,7 @@ const Overview: React.FC = () => {
   return (
     <div className="bg-white p-4 rounded-lg">
       <h2 className="paragraph-9 mb-4">Overview</h2>
-      <div className="flex justify-between">
+      <div className="flex md:flex-row flex-col justify-between space-y-6">
         <OverviewCard iconSrc={supportIcon.src} title="Total Donation" value="$15,594" />
         <OverviewCard iconSrc={supportIcon.src} title="Donors" value="350" />
         <OverviewCard iconSrc={supportIcon.src} title="Ongoing Projects" value="12" />

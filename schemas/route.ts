@@ -3,39 +3,44 @@ import * as z from "zod";
 
 export const SettingsSchema = z
   .object({
-    name: z.optional(z.string()),
-    isTwoFactorEnabled: z.optional(z.boolean()),
-    role: z.enum([UserRole.ADMIN, UserRole.USER]),
-    email: z.optional(z.string().email()),
-    password: z.optional(z.string().min(6)),
-    newPassword: z.optional(z.string().min(6)),
+    name: z.string().optional(),
+    email: z.string().email().optional(),
+    image: z.string().optional(),
+    address: z.string().optional(),
+    phonenubmer: z.string().optional(),
+    accountnumber: z.string().optional(),
+    bank: z.string().optional(),
+    nameonbank: z.string().optional(),
+    idnumber: z.string().optional(),
+    front: z.string().optional(),
+    back: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.password && !data.newPassword) {
-        return false;
-      }
+  // .refine(
+  //   (data) => {
+  //     if (data.password && !data.newPassword) {
+  //       return false;
+  //     }
 
-      return true;
-    },
-    {
-      message: "New Password is required",
-      path: ["newPassword"],
-    }
-  )
-  .refine(
-    (data) => {
-      if (!data.password && data.newPassword) {
-        return false;
-      }
+  //     return true;
+  //   },
+  //   {
+  //     message: "New Password is required",
+  //     path: ["newPassword"],
+  //   }
+  // )
+  // .refine(
+  //   (data) => {
+  //     if (!data.password && data.newPassword) {
+  //       return false;
+  //     }
 
-      return true;
-    },
-    {
-      message: "Password is required",
-      path: ["newPassword"],
-    }
-  );
+  //     return true;
+  //   },
+  //   {
+  //     message: "Password is required",
+  //     path: ["newPassword"],
+  //   }
+  // );
 
 export const NewPasswordSchema = z.object({
   password: z.string().min(6, {
