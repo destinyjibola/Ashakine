@@ -26,7 +26,7 @@ const Layout = ({ children }: ProtectedLayoutProps) => {
 
   return (
     <div className="w-full">
-      {/* Tab Buttons */}
+   
       <div className="flex whitespace-nowrap mb-4 border-b border-gray-200">
         {tabs.map((tab) => (
           <Button

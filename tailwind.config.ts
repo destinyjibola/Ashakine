@@ -26,7 +26,7 @@ const config = {
         "secondary-color": "#812C8180",
         "primary-color-50": "#A787A7",
         "primary-color-100": "#561D56",
-        "primary-color-150": "#A937A9", 
+        "primary-color-150": "#A937A9",
 
         "custom-gray": "#808081",
         'bordercolor': "#ECECEC", 

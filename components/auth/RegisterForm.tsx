@@ -6,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import heroimage from "../../assets/crowdfund/hero-image.svg";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
 import {
   Form,
   FormControl,
@@ -19,8 +22,12 @@ import { Button } from "../ui/button";
 import FormError from "../FormError";
 import FormSuccess from "../FormSuccess";
 import { useState, useTransition } from "react";
+import Cookies from "js-cookie";
 // import { register } from "@/actions/register";
 const RegisterForm = () => {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -30,28 +37,30 @@ const RegisterForm = () => {
     defaultValues: {
       email: "",
       password: "",
-      name: "",
+      fullName: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
+  const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     setError("");
     setSuccess("");
+    setLoading(true);
+    // console.log(values)
 
-    console.log(values)
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/regUser`, values);
 
-    // startTransition(() => {
-    //   register(values).then((data: any) => {
-    //     setError(data?.error);
-    //     setSuccess(data?.success);
-    //     toast.info(data?.error,{
-    //       theme: "light",
-    //     });
-    //     toast.info(data?.success,{
-    //       theme: "light",
-    //     });
-    //   });
-    // });
+      if (res.status === 200) {
+        setLoading(false);
+        console.log(res.data.user);
+        router.push("/auth/login");
+      } else {
+        console.log("other error", res);
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error.response.data.message);
+    }
   };
   return (
     <main
@@ -73,17 +82,17 @@ const RegisterForm = () => {
             <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="fullName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
                         className="py-[1.3rem]"
-                        disabled={isPending}
+                        disabled={loading}
                         placeholder="john doe"
                         {...field}
-                        type="name"
+                        type="text"
                       />
                     </FormControl>
                     <FormMessage />
@@ -99,7 +108,7 @@ const RegisterForm = () => {
                     <FormControl>
                       <Input
                         className="py-[1.3rem]"
-                        disabled={isPending}
+                        disabled={loading}
                         placeholder="example@email.com"
                         {...field}
                         type="email"
@@ -118,7 +127,7 @@ const RegisterForm = () => {
                     <FormControl>
                       <Input
                         className="py-[1.3rem]"
-                        disabled={isPending}
+                        disabled={loading}
                         placeholder="*****"
                         {...field}
                         type="password"
@@ -132,12 +141,12 @@ const RegisterForm = () => {
             <FormError message={error} />
             <FormSuccess message={success} />
             <Button
-              disabled={isPending}
+              disabled={loading}
               type="submit"
               className="w-full rounded-[12px]  py-[1.3rem] bg-primary-color paragraph-7"
             >
-              {isPending ? "Registering" : "Register"}{" "}
-              {isPending && <div className="lds-hourglass ms-3"></div>}
+              {loading ? "Registering" : "Register"}{" "}
+              {loading && <div className="lds-hourglass ms-3"></div>}
             </Button>
           </form>
         </Form>

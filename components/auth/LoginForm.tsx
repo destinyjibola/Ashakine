@@ -4,6 +4,7 @@ import CardWrapper from "./CardWrapper";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import axios from "axios";
 import {
   Form,
   FormControl,
@@ -18,13 +19,15 @@ import FormError from "../FormError";
 import FormSuccess from "../FormSuccess";
 // import { login } from "@/actions/login";
 import { useState, useTransition } from "react";
+import Cookies from "js-cookie";
 
 import Link from "next/link";
 import heroimage from "../../assets/crowdfund/hero-image.svg";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
-
-
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -36,37 +39,34 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
+    setLoading(true);
 
-    console.log(values)
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/userLogin`,
+        values
+      );
 
-    //   login(values,callbackUrl)
-    //     .then((data) => {
-    //       if (data?.error) {
-    //         form.reset();
-    //         setError(data?.error);
-    //       }
+      if (res.status === 200) {
+        setLoading(false);
+        console.log(res.data.user);
 
-    //       if (data?.success) {
-    //         form.reset();
-    //         setSuccess(data?.success);
-    //       }
+        Cookies.set("user", JSON.stringify(res.data.user), { expires: 7 });
+        router.push("/")
+      } else {
 
-    //       if (data?.twoFactor) {
-    //         setShowTwoFactor(true);
-    //       }
-    //       toast.info(data?.error, {
-    //         theme: "light",
-    //       });
-    //       toast.info(data?.success, {
-    //         theme: "light",
-    //       });
-    //     })
-    //     .catch(() => setError("Something went wrong"));
-    // });
+        console.log("other error", res);
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error.response.data.message);
+  
+    }
   };
+
   return (
     <main
       style={{
@@ -85,29 +85,6 @@ const LoginForm = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
-              {/* {showTwoFactor && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Two Factor Code</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isPending}
-                          placeholder="123456"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                ></FormField>
-              </>
-            )} */}
-              {/* {!showTwoFactor && ( */}
-              {/* <> */}
               <FormField
                 control={form.control}
                 name="email"
@@ -157,16 +134,16 @@ const LoginForm = () => {
               {/* </> */}
               {/* )} */}
             </div>
-            <FormError message={error} />
-            <FormSuccess message={success} />
+            {/* <FormError message={error} />
+            <FormSuccess message={success} /> */}
             {/* {!showTwoFactor && ( */}
             <Button
-              disabled={isPending}
+              disabled={loading}
               type="submit"
               className="w-full rounded-[12px] py-[1.3rem] bg-primary-color paragraph-7"
             >
-              {isPending ? "Logging In" : "Log In"}
-              {isPending && <div className="lds-hourglass ms-3"></div>}
+              {loading ? "Logging In" : "Log In"}
+              {loading && <div className="lds-hourglass ms-3"></div>}
             </Button>
             {/* )} */}
             {/* {showTwoFactor && (

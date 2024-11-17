@@ -1,6 +1,21 @@
 import { UserRole } from "@prisma/client";
 import * as z from "zod";
 
+export const ProjectSchema = z.object({
+  title: z.string().min(1, "Title is required").trim(),
+  description: z.string().optional(),
+  goalAmount: z.number().min(0, "Goal amount cannot be negative"),
+  startdate: z.string().refine(date => !isNaN(Date.parse(date)), {
+    message: "Invalid start date"
+  }),
+  enddate: z.string().refine(date => !isNaN(Date.parse(date)), {
+    message: "Invalid end date"
+  }),
+  budgetDetails: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  userId: z.string().min(1, "User ID is required")
+});
+
 export const SettingsSchema = z
   .object({
     name: z.string().optional(),
@@ -71,7 +86,7 @@ export const RegisterSchema = z.object({
   password: z.string().min(6, {
     message: "Password is required",
   }),
-  name: z.string().min(4, {
+  fullName: z.string().min(4, {
     message: "name is required",
   }),
 });

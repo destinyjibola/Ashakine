@@ -1,5 +1,7 @@
 "use client";
 import DynamicTable from "@/components/dashboard/Table";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import React from "react";
 
 const Page = () => {
@@ -47,7 +49,12 @@ const Page = () => {
     },
   ];
 
-  return <DynamicTable columns={columns} data={projects} />;
+  return (
+    <>
+     <Link href={'/dashboard/project/addproject'}>  <Button className="mb-4">Create project</Button></Link>
+      <DynamicTable columns={columns} data={projects} />
+    </>
+  );
 };
 
 export default Page;

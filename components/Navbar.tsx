@@ -1,24 +1,29 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
-// import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
-
-// import logo from "../assets/images/hospitallogo.png";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
+import Cookies from 'js-cookie';
+import UserButtonHome from "./auth/UserButtonHome";
+
 
 export default function Navbar() {
   const pathname = usePathname();
   const [state, setState] = React.useState(false);
+  const [userCookie, setUserCookie] = useState<string | undefined>();
+
+  // Only set userCookie on the client-side after hydration
+  React.useEffect(() => {
+    const cookie = Cookies.get('user');
+    setUserCookie(cookie);
+  }, []);
 
   const menus = [
     { title: "Discovery", path: "/discovery" },
     { title: "About", path: "/about" },
     { title: "Help", path: "/help" },
- 
   ];
 
   // Function to handle link click and close mobile menu
@@ -34,7 +39,7 @@ export default function Navbar() {
       <div className="items-center mx-auto lg:flex px-4 lg:px-[12rem]">
         <div className="flex items-center justify-between py-[0.8rem] lg:block">
           <Link href="/" className="flex items-center space-x-2">
-              <h2 className="text-[28px]">Crowdfund+</h2>
+            <h2 className="text-[28px]">Crowdfund+</h2>
           </Link>
 
           <div className="lg:hidden">
@@ -56,10 +61,6 @@ export default function Navbar() {
             state ? "block" : "hidden"
           }`}
         >
-
-
- 
-
           <div className="lg:hidden block">
             <Link
               href="https://wa.me/+2348062547433"
@@ -73,16 +74,8 @@ export default function Navbar() {
           </div>
         </div>
 
-
-        <div>
-
-
-        </div>
-
-
-
-    <div className="flex space-x-4">
-    <ul className="justify-center items-center space-y-8 lg:flex lg:space-x-4 lg:space-y-0">
+        <div className="flex space-x-4">
+          <ul className="justify-center items-center space-y-8 lg:flex lg:space-x-4 lg:space-y-0">
             {menus.map((item, idx) => (
               <li
                 key={idx}
@@ -96,17 +89,22 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-        <Link
-          href="https://wa.me/+2348062547433"
-          rel="noopener noreferrer"
-          target="_blank"
-          className="lg:block hidden mb-4"
-        >
-          <Button className="rounded-[24px] mt-4 p-[25px] text-base bg-primary-color">
-            Sign In
-          </Button>
-        </Link>
-    </div>
+
+          {userCookie ? (
+            <UserButtonHome />
+          ) : (
+            <Link
+              href="https://wa.me/+2348062547433"
+              rel="noopener noreferrer"
+              target="_blank"
+              className="lg:block hidden mb-4"
+            >
+              <Button className="rounded-[24px] mt-4 p-[25px] text-base bg-primary-color">
+                Sign In
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
     </nav>
   );
