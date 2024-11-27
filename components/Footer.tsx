@@ -5,23 +5,24 @@ import instagram from "../assets/icons/instagram.svg";
 import twitter from "../assets/icons/twitter.svg";
 import Link from "next/link";
 
-
 const Footer = () => {
   return (
     <>
-      <div className="container-spacing">
-     
-      </div>
-      <footer role="contentinfo" className="bg-primary-dark container-spacing section-spacing">
+      <div className="container-spacing"></div>
+      <footer
+        role="contentinfo"
+        className="bg-primary-dark container-spacing section-spacing"
+      >
         <div className="py-[3rem] text-white grid grid-cols-1 lg:gap-0 gap-10 lg:grid-cols-2">
           <div className="flex flex-row">
             <div className="w-full lg:basis-[70%]">
               <h3 className="scroll-m-20 text-[32px] font-normal tracking-tight">
-                Matrix Orthopaedic Hospital
+                Crowdfund+
               </h3>
               <p className="leading-7 text-sm [&:not(:first-child)]:mt-2">
-                Providing top-notch orthopaedic services with a patient-centered
-                approach.
+                Whether it is a personal need, community project, or faith-based
+                initiative, we’re here to help you raise the support you
+                deserve.
               </p>
 
               <div className="flex space-x-6 mt-4">
@@ -39,7 +40,7 @@ const Footer = () => {
                   height={20}
                   alt="facebook"
                 />
-               
+
                 <Image
                   className="cursor-pointer"
                   src={twitter.src}
@@ -57,7 +58,7 @@ const Footer = () => {
               <div className="mt-2 text-sm">
                 <Link href={"/contact"}>
                   {" "}
-                  <p className="leading-8">Contact</p>
+                  <p className="leading-8">Discovery</p>
                 </Link>
                 <Link href={"/about"}>
                   {" "}
@@ -65,7 +66,7 @@ const Footer = () => {
                 </Link>
                 <Link href={"/service"}>
                   {" "}
-                  <p className="leading-8">Services</p>
+                  <p className="leading-8">Help</p>
                 </Link>
               </div>
             </div>
@@ -81,7 +82,7 @@ const Footer = () => {
                       target="_blank"
                       className="hover:underline"
                     >
-                      09123928997
+                      +1(12345678)
                     </a>
                   </p>
                   <p className="leading-8">
@@ -89,14 +90,13 @@ const Footer = () => {
                       href="mailto:yemafolaofmatrix@gmail.com"
                       className="hover:underline"
                     >
-                      yemafolaofmatrix@gmail.com
+                      example@gmail.com
                     </a>
                   </p>
                   <p className="leading-8">
-                    Madojutimi junction, Abiola way Abeokuta.
-                    <br /> Ogun State
+                    No, 4 , mobolaji anthony way lagos
+                    <br /> Nigeria
                   </p>
-             
                 </div>
               </div>
             </div>
@@ -105,7 +105,7 @@ const Footer = () => {
         <hr className="border-white" />
         <div className="justify-between text-sm space-y-3 items-center lg:flex-row flex-col flex py-[2rem]">
           <div className="text-white">
-            @2024 Matrix Orthopaedic Hospital All Rights Reserved
+            @2024 Crowdfund+ All Rights Reserved
           </div>
 
           <div className="text-white">

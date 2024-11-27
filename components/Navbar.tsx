@@ -94,7 +94,7 @@ export default function Navbar() {
             <UserButtonHome />
           ) : (
             <Link
-              href="https://wa.me/+2348062547433"
+              href="/auth/register"
               rel="noopener noreferrer"
               target="_blank"
               className="lg:block hidden mb-4"

@@ -4,6 +4,7 @@ import community from "../assets/crowdfund/community.jpeg";
 import DonationCard from "./DonationCard";
 
 const DonationSection = () => {
+  
   return (
     <section id="donation" className="container-spacing section-spacing ">
       <h2 className=" primaryheading mb-10 text-custom-gray">

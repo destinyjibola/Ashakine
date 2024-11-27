@@ -52,9 +52,10 @@ const LoginForm = () => {
 
       if (res.status === 200) {
         setLoading(false);
-        console.log(res.data.user);
+        Cookies.set("user", res.data.user._id, { expires: 7 });
+       
+        // console.log(res.data.user);
 
-        Cookies.set("user", JSON.stringify(res.data.user), { expires: 7 });
         router.push("/")
       } else {
 

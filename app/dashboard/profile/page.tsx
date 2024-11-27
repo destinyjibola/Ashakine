@@ -2,12 +2,11 @@
 import { SettingsSchema } from "@/schemas/route";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import React, { useState, useTransition } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,25 +15,37 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-// import { useForm } from 'react-hook-form';
+import Cookies from "js-cookie";
+import axios from "axios";
+import Image from "next/image";
+import { fetchUserData } from "@/lib/fetchUser";
 
 const Homepage = () => {
   const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
-  const [isPending, startTransition] = useTransition();
-  const [banner, setBanner] = useState<string | undefined>(undefined);
+  const [data, setData] = useState<any>();
+  const [banner, setBanner] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const user = Cookies.get("user");
 
   const form = useForm<z.infer<typeof SettingsSchema>>({
     resolver: zodResolver(SettingsSchema),
     defaultValues: {
-      name: undefined,
-      phonenubmer: undefined,
-      address: undefined,
-      image: undefined,
+      fullName: data?.fullName || "",
+      phoneNumber: data?.phoneNumber || "",
+      homeAddress: data?.homeAddress || "",
+      email: data?.email || "",
     },
   });
 
+  useEffect(() => {
+    // Specify the desired endpoint and fields to inject
+    fetchUserData(
+      setData,
+      form,
+      ["fullName", "email", "phoneNumber", "homeAddress"],
+      "getSingleUser"
+    );
+  }, [form]);
 
   const readFileAsDataURL = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -55,17 +66,33 @@ const Homepage = () => {
     if (selectedFile && selectedFile.type.startsWith("image/")) {
       const imageData = await readFileAsDataURL(selectedFile);
       setFile(imageData);
-      e.target.value = ""; 
+      e.target.value = "";
     } else {
       alert("Invalid file type. Please select an image");
       e.target.value = "";
     }
   };
 
+  const onSubmit = async (values: z.infer<typeof SettingsSchema>) => {
+    const datas = { _id: user, ...values, image: banner };
+    console.log(datas);
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/updateProfile`,
+        datas
+      );
 
-  const onSubmit: any = (values: z.infer<typeof SettingsSchema>) => {
-    console.log(values);
+      if (res.status === 200) {
+        setLoading(false);
+        alert("profile updated successfully");
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error.response.data.message);
+    }
   };
+
   return (
     <>
       <Form {...form}>
@@ -73,38 +100,42 @@ const Homepage = () => {
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Contact info
           </h4>
-          {/* contact info */}
-
+          <div>
+            {data && (
+              <Image
+                src={data.image}
+                alt="image"
+                width={120}
+                height={60}
+                className="flex-1"
+              />
+            )}
+          </div>
           <FormItem>
-            <FormLabel>Proifle picture</FormLabel>
+            <FormLabel>Change picture</FormLabel>
             <FormControl>
               <Input
                 type="file"
-                onChange={async (e) => handleFileChange(e, setBanner)}
-                disabled={isPending}
+                className="w-[50%]"
+                onChange={(e) => handleFileChange(e, setBanner)}
+                disabled={loading}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
-
           <FormField
             control={form.control}
-            name="name"
+            name="fullName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="John Doe"
-                    disabled={isPending}
-                  />
+                  <Input {...field} placeholder="John Doe" disabled={loading} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="email"
@@ -126,10 +157,9 @@ const Homepage = () => {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="phonenubmer"
+            name="phoneNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Phone number</FormLabel>
@@ -137,25 +167,24 @@ const Homepage = () => {
                   <Input
                     {...field}
                     placeholder="phone number"
-                    disabled={true}
+                    disabled={loading}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="address"
+            name="homeAddress"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Home Address</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
-                    disabled={isPending}
-                    placeholder="Adress here..."
+                    disabled={loading}
+                    placeholder="Address here..."
                   />
                 </FormControl>
                 <FormMessage />
@@ -163,13 +192,9 @@ const Homepage = () => {
             )}
           />
 
-          {/* contact info */}
-          {/* 
-          <FormError message={error} />
-          <FormSuccess message={success} /> */}
-          <Button disabled={isPending} type="submit">
-            {isPending ? "Updating..." : "Update"}
-            {isPending && <div className="lds-hourglass ms-3"></div>}
+
+          <Button disabled={loading} type="submit">
+            {loading ? "Updating..." : "Update"}
           </Button>
         </form>
       </Form>

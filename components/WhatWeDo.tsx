@@ -1,13 +1,17 @@
+
 import ServiceCard from "./ServiceCard";
 import birthday from "../assets/crowdfund/birthday.webp";
 import church from "../assets/crowdfund/chuch.jpeg";
 import community from "../assets/crowdfund/community.jpeg";
 
 const WhatWeDo = () => {
+
+   
+
   return (
     <section id="welcome" className="container-spacing section-spacing ">
       <h2 className="text-center primaryheading mb-10 text-custom-gray">
-      What we offer
+        What we offer
       </h2>
       <div className="mx-auto grid grid-cols-3 gap-4 w-[90%]">
         <ServiceCard
@@ -20,7 +24,8 @@ const WhatWeDo = () => {
 
         <ServiceCard
           title="Transforming Communities, Together"
-          description="Start a campaign to repair bridges, improve schools, or enhance local infrastructure. Connect with neighbors and make a lasting difference."
+          description="
+Support church projects, tithing, mission efforts, or create impactful campaigns. Mobilize your faith community and make a difference, publicly or privately."
           imageSrc={church.src}
           altText="Trauma Care"
           link="/service#trauma-care"

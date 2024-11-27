@@ -5,30 +5,26 @@ export const ProjectSchema = z.object({
   title: z.string().min(1, "Title is required").trim(),
   description: z.string().optional(),
   goalAmount: z.number().min(0, "Goal amount cannot be negative"),
-  startdate: z.string().refine(date => !isNaN(Date.parse(date)), {
-    message: "Invalid start date"
-  }),
-  enddate: z.string().refine(date => !isNaN(Date.parse(date)), {
-    message: "Invalid end date"
-  }),
+  // enddate: z.string().refine(date => !isNaN(Date.parse(date)), {
+  //   message: "Invalid end date"
+  // }),
   budgetDetails: z.string().optional(),
-  category: z.string().min(1, "Category is required"),
-  userId: z.string().min(1, "User ID is required")
+  categoryId: z.string().min(1, "Category is required"),
 });
 
 export const SettingsSchema = z
   .object({
-    name: z.string().optional(),
+    fullName: z.string().optional(),
     email: z.string().email().optional(),
     image: z.string().optional(),
-    address: z.string().optional(),
-    phonenubmer: z.string().optional(),
-    accountnumber: z.string().optional(),
+    homeAddress: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    accountNumber: z.string().optional(),
     bank: z.string().optional(),
-    nameonbank: z.string().optional(),
-    idnumber: z.string().optional(),
-    front: z.string().optional(),
-    back: z.string().optional(),
+    bankName: z.string().optional(),
+    idNumber: z.number().optional(),
+    idFront: z.string().optional(),
+    idBack: z.string().optional(),
   })
   // .refine(
   //   (data) => {

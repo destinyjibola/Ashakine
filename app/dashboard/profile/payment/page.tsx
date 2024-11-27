@@ -2,7 +2,7 @@
 import { SettingsSchema } from "@/schemas/route";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import React, { useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -15,23 +15,54 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { fetchUserData } from "@/lib/fetchUser";
+import Cookies from "js-cookie";
+import axios from "axios";
+
 
 const PaymentPage = () => {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
-  const [isPending, startTransition] = useTransition();
+  const [data, setData] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const user = Cookies.get("user");
 
   const form = useForm<z.infer<typeof SettingsSchema>>({
     resolver: zodResolver(SettingsSchema),
     defaultValues: {
-      accountnumber: undefined,
+      accountNumber: undefined,
       bank: undefined,
-      nameonbank: undefined,
+      bankName: undefined,
     },
   });
 
-  const onSubmit: any = (values: z.infer<typeof SettingsSchema>) => {
-    console.log(values);
+  useEffect(() => {
+    // Specify the desired endpoint and fields to inject
+    fetchUserData(
+      setData,
+      form,
+      ["accountNumber", "bank", "bankName"],
+      "getSingleUser"
+    );
+  }, [form]);
+
+  const onSubmit: any = async (values: z.infer<typeof SettingsSchema>) => {
+    const data = { _id: user, ...values};
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/updateProfile`,
+        data
+      );
+
+      if (res.status === 200) {
+        setLoading(false);
+        alert("profile updated successfully");
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error.response.data.message);
+    }
   };
 
   return (
@@ -39,13 +70,13 @@ const PaymentPage = () => {
       <Form {...form}>
         <form className="space-y-6 py-6" onSubmit={form.handleSubmit(onSubmit)}>
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-            Contact info
+            Bank details
           </h4>
           {/* contact info */}
 
           <FormField
             control={form.control}
-            name="accountnumber"
+            name="accountNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Number</FormLabel>
@@ -53,7 +84,7 @@ const PaymentPage = () => {
                   <Input
                     {...field}
                     placeholder="account number"
-                    disabled={isPending}
+                    disabled={loading}
                     type="number"
                   />
                 </FormControl>
@@ -64,17 +95,17 @@ const PaymentPage = () => {
 
           <FormField
             control={form.control}
-            name="nameonbank"
+            name="bankName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name on bank</FormLabel>
+                <FormLabel>Account name</FormLabel>
                 <div className="flex space-x-4">
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="JohnDoe@gmail.com"
-                      disabled={isPending}
-                      type="email"
+                      placeholder="account number"
+                      disabled={loading}
+                      type="text"
                       // className="w-[80%]"
                     />
                   </FormControl>
@@ -94,7 +125,7 @@ const PaymentPage = () => {
                   <Input
                     {...field}
                     placeholder="bank name"
-                    disabled={isPending}
+                    disabled={loading}
                   />
                 </FormControl>
                 <FormMessage />
@@ -106,9 +137,9 @@ const PaymentPage = () => {
           {/* 
           <FormError message={error} />
           <FormSuccess message={success} /> */}
-          <Button disabled={isPending} type="submit">
-            {isPending ? "Updating..." : "Update"}
-            {isPending && <div className="lds-hourglass ms-3"></div>}
+          <Button disabled={loading} type="submit">
+            {loading ? "Updating..." : "Update"}
+            {loading && <div className="lds-hourglass ms-3"></div>}
           </Button>
         </form>
       </Form>

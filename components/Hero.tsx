@@ -27,7 +27,7 @@ const Hero = () => {
         Whether it is a personal need, community project, or faith-based initiative, we’re here to help you raise the support you deserve.
         </h2>
         <Link
-          href="https://wa.me/+2348062547433"
+          href="/auth/register"
           rel="noopener noreferrer"
           target="_blank"
         >

@@ -1,7 +1,5 @@
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 
 interface ServiceCardProps {
@@ -9,6 +7,8 @@ interface ServiceCardProps {
   description: string;
   imageSrc: string;
   altText: string;
+  goalAmount: number; // Total goal for the donation
+  currentAmount: number; // Current amount raised
   link: string;
 }
 
@@ -17,8 +17,16 @@ const DonationCard: React.FC<ServiceCardProps> = ({
   description,
   imageSrc,
   altText,
+  goalAmount,
+  currentAmount,
   link,
 }) => {
+  // Calculate percentage raised
+  const percentageRaised = Math.min((currentAmount / goalAmount) * 100, 100);
+  const formattedPercentage =
+    percentageRaised % 1 === 0
+      ? percentageRaised.toFixed(0)
+      : percentageRaised.toFixed(2);
   return (
     <div className="flex flex-col h-full p-4 rounded-xl shadow-md cursor-pointer">
       <Image
@@ -34,15 +42,18 @@ const DonationCard: React.FC<ServiceCardProps> = ({
       </h2>
 
       <div className="flex flex-col space-y-4 flex-grow justify-between">
-        <p className="paragraph-1 text-custom-gray-50 dark:text-white">{description}</p>
+        <p className="paragraph-1 text-custom-gray-50 dark:text-white">
+          {description}
+        </p>
 
-        <Progress value={33} />
-        
+        {/* Progress bar */}
+        <Progress value={+percentageRaised} />
+
         <div className="flex justify-between paragraph-1">
-            <p>$20,487 raised</p>
-            <p>77%  completed</p>
+          {/* Dynamically display amounts and percentage */}
+          <p>${currentAmount.toLocaleString()} raised</p>
+          <p>{percentageRaised}% completed</p>
         </div>
-
       </div>
     </div>
   );
