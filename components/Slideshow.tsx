@@ -5,17 +5,18 @@ import two from "../assets/crowdfund/chuch.jpeg";
 import three from "../assets/crowdfund/birthday.webp";
 import Image from "next/image";
 
-const Slideshow = () => {
+interface ImageProps {
+  src: string;
+  alt: string;
+}
+
+interface SlideshowProps {
+  images: ImageProps[];
+}
+
+const Slideshow: React.FC<SlideshowProps> = ({ images }) => {
   const [slideIndex, setSlideIndex] = useState(0);
 
-  const images = [
-    { src: community, alt: "The Woods" },
-    { src: two, alt: "Cinque Terre" },
-    { src: community, alt: "Mountains and fjords" },
-    { src: three, alt: "Northern Lights" },
-    { src: community, alt: "Nature and sunrise" },
-    { src: two, alt: "Snowy Mountains" },
-  ];
 
   const nextSlide = () => {
     setSlideIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -43,7 +44,7 @@ const Slideshow = () => {
           <div className="absolute top-0 left-0 p-2 text-sm text-white bg-gray-800 rounded-md">
             {index + 1} / {images.length}
           </div>
-          <Image objectFit="cover" src={image.src} alt={image.alt} className="w-full h-[24rem]  rounded-lg" />
+          <Image objectFit="cover" src={image.src} alt={image.alt} width={1000} height={500} className="w-full h-[24rem]  rounded-lg" />
         </div>
       ))}
 
@@ -68,6 +69,7 @@ const Slideshow = () => {
             key={index}
             src={image.src}
             alt={image.alt}
+            width={500} height={200}
             onClick={() => currentSlide(index)}
             className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${
               index === slideIndex ? "border-blue-500" : "border-transparent"

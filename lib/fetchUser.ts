@@ -31,9 +31,9 @@ export const fetchUserData = async (
     );
     const fetchedData: FetchUserDataResponse = await response.json();
     setData(fetchedData.data);
-console.log(fetchedData.data)
+    console.log(fetchedData.data);
     // Only update specified form fields if the form and fetched data exist
-    if (form && fetchedData.data && typeof fetchedData.data === 'object') {
+    if (form && fetchedData.data && typeof fetchedData.data === "object") {
       fieldsToInject.forEach((field) => {
         if (field in fetchedData.data) {
           form.setValue(field, fetchedData.data[field]);

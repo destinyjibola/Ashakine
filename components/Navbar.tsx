@@ -21,7 +21,7 @@ export default function Navbar() {
   }, []);
 
   const menus = [
-    { title: "Discovery", path: "/discovery" },
+    { title: "Discovery", path: "/" },
     { title: "About", path: "/about" },
     { title: "Help", path: "/help" },
   ];

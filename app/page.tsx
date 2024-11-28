@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import WhatWeDo from "@/components/WhatWeDo";
-import DonationSection from "@/components/DonationSection";
 import Categories from "@/components/Categories";
 import Footer from "@/components/Footer";
 import getAllProject from "@/helpers/getAllProject";
@@ -20,7 +19,7 @@ const font = Poppins({
 export default async function page() {
   const project = await getAllProject();
 
-  console.log(project);
+  
   return (
     <>
       <Navbar />
@@ -39,6 +38,7 @@ export default async function page() {
                   goalAmount={data.goalAmount}
                   currentAmount={data.currentAmount}
                   title={data.title}
+                  shortdesc={data.shortdesc}
                   description={data.description}
                   imageSrc={data.images[0] || birthday.src}
                   altText={data.title}
