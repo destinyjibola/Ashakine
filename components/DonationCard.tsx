@@ -46,7 +46,7 @@ const DonationCard: React.FC<ServiceCardProps> = ({
         </h2>
 
         <div className="flex flex-col space-y-4 flex-grow justify-between">
-          <p className="paragraph-1 text-custom-gray-50 dark:text-white">
+          <p className="paragraph-1  text-custom-gray-50 dark:text-white">
             {shortdesc}
           </p>
 

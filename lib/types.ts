@@ -65,6 +65,6 @@ export interface ProjectResponse {
   startdate: string;
   title: string;
   updatedAt: string;
-  userId: string | null;
+  userId: User;
   __v: number;
 }

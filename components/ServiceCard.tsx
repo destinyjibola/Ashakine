@@ -34,11 +34,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
       <div className="flex flex-col space-y-4 flex-grow justify-between">
         <p className="paragraph-1 text-custom-gray-50 dark:text-white">{description}</p>
-        <Link href={link}>
+        {/* <Link href={link}>
           <Button className="self-start rounded-3xl bg-primary-color">
             Learn more
           </Button>
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

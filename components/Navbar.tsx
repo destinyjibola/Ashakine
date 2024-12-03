@@ -1,22 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import UserButtonHome from "./auth/UserButtonHome";
-
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [state, setState] = React.useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [userCookie, setUserCookie] = useState<string | undefined>();
 
-  // Only set userCookie on the client-side after hydration
-  React.useEffect(() => {
-    const cookie = Cookies.get('user');
+  useEffect(() => {
+    const cookie = Cookies.get("user");
     setUserCookie(cookie);
   }, []);
 
@@ -26,9 +24,8 @@ export default function Navbar() {
     { title: "Help", path: "/help" },
   ];
 
-  // Function to handle link click and close mobile menu
   const handleLinkClick = () => {
-    setState(false);
+    setMenuOpen(false);
   };
 
   return (
@@ -36,18 +33,28 @@ export default function Navbar() {
       role="navigation"
       className="w-full items-center bg-white border-b shadow-lg lg:border fixed top-0 z-50"
     >
-      <div className="items-center mx-auto lg:flex px-4 lg:px-[12rem]">
+      <div className="items-center justify-between mx-auto lg:flex px-4 lg:px-[12rem]">
+        {/* Logo and Mobile Menu Toggle */}
         <div className="flex items-center justify-between py-[0.8rem] lg:block">
           <Link href="/" className="flex items-center space-x-2">
             <h2 className="text-[28px]">Crowdfund+</h2>
           </Link>
 
-          <div className="lg:hidden">
+          <div className="lg:hidden flex items-center space-x-2">
+            {userCookie ? (
+              <UserButtonHome />
+            ) : (
+              <Link href="/auth/register" className="lg:block hidden mb-4">
+                <Button className="rounded-[24px] mt-4 p-[25px] text-base bg-primary-color">
+                  Sign In
+                </Button>
+              </Link>
+            )}
             <button
               className="text-gray-700 outline-none p-2 rounded-md focus:border-gray-400 focus:border"
-              onClick={() => setState(!state)}
+              onClick={() => setMenuOpen(!menuOpen)}
             >
-              {state ? (
+              {menuOpen ? (
                 <X width={45} height={45} />
               ) : (
                 <Menu width={45} height={45} />
@@ -56,26 +63,13 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Menu Items */}
         <div
-          className={`flex-1 justify-self-center lg:bg-white bg-gray-200 p-3 lg:block lg:pb-0 lg:mt-0 ${
-            state ? "block" : "hidden"
-          }`}
+          className={`flex space-x-4 lg:flex lg:space-x-4 lg-pb-0 pb-4 lg:items-center ${
+            menuOpen ? "block" : "hidden"
+          } lg:block`}
         >
-          <div className="lg:hidden block">
-            <Link
-              href="https://wa.me/+2348062547433"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <Button className="rounded-[24px] mt-4 p-[25px] text-lg bg-primary-color">
-                Book Consultation
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="flex space-x-4">
-          <ul className="justify-center items-center space-y-8 lg:flex lg:space-x-4 lg:space-y-0">
+          <ul className="justify-center items-center space-y-6 lg:space-y-0 lg:space-x-6 lg:flex">
             {menus.map((item, idx) => (
               <li
                 key={idx}
@@ -88,22 +82,18 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
+            <li className="lg:block hidden">
+              {userCookie ? (
+                <UserButtonHome />
+              ) : (
+                <Link href="/auth/register" className="lg:block hidden mb-4">
+                  <Button className="rounded-[24px] mt-4 p-[25px] text-base bg-primary-color">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
+            </li>
           </ul>
-
-          {userCookie ? (
-            <UserButtonHome />
-          ) : (
-            <Link
-              href="/auth/register"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="lg:block hidden mb-4"
-            >
-              <Button className="rounded-[24px] mt-4 p-[25px] text-base bg-primary-color">
-                Sign In
-              </Button>
-            </Link>
-          )}
         </div>
       </div>
     </nav>

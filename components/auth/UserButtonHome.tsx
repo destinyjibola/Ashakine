@@ -26,7 +26,7 @@ const UserButtonHome = () => {
         <DropdownMenuItem className="cursor-pointer">
           <Link href="/dashboard" className="flex items-center">
           <FaUser className="h-4 w-4 mr-2" />
-          Profile
+          Dashboard
           </Link>
    
         </DropdownMenuItem>

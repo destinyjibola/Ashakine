@@ -109,7 +109,7 @@ const Footer = () => {
           </div>
 
           <div className="text-white">
-            Created by Dreamforge Creative Studio
+            Created by JibolaDestiny 
           </div>
         </div>
       </footer>

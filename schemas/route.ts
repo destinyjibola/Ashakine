@@ -86,3 +86,12 @@ export const RegisterSchema = z.object({
     message: "name is required",
   }),
 });
+
+
+
+export const BillingSchema = z.object({
+  fullName: z.string().min(1, { message: "First name is required" }),
+  email: z.string().email({ message: "Valid email is required" }),
+  isAnonymous: z.boolean().optional().default(false), // Optional, defaults to false
+  amount: z.number().positive({ message: "Amount must be greater than 0" }),
+});
