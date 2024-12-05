@@ -40,7 +40,7 @@ const DonationSection = ({ project }: ProjectProps) => {
   const user = Cookies.get("user");
   const { _id } = project;
   const loggedin = user !== undefined;
-  // const loggedin = false;
+
 
   const form = useForm<z.infer<typeof BillingSchema>>({
     resolver: zodResolver(BillingSchema),
