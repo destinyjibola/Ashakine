@@ -28,7 +28,6 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Switch from "./Switch";
 
-
 type ProjectProps = {
   project: ProjectResponse;
 };
@@ -87,7 +86,6 @@ const DonationSection = ({ project }: ProjectProps) => {
       anonymous: isChecked,
       projectId: _id,
       guest: !loggedin,
-      ...(loggedin && { userId: user }),
     };
 
     setLoading(true);
@@ -118,27 +116,29 @@ const DonationSection = ({ project }: ProjectProps) => {
       anonymous: isChecked,
       projectId: _id,
       guest: !loggedin,
+      ...(loggedin && { userId: user }),
     };
 
-    console.table(data);
-    // setLoading(true);
-    // try {
-    //   const res = await axios.post(
-    //     `${process.env.NEXT_PUBLIC_APP_URL}/api/donation/initialize`,
-    //     data
-    //   );
+    console.log(data);
 
-    //   const { url } = res.data;
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/donation/initialize`,
+        data
+      );
 
-    //   if (res.status === 200) {
-    //     setLoading(false);
-    //     window.location.href = url;
-    //     alert("Payment initialized");
-    //   }
-    // } catch (error: any) {
-    //   setLoading(false);
-    //   console.log(error.response);
-    // }
+      const { url } = res.data;
+
+      if (res.status === 200) {
+        setLoading(false);
+        window.location.href = url;
+        alert("Payment initialized");
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error.response);
+    }
   };
 
   return (
@@ -258,8 +258,10 @@ const DonationSection = ({ project }: ProjectProps) => {
                 <Button
                   className="rounded-[12px] w-full p-[22px] bg-primary-color paragraph-7 mt-6"
                   type="submit"
+                  disabled={loading}
                 >
-                  {loading ? "Donating" : "Donates"}
+                  {loading ? "Donating" : "Donate"}
+                  {loading && <div className="lds-hourglass ms-3"></div>}
                 </Button>
               </form>
             </Form>
@@ -314,8 +316,10 @@ const DonationSection = ({ project }: ProjectProps) => {
                 <Button
                   className="rounded-[12px] w-full p-[22px] bg-primary-color paragraph-7 mt-6"
                   type="submit"
+                  disabled={loading}
                 >
-                  {loading ? "Donating" : "Donates"}
+                  {loading ? "Donating" : "Donate"}
+                  {loading && <div className="lds-hourglass ms-3"></div>}
                 </Button>
               </form>
             </Form>
