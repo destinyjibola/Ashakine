@@ -26,7 +26,8 @@ import { Input } from "./ui/input";
 
 import axios from "axios";
 import Cookies from "js-cookie";
-import Switch from "./ui/Switch";
+import Switch from "./Switch";
+
 
 type ProjectProps = {
   project: ProjectResponse;
