@@ -56,15 +56,15 @@ const Footer = () => {
               <p className="text-base font-semi-bold">Links</p>
 
               <div className="mt-2 text-sm">
-                <Link href={"/contact"}>
+                <Link href={"/"}>
                   {" "}
                   <p className="leading-8">Discovery</p>
                 </Link>
-                <Link href={"/about"}>
+                <Link href={"/"}>
                   {" "}
                   <p className="leading-8">About</p>
                 </Link>
-                <Link href={"/service"}>
+                <Link href={"/"}>
                   {" "}
                   <p className="leading-8">Help</p>
                 </Link>
