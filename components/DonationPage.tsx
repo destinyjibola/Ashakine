@@ -10,7 +10,7 @@ import { ProjectResponse } from "@/lib/types";
 import Modal from "./Modal";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
-import { BillingSchema } from "@/schemas/route";
+import { BillingSchema, LoggedInBillingSchema } from "@/schemas/route";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import {
@@ -24,6 +24,8 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import Switch from "./ui/Switch";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 type ProjectProps = {
   project: ProjectResponse;
@@ -34,14 +36,23 @@ const DonationSection = ({ project }: ProjectProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>();
   const [isChecked, setIsChecked] = useState<boolean>(false);
-
-  const loggedin = false;
+  const user = Cookies.get("user");
+  const { _id } = project;
+  const loggedin = user !== undefined;
+  // const loggedin = false;
 
   const form = useForm<z.infer<typeof BillingSchema>>({
     resolver: zodResolver(BillingSchema),
     defaultValues: {
       fullName: "",
       email: "",
+      amount: undefined,
+    },
+  });
+
+  const loginform = useForm<z.infer<typeof LoggedInBillingSchema>>({
+    resolver: zodResolver(LoggedInBillingSchema),
+    defaultValues: {
       amount: undefined,
     },
   });
@@ -59,7 +70,9 @@ const DonationSection = ({ project }: ProjectProps) => {
     percentageRaised % 1 === 0
       ? percentageRaised.toFixed(0)
       : percentageRaised.toFixed(2);
-
+  // console.log(project)
+  // console.log(percentageRaised)
+  // console.log(formattedPercentage)
   const cleardatas = () => {};
 
   const toggleModal = () => {
@@ -67,11 +80,68 @@ const DonationSection = ({ project }: ProjectProps) => {
   };
 
   const onSubmit = async (values: z.infer<typeof BillingSchema>) => {
-    console.log({...values, isChecked });
+    const data = {
+      ...values,
+      anonymous: isChecked,
+      projectId: _id,
+      guest: !loggedin,
+      ...(loggedin && { userId: user }),
+    };
+
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/donation/initialize`,
+        data
+      );
+
+      const { url } = res.data;
+
+      if (res.status === 200) {
+        setLoading(false);
+        window.location.href = url;
+        alert("Payment initialized");
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.log(error.response);
+    }
+  };
+
+  const onSubmitLoggedIn = async (
+    values: z.infer<typeof LoggedInBillingSchema>
+  ) => {
+    const data = {
+      ...values,
+      anonymous: isChecked,
+      projectId: _id,
+      guest: !loggedin,
+    };
+
+    console.table(data);
+    // setLoading(true);
+    // try {
+    //   const res = await axios.post(
+    //     `${process.env.NEXT_PUBLIC_APP_URL}/api/donation/initialize`,
+    //     data
+    //   );
+
+    //   const { url } = res.data;
+
+    //   if (res.status === 200) {
+    //     setLoading(false);
+    //     window.location.href = url;
+    //     alert("Payment initialized");
+    //   }
+    // } catch (error: any) {
+    //   setLoading(false);
+    //   console.log(error.response);
+    // }
   };
 
   return (
     <section id="donation" className="container-spacing section-spacing">
+      {/* modal */}
       <Modal isOpen={isModalOpen} toggleModal={toggleModal}>
         <div>
           {!loggedin && step == 1 && (
@@ -97,55 +167,51 @@ const DonationSection = ({ project }: ProjectProps) => {
             </>
           )}
 
-          {step == 2 && (
+          {step == 2 && !loggedin && (
             <Form {...form}>
               <form
                 className="space-y-6 py-6"
                 onSubmit={form.handleSubmit(onSubmit)}
               >
-                {!loggedin && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="John Doe"
-                              disabled={loading}
-                              type="text"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="John Doe"
+                          disabled={loading}
+                          type="text"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <div className="flex space-x-4">
-                            <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="JohnDoe@gmail.com"
-                                disabled={loading}
-                                type="email"
-                              />
-                            </FormControl>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <div className="flex space-x-4">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="JohnDoe@gmail.com"
+                            disabled={loading}
+                            type="email"
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -159,21 +225,15 @@ const DonationSection = ({ project }: ProjectProps) => {
                           placeholder=""
                           disabled={loading}
                           type="number"
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {/* 
-                <div>
-                  <Switch
-                    checked={isChecked}
-                    onChange={(value) => setIsChecked(value)}
-                  />
-                </div> */}
 
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2">
                   <div className="space-y-0.5 basis-8/12">
@@ -194,16 +254,74 @@ const DonationSection = ({ project }: ProjectProps) => {
                 </FormItem>
 
                 <Button
-                  className="rounded-[12px] w-full p-[25px] bg-primary-color paragraph-7 mt-6"
+                  className="rounded-[12px] w-full p-[22px] bg-primary-color paragraph-7 mt-6"
                   type="submit"
                 >
-                  Donate
+                  {loading ? "Donating" : "Donates"}
+                </Button>
+              </form>
+            </Form>
+          )}
+
+          {step == 2 && loggedin && (
+            <Form {...loginform}>
+              <form
+                className="space-y-6 py-6"
+                onSubmit={loginform.handleSubmit(onSubmitLoggedIn)}
+              >
+                <FormField
+                  control={loginform.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder=""
+                          disabled={loading}
+                          type="number"
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2">
+                  <div className="space-y-0.5 basis-8/12">
+                    <FormLabel className="text-base">
+                      Donate Anonymously
+                    </FormLabel>
+                    <FormDescription>
+                      Your name and details will be hidden from the public
+                      donations list when switched on.{" "}
+                    </FormDescription>
+                  </div>
+                  <FormControl className="basis-4/12">
+                    <Switch
+                      checked={isChecked}
+                      onChange={(value) => setIsChecked(value)}
+                    />
+                  </FormControl>
+                </FormItem>
+
+                <Button
+                  className="rounded-[12px] w-full p-[22px] bg-primary-color paragraph-7 mt-6"
+                  type="submit"
+                >
+                  {loading ? "Donating" : "Donates"}
                 </Button>
               </form>
             </Form>
           )}
         </div>
       </Modal>
+      {/* modal */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 pt-[1rem] gap-[4rem]">
         <div>
           <hr className="border-t-[5px] border-gray-300 mb-[1rem]" />
@@ -250,7 +368,11 @@ const DonationSection = ({ project }: ProjectProps) => {
               className="rounded-[12px] w-[85%] p-[25px] bg-primary-color paragraph-7"
               onClick={() => {
                 setIsModalOpen(true);
-                setStep(1);
+                if (loggedin) {
+                  setStep(2);
+                } else {
+                  setStep(1);
+                }
               }}
             >
               Donate now
@@ -262,7 +384,7 @@ const DonationSection = ({ project }: ProjectProps) => {
         </div>
       </div>
 
-      <hr className="border-t-[3px] border-gray-300 mt-[4rem]" />
+      {/* <hr className="border-t-[3px] border-gray-300 mt-[4rem]" /> */}
 
       <div className="grid lg:grid-cols-2 grid-cols-1">
         <section>

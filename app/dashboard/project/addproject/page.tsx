@@ -58,6 +58,8 @@ const LoginForm = () => {
       description: "",
       budgetDetails: "",
       categoryId: "",
+      shortdesc: "",
+      goalAmount: undefined
     },
   });
 
@@ -65,7 +67,6 @@ const LoginForm = () => {
     const startdate = new Date();
     const data = { userId: user, ...values, startdate, enddate: date, images };
     console.log(data);
-
 
     setLoading(true);
     try {
@@ -109,7 +110,6 @@ const LoginForm = () => {
     }
   };
 
-
   // Function to handle deleting an image
   const handleDeleteImage = (index: number) => {
     setImages((prevImages) => prevImages.filter((_, i) => i !== index));
@@ -142,6 +142,24 @@ const LoginForm = () => {
 
                 <FormField
                   control={form.control}
+                  name="shortdesc"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Short description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          disabled={loading}
+                          placeholder="Write short description here..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
@@ -150,7 +168,7 @@ const LoginForm = () => {
                         <Textarea
                           {...field}
                           disabled={loading}
-                          placeholder="Write description here..."
+                          placeholder="extensive description here..."
                         />
                       </FormControl>
                       <FormMessage />
@@ -229,7 +247,13 @@ const LoginForm = () => {
                   )}
                 </div> */}
 
-                <FormField
+              
+              </div>
+
+              <div className="flex flex-col space-y-4">
+
+
+              <FormField
                   control={form.control}
                   name="categoryId"
                   render={({ field }) => (
@@ -246,17 +270,20 @@ const LoginForm = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="673cabe71558d418928d836e">Community</SelectItem>
-                          <SelectItem value="673cabe71558d418928d836e">Faith Based</SelectItem>
+                          <SelectItem value="674f94d3f79a8218f336fa35">
+                            Community
+                          </SelectItem>
+                          <SelectItem value="674f94e8f79a8218f336fa38">
+                            Faith Based
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="flex flex-col space-y-4">
+
                 <div className="flex flex-col space-y-4">
                   <FormLabel>Dead line</FormLabel>
                   <Popover>

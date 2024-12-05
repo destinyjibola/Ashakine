@@ -4,6 +4,7 @@ import * as z from "zod";
 export const ProjectSchema = z.object({
   title: z.string().min(1, "Title is required").trim(),
   description: z.string().optional(),
+  shortdesc: z.string().optional(),
   goalAmount: z.number().min(0, "Goal amount cannot be negative"),
   // enddate: z.string().refine(date => !isNaN(Date.parse(date)), {
   //   message: "Invalid end date"
@@ -92,6 +93,11 @@ export const RegisterSchema = z.object({
 export const BillingSchema = z.object({
   fullName: z.string().min(1, { message: "First name is required" }),
   email: z.string().email({ message: "Valid email is required" }),
-  isAnonymous: z.boolean().optional().default(false), // Optional, defaults to false
+  amount: z.number().positive({ message: "Amount must be greater than 0" }),
+});
+
+
+
+export const LoggedInBillingSchema = z.object({
   amount: z.number().positive({ message: "Amount must be greater than 0" }),
 });

@@ -18,10 +18,8 @@ type Params = {
 
 const page = async ({ params: { donationId } }: Params) => {
   const project = await getSingleProject(donationId);
-console.log(project)
-  
-  return (
 
+  return (
     <>
       <Navbar />
       <DonationSection project={project} />

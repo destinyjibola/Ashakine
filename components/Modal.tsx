@@ -27,7 +27,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, toggleModal, children }) => {
       >
         <div
           onClick={handleCloseModal}
-          className="absolute bg-red-500 right-[0px] cursor-pointer top-[0px] text-white w-[25px] h-[25px] rounded-full flex items-center justify-center"
+          className="absolute bg-red-500 right-[6px] cursor-pointer top-[6px] text-white w-[25px] h-[25px] rounded-full flex items-center justify-center"
         >
           X
         </div>

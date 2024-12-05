@@ -86,7 +86,7 @@ export default function Navbar() {
               {userCookie ? (
                 <UserButtonHome />
               ) : (
-                <Link href="/auth/register" className="lg:block hidden mb-4">
+                <Link href="/auth/login" className="lg:block hidden mb-4">
                   <Button className="rounded-[24px] mt-4 p-[25px] text-base bg-primary-color">
                     Sign In
                   </Button>
