@@ -24,7 +24,6 @@ const DonationCard: React.FC<ServiceCardProps> = ({
   currentAmount,
   link,
 }) => {
-  // Calculate percentage raised
   const percentageRaised = Math.min((currentAmount / goalAmount) * 100, 100);
   const formattedPercentage =
     percentageRaised % 1 === 0
@@ -50,11 +49,10 @@ const DonationCard: React.FC<ServiceCardProps> = ({
             {shortdesc}
           </p>
 
-          {/* Progress bar */}
           <Progress value={+percentageRaised} />
 
           <div className="flex justify-between paragraph-1">
-            {/* Dynamically display amounts and percentage */}
+         
             <p>${currentAmount.toLocaleString()} raised</p>
             <p>{formattedPercentage}% completed</p>
           </div>
