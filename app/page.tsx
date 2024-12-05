@@ -19,7 +19,7 @@ const font = Poppins({
 export default async function page() {
   const project = await getAllProject();
 
-  // console.log(project)
+
   return (
     <>
       <Navbar />

@@ -71,9 +71,7 @@ const DonationSection = ({ project }: ProjectProps) => {
     percentageRaised % 1 === 0
       ? percentageRaised.toFixed(0)
       : percentageRaised.toFixed(2);
-  // console.log(project)
-  // console.log(percentageRaised)
-  // console.log(formattedPercentage)
+
   const cleardatas = () => {};
 
   const toggleModal = () => {
@@ -119,7 +117,7 @@ const DonationSection = ({ project }: ProjectProps) => {
       ...(loggedin && { userId: user }),
     };
 
-    console.log(data);
+  
 
     setLoading(true);
     try {
