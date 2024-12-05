@@ -23,9 +23,10 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import Switch from "./ui/Switch";
+
 import axios from "axios";
 import Cookies from "js-cookie";
+import Switch from "./ui/Switch";
 
 type ProjectProps = {
   project: ProjectResponse;
