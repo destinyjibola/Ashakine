@@ -41,7 +41,6 @@ const DonationSection = ({ project }: ProjectProps) => {
   const { _id } = project;
   const loggedin = user !== undefined;
 
-
   const form = useForm<z.infer<typeof BillingSchema>>({
     resolver: zodResolver(BillingSchema),
     defaultValues: {
@@ -117,8 +116,6 @@ const DonationSection = ({ project }: ProjectProps) => {
       ...(loggedin && { userId: user }),
     };
 
-  
-
     setLoading(true);
     try {
       const res = await axios.post(
@@ -149,9 +146,11 @@ const DonationSection = ({ project }: ProjectProps) => {
               <div className="text-sm text-gray-800 bg-[#fff9db] p-2 rounded">
                 You are not logged in. Your details will still reflect on the
                 donations list unless you choose to donate anonymously. Consider{" "}
-                <span className="text-[#812c81] underline hover:font-semibold hover:text-purple-700 transition duration-200 cursor-pointer">
-                  signing up
-                </span>{" "}
+                <Link href={"/auth/register"}>
+                  <span className="text-[#812c81] underline hover:font-semibold hover:text-purple-700 transition duration-200 cursor-pointer">
+                    signing up
+                  </span>
+                </Link>{" "}
                 to monitor your donations and create future projects more
                 easily.
               </div>

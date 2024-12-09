@@ -9,7 +9,7 @@ const WhatWeDo = () => {
       <h2 className="text-center primaryheading mb-10 text-custom-gray">
         What we offer
       </h2>
-      <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-4 w-[90%]">
+      <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-4 w-full">
         <ServiceCard
           title="Celebrate Life’s Moments with Support"
           description="Create a campaign for your special moments, whether it's birthdays, weddings, funerals, or any personal need. Let friends and family rally behind you."

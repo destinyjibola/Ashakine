@@ -36,7 +36,7 @@ const Supporters = () => {
   return (
     <div className="bg-white p-4 rounded-lg">
       <h2 className="paragraph-9 mb-4">Supported Projects</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {projects.map((project, index) => (
           <SupporterCard
             key={index}

@@ -43,13 +43,15 @@ export default function Navbar() {
           <div className="lg:hidden flex items-center space-x-2">
             {userCookie ? (
               <UserButtonHome />
-            ) : (
-              <Link href="/auth/register" className="lg:block hidden mb-4">
+            ) 
+            : (
+              <Link href="/auth/register" className="lg:hidden block mb-4">
                 <Button className="rounded-[24px] mt-4 p-[25px] text-base bg-primary-color">
                   Sign In
                 </Button>
               </Link>
-            )}
+            )
+            }
             <button
               className="text-gray-700 outline-none p-2 rounded-md focus:border-gray-400 focus:border"
               onClick={() => setMenuOpen(!menuOpen)}
