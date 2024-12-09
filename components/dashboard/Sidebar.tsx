@@ -13,6 +13,7 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
+import { IoMdContact } from "react-icons/io";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -39,18 +40,17 @@ const Sidebar = () => {
               Overview
             </Link>
 
-
-            {/* <Link
-              href="/dashboard/project"
+            <Link
+              href="/dashboard/profile"
               className={`flex items-center gap-3 rounded px-3 py-2 transition-all paragraph-9 ${
-                pathname === "/dashboard/project"
+                pathname === "/dashboard/profile"
                   ? "bg-[#A937A9] text-white"
                   : "text-primary"
               }`}
             >
-              <HiOutlineSpeakerphone className="h-6 w-6" />
-              Project
-            </Link> */}
+              <IoMdContact className="h-6 w-6" />
+              Profile
+            </Link>
 
             {/* <Link
               href="/dashboard/contribution"
