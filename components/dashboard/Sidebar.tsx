@@ -40,7 +40,7 @@ const Sidebar = () => {
               Overview
             </Link>
 
-            <Link
+            {/* <Link
               href="/dashboard/profile"
               className={`flex items-center gap-3 rounded px-3 py-2 transition-all paragraph-9 ${
                 pathname === "/dashboard/profile"
@@ -50,7 +50,7 @@ const Sidebar = () => {
             >
               <IoMdContact className="h-6 w-6" />
               Profile
-            </Link>
+            </Link> */}
 
             {/* <Link
               href="/dashboard/contribution"

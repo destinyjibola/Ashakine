@@ -21,10 +21,13 @@ const page = async () => {
     getUserDonations(userId),
   ]);
 
-  console.log(project);
-
+ 
+//  console.log(project);
   // Ensure project.data is an array of ProjectResponse
+  // const projects = [] as ProjectResponse[]
   const projects = project.data as ProjectResponse[];
+  // const donation = [] as ProjectResponse[]
+
   const donation = donations.data as ProjectResponse[];
 
   return (

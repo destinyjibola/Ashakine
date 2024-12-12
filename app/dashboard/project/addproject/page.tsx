@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
 import { FiX } from "react-icons/fi";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -40,6 +40,14 @@ import { cn } from "@/lib/utils";
 import Cookies from "js-cookie";
 import Image from "next/image";
 
+interface Category {
+  _id: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -48,6 +56,7 @@ const LoginForm = () => {
   const [success, setSuccess] = useState<string | undefined>("");
   const [date, setDate] = useState<Date>();
   const [images, setImages] = useState<string[]>([]); // State to hold multiple image data URLs
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const user = Cookies.get("user");
 
@@ -59,15 +68,33 @@ const LoginForm = () => {
       budgetDetails: "",
       categoryId: "",
       shortdesc: "",
-      goalAmount: undefined
+      goalAmount: undefined,
     },
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/getCategory`
+        );
+
+        if (response.status === 200) {
+          const data: Category[] = await response.json();
+          setCategories(data);
+          console.log(data)
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const onSubmit = async (values: z.infer<typeof ProjectSchema>) => {
     const startdate = new Date();
     const data = { userId: user, ...values, startdate, enddate: date, images };
-    console.log(data);
-
     setLoading(true);
     try {
       const res = await axios.post(
@@ -97,16 +124,23 @@ const LoginForm = () => {
     });
   };
 
-  // Function to handle file change
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
     if (selectedFiles) {
+      const newImagesCount = images.length + selectedFiles.length;
+
+      if (newImagesCount > 3) {
+        alert("You can only upload a maximum of 3 images.");
+        e.target.value = ""; // Reset the input
+        return;
+      }
+
       const imagePromises = Array.from(selectedFiles).map((file) =>
         readFileAsDataURL(file)
       );
       const newImages = await Promise.all(imagePromises);
       setImages((prevImages) => [...prevImages, ...newImages]);
-      e.target.value = ""; // Clear the input
+      e.target.value = ""; // Clear the file input to allow re-upload
     }
   };
 
@@ -120,7 +154,7 @@ const LoginForm = () => {
       <div className="bg-white max-w-full p-8">
         <Form {...form}>
           <form className="" onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="flex flex-col space-y-4">
                 <FormField
                   control={form.control}
@@ -246,14 +280,10 @@ const LoginForm = () => {
                     <></>
                   )}
                 </div> */}
-
-              
               </div>
 
               <div className="flex flex-col space-y-4">
-
-
-              <FormField
+                <FormField
                   control={form.control}
                   name="categoryId"
                   render={({ field }) => (
@@ -266,23 +296,26 @@ const LoginForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a role" />
+                            <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="674f94d3f79a8218f336fa35">
-                            Community
-                          </SelectItem>
-                          <SelectItem value="674f94e8f79a8218f336fa38">
+                          {categories.map((item: Category) => {
+                            return (
+                              <SelectItem key={item._id} value="674f94d3f79a8218f336fa35">
+                                {item.category}
+                              </SelectItem>
+                            );
+                          })}
+                          {/* <SelectItem value="674f94e8f79a8218f336fa38">
                             Faith Based
-                          </SelectItem>
+                          </SelectItem> */}
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
 
                 <div className="flex flex-col space-y-4">
                   <FormLabel>Dead line</FormLabel>
@@ -291,7 +324,7 @@ const LoginForm = () => {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-[280px] justify-start text-left font-normal",
+                          "w-full justify-start text-left font-normal",
                           !date && "text-muted-foreground"
                         )}
                       >
