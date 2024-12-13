@@ -80,9 +80,12 @@ const LoginForm = () => {
         );
 
         if (response.status === 200) {
-          const data: Category[] = await response.json();
-          setCategories(data);
-          console.log(data)
+          
+          const data = await response.json();
+          const category: Category[] = data.data;
+    
+          setCategories(category);
+          console.log(category)
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -302,7 +305,7 @@ const LoginForm = () => {
                         <SelectContent>
                           {categories.map((item: Category) => {
                             return (
-                              <SelectItem key={item._id} value="674f94d3f79a8218f336fa35">
+                              <SelectItem key={item._id} value={item._id}>
                                 {item.category}
                               </SelectItem>
                             );
@@ -382,7 +385,7 @@ const LoginForm = () => {
             </div>
 
             <Button disabled={loading} type="submit" className="mt-8">
-              {loading ? "Updating..." : "Update"}
+              {loading ? "Creating Campaign..." : "Create campaign"}
               {loading && <div className="lds-hourglass ms-3"></div>}
             </Button>
           </form>
