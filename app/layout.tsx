@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import TanstackProvider from "@/providers/TanstackProviders";
 import NextTopLoader from "nextjs-toploader";
+import { Toaster } from "@/components/ui/sonner"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+      <Toaster />
         <NextTopLoader
           color="#812c81"
           initialPosition={0.08}

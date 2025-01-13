@@ -1,24 +1,68 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Poppins } from "next/font/google";
-import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import WhatWeDo from "@/components/WhatWeDo";
 import Categories from "@/components/Categories";
 import Footer from "@/components/Footer";
-import getAllProject from "@/helpers/getAllProject";
-import { Suspense } from "react";
-import { ProjectResponse } from "@/lib/types";
 import DonationCard from "@/components/DonationCard";
 import birthday from "../assets/crowdfund/birthday.webp";
+import useFcmToken from "@/hooks/useFcmToken";
+import Cookies from "js-cookie";
+import { ProjectResponse } from "@/lib/types";
 
 const font = Poppins({
   subsets: ["latin"],
   weight: ["600"],
 });
 
-export default async function page() {
-  const project = await getAllProject();
+const Page = () => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  const user = Cookies.get("user"); // Check if user is logged in from cookies
+  const { token, notificationPermissionStatus } = useFcmToken();
+
+  // Save the FCM token if the notification permission is granted
+  useEffect(() => {
+    const saveFcmToken = async () => {
+      if (notificationPermissionStatus === "granted" && token) {
+        try {
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_APP_URL}/api/updateProfile`,
+            { token, _id: user }
+          );
+          console.log("FCM token saved:", response.data.message);
+        } catch (error) {
+          console.error("Error saving FCM token:", error);
+        }
+      }
+    };
+
+    saveFcmToken();
+  }, [notificationPermissionStatus, token,user]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/getAllPost`,
+          { headers: { "Cache-Control": "no-store" } }
+        );
+        setProjects(response.data.data); // Assuming `response.data.data` contains the project list
+      } catch (err: any) {
+        setError(err.response?.data?.message || err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   return (
     <>
@@ -26,31 +70,38 @@ export default async function page() {
       <Hero />
       <WhatWeDo />
 
-      <section id="donation" className="container-spacing section-spacing ">
-        <h2 className=" primaryheading text-center mb-10 text-custom-gray">Donations</h2>
+      <section id="donation" className="container-spacing section-spacing">
+        <h2 className="primaryheading text-center mb-10 text-custom-gray">
+          Donations
+        </h2>
 
         <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Suspense fallback={<p>Course loading</p>}>
-            {project.data.map((data: ProjectResponse) => {
-              return (
-                <DonationCard
-                  key={data._id}
-                  goalAmount={data.goalAmount}
-                  currentAmount={data.currentAmount}
-                  title={data.title}
-                  shortdesc={data.shortdesc}
-                  description={data.description}
-                  imageSrc={data.images[0] || birthday.src}
-                  altText={data.title}
-                  link={`/donation/${data._id}`}
-                />
-              );
-            })}
-          </Suspense>
+          {loading ? (
+            <p>Loading donations...</p>
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : (
+            projects.map((data: ProjectResponse) => (
+              <DonationCard
+                key={data._id}
+                goalAmount={data.goalAmount}
+                currentAmount={data.currentAmount}
+                title={data.title}
+                shortdesc={data.shortdesc}
+                description={data.description}
+                imageSrc={data.images[0] || birthday.src}
+                altText={data.title}
+                link={`/donation/${data._id}`}
+              />
+            ))
+          )}
         </div>
       </section>
+
       <Categories />
       <Footer />
     </>
   );
-}
+};
+
+export default Page;
