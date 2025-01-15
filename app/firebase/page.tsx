@@ -34,7 +34,7 @@ export default function Home() {
       <h1 className="text-4xl mb-4 font-bold">Firebase Cloud Messaging Demo</h1>
 
       {notificationPermissionStatus === "granted" ? (
-        <p>Permission to receive notifications has been granted.</p>
+        <p>Permission to receive notifications has been granted. token is {token}</p>
       ) : notificationPermissionStatus !== null ? (
         <p>
           You have not granted permission to receive notifications. Please
