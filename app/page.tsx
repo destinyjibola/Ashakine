@@ -13,6 +13,7 @@ import birthday from "../assets/crowdfund/birthday.webp";
 import useFcmToken from "@/hooks/useFcmToken";
 import Cookies from "js-cookie";
 import { ProjectResponse } from "@/lib/types";
+import generateEnhancedFingerprint from "@/lib/fingerPrint";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -20,6 +21,7 @@ const font = Poppins({
 });
 
 const Page = () => {
+  const [fingerprint, setFingerprint] = useState<string | null>();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ const Page = () => {
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_APP_URL}/api/updateProfile`,
-            { token, _id: user }
+            { token, device: fingerprint, _id: user }
           );
           console.log("FCM token saved:", response.data.message);
         } catch (error) {
@@ -44,7 +46,21 @@ const Page = () => {
     };
 
     saveFcmToken();
-  }, [notificationPermissionStatus, token,user]);
+  }, [notificationPermissionStatus, fingerprint, token, user]);
+
+
+
+  useEffect(() => {
+    const fetchFingerprint = async () => {
+      const fingerprintResult = await generateEnhancedFingerprint();
+      setFingerprint(fingerprintResult);
+      console.log("Browser Fingerprint:", fingerprintResult);
+    };
+
+    fetchFingerprint();
+  }, []);
+
+
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -53,7 +69,7 @@ const Page = () => {
           `${process.env.NEXT_PUBLIC_APP_URL}/api/getAllPost`,
           { headers: { "Cache-Control": "no-store" } }
         );
-        setProjects(response.data.data); // Assuming `response.data.data` contains the project list
+        setProjects(response.data.data);
       } catch (err: any) {
         setError(err.response?.data?.message || err.message);
       } finally {
