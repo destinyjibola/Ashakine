@@ -88,7 +88,7 @@ const Page = () => {
 
       <section id="donation" className="container-spacing section-spacing">
         <h2 className="primaryheading text-center mb-10 text-custom-gray">
-          Donations
+          Donations {fingerprint}
         </h2>
 
         <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
