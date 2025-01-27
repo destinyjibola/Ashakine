@@ -26,7 +26,7 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const user = Cookies.get("user"); // Check if user is logged in from cookies
+  const user = Cookies.get("user"); 
   const { token, notificationPermissionStatus } = useFcmToken();
 
   // Save the FCM token if the notification permission is granted
