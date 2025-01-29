@@ -8,11 +8,11 @@ import dashboardOverview from "@/helpers/dashboardOverview";
 import getUserDonations from "@/helpers/getUserDonations";
 import getUserProjects from "@/helpers/getUserProjects";
 import Cookies from "js-cookie";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import { ProjectResponse } from "@/lib/types";
 
-
-const socket = io("http://localhost:7000"); // Replace with your server URL
+// Socket connection setup
+const socket = io("http://localhost:7000");
 
 interface DashboardData {
   totalDonors: number;
@@ -36,21 +36,24 @@ const DashboardPage = () => {
       try {
         setLoading(true);
 
-        // Retrieve user ID from cookies
         const userId = Cookies.get("user");
         if (!userId) {
           throw new Error("User ID not found in cookies.");
         }
 
-        // Notify the server of the connected user
         socket.emit("user_connected", userId);
 
-        // Listen for real-time dashboard updates
         socket.on("dashboardoverview", (updatedDashboard: DashboardData) => {
-          console.log("Received updated dashboard data:", updatedDashboard);
           setDashboard(updatedDashboard);
         });
 
+        socket.on("project", (project: ProjectResponse[]) => {
+          setProjects(project);
+        });
+
+        socket.on("donation", (donation: ProjectResponse[]) => {
+          setDonations(donation);
+        });
 
         const [dashboardData, projectsData, donationsData] = await Promise.all([
           dashboardOverview(userId),
@@ -62,9 +65,9 @@ const DashboardPage = () => {
         setProjects(projectsData.data as ProjectResponse[]);
         setDonations(donationsData.data as ProjectResponse[]);
 
-   
       } catch (err: any) {
-        setError(err.message || "An error occurred while fetching data.");
+        const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -72,19 +75,12 @@ const DashboardPage = () => {
 
     fetchData();
 
-    // Cleanup on unmount
     return () => {
       socket.off("dashboardoverview");
+      socket.off("project");
+      socket.off("donation");
     };
   }, []);
-
-  const fetchDashboardData = async (userId: string): Promise<DashboardData> => {
-    const response = await fetch(`/api/dashboard/${userId}`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch dashboard data");
-    }
-    return response.json();
-  };
 
   if (loading) {
     return <div>Loading...</div>;
