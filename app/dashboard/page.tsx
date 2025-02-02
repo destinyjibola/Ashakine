@@ -12,7 +12,7 @@ import { io } from "socket.io-client";
 import { ProjectResponse } from "@/lib/types";
 
 // Socket connection setup
-const socket = io("http://localhost:7000");
+const socket = io(process.env.NEXT_PUBLIC_APP_URL);
 
 interface DashboardData {
   totalDonors: number;
