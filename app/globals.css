@@ -179,7 +179,7 @@ html {
     @apply font-bold text-2xl tracking-tight first:mt-0 scroll-m-20;
   }
 
-  .secondaryheading-5{
+  .secondaryheading-5 {
     @apply font-bold text-xl tracking-tight first:mt-0 scroll-m-20;
   }
   .topheading {

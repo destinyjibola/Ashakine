@@ -12,7 +12,7 @@ import DonationCard from "@/components/DonationCard";
 import birthday from "../assets/crowdfund/birthday.webp";
 import useFcmToken from "@/hooks/useFcmToken";
 import Cookies from "js-cookie";
-import { ProjectResponse } from "@/lib/types";
+import { Category, ProjectResponse } from "@/lib/types";
 import generateEnhancedFingerprint from "@/lib/fingerPrint";
 
 const font = Poppins({
@@ -25,6 +25,7 @@ const Page = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
 
   const user = Cookies.get("user"); 
   const { token, notificationPermissionStatus } = useFcmToken();
@@ -47,6 +48,9 @@ const Page = () => {
 
     saveFcmToken();
   }, [notificationPermissionStatus, fingerprint, token, user]);
+
+
+
 
 
 

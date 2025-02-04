@@ -18,8 +18,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-      <Toaster />
+      <body className={`${inter.className}  bg-gray-100`}>      <Toaster />
         <NextTopLoader
           color="#812c81"
           initialPosition={0.08}

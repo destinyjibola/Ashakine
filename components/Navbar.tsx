@@ -19,7 +19,7 @@ export default function Navbar() {
   }, []);
 
   const menus = [
-    { title: "Discovery", path: "/" },
+    { title: "Discovery", path: "/discovery" },
     { title: "About", path: "/" },
     { title: "Help", path: "/" },
   ];
