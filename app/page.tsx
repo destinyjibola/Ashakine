@@ -91,9 +91,11 @@ const Page = () => {
       <WhatWeDo />
 
       <section id="donation" className="container-spacing section-spacing">
-        <h2 className="primaryheading text-center mb-10 text-custom-gray">
+        <h2 className="primaryheading text-custom-gray">
           Donations 
         </h2>
+
+        <p className="paragraph-1 mb-6">Top campaigns</p>
 
         <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
           {loading ? (

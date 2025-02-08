@@ -1,6 +1,6 @@
 "use client";
 import Slideshow from "@/components/Slideshow";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import avatar from "../assets/icons/avatarimage.jpg";
 import Image from "next/image";
 import { FaLocationDot } from "react-icons/fa6";
@@ -27,6 +27,7 @@ import { Input } from "./ui/input";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Switch from "./Switch";
+import { FaHandHoldingDollar } from "react-icons/fa6";
 
 type ProjectProps = {
   project: ProjectResponse;
@@ -36,6 +37,7 @@ const DonationSection = ({ project }: ProjectProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>();
+  const [paymentlist, setPaymentLists] = useState<[]>();
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const user = Cookies.get("user");
   const { _id } = project;
@@ -71,7 +73,7 @@ const DonationSection = ({ project }: ProjectProps) => {
       ? percentageRaised.toFixed(0)
       : percentageRaised.toFixed(2);
 
-  const cleardatas = () => {};
+  const cleardatas = () => { };
 
   const toggleModal = () => {
     setIsModalOpen((prev) => !prev);
@@ -135,6 +137,21 @@ const DonationSection = ({ project }: ProjectProps) => {
       console.log(error.response);
     }
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/${project._id}`
+        );
+        setPaymentLists(response.data.data);
+      } catch (err: any) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+
+    fetchCategories();
+  });
 
   return (
     <section id="donation" className="container-spacing section-spacing">
@@ -332,8 +349,13 @@ const DonationSection = ({ project }: ProjectProps) => {
             {project.title}
           </h2>
           <Slideshow images={images} />
-        </div>
-        <div>
+
+
+
+
+
+          {/*  first left grid */}
+        <div className="md:hidden block mt-10">
           <hr className="border-t-[5px] border-gray-300 mb-[1rem]" />
           <h2 className="primaryheading-2 lg:block hidden">{project.title}</h2>
 
@@ -357,12 +379,12 @@ const DonationSection = ({ project }: ProjectProps) => {
 
           <p className="paragraph-1 mt-[1rem]">{project.shortdesc}</p>
 
-          <h2 className="mt-[1rem] primaryheading">${project.goalAmount}</h2>
+          <h2 className="mt-[1rem] primaryheading">&#8358;{project.goalAmount}</h2>
 
           <Progress className="my-[1rem]" value={+percentageRaised} />
 
           <div className="flex justify-between paragraph-1">
-            <p>${project.currentAmount} raised</p>
+            <p>&#8358;{project.currentAmount} raised</p>
             <p>{formattedPercentage}% completed</p>
           </div>
 
@@ -384,12 +406,156 @@ const DonationSection = ({ project }: ProjectProps) => {
               Share
             </Button>
           </div>
+
+          <div className="mt-8 h-[20rem] overflow-y-auto">
+            <ul className="space-y-2">
+              {paymentlist ? (
+                paymentlist.length > 0 ? (
+                  paymentlist.map((payment: any, index) => (
+                    <li
+                      className="flex items-center cursor-pointer bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 paragraph-1"
+                      key={payment._id || index}
+                    >
+                      <FaHandHoldingDollar className="mr-4 text-green-500" />{" "}
+                      <span className="text-gray-700">
+                        {payment.userId.guest ? "Anonymous" : payment.userId.fullName} donated
+                      </span>
+                      <span className="font-bold text-green-600 ms-2">
+                      &#8358;{payment.amount}
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500 italic">No payments found</li> // Fallback for empty array
+                )
+              ) : (
+                <li className="text-gray-500 italic">loading...</li>
+              )}
+            </ul>
+
+          </div>
         </div>
+        {/*first left grid */}
+
+
+
+
+
+
+
+
+
+          {/* details */}
+          <div className="">
+            <section>
+              <div className="mt-[4rem]">
+                <h2 className="paragraph-8 mb-[1rem]">About</h2>
+                <p className="paragraph-1">{project.description}</p>
+              </div>
+
+              <div className="mt-[4rem]">
+                <h2 className="paragraph-8 mb-[1rem]">Budget details</h2>
+                <p className="paragraph-1">{project.budgetDetails}</p>
+              </div>
+            </section>
+          </div>
+          {/* details */}
+
+
+
+        </div>
+
+
+        {/* left grid */}
+        <div className="md:block hidden">
+          <hr className="border-t-[5px] border-gray-300 mb-[1rem]" />
+          <h2 className="primaryheading-2 lg:block hidden">{project.title}</h2>
+
+          <div className="flex items-start space-x-2 mt-[1rem]">
+            <Image
+              alt="avatar"
+              width={50}
+              height={50}
+              src={project.userId?.image || avatar.src} // Use user image or fallback avatar
+            />
+            <div className="paragraph-1">
+              <span>{project.userId?.fullName || "Anonymous"}</span>
+              <span className="flex items-center space-x-1">
+                <FaLocationDot />
+                <span className="text-custom-gray">
+                  {project.userId?.country || "Unknown"}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <p className="paragraph-1 mt-[1rem]">{project.shortdesc}</p>
+
+          <h2 className="mt-[1rem] primaryheading">&#8358;{project.goalAmount}</h2>
+
+          <Progress className="my-[1rem]" value={+percentageRaised} />
+
+          <div className="flex justify-between paragraph-1">
+            <p>&#8358;{project.currentAmount} raised</p>
+            <p>{formattedPercentage}% completed</p>
+          </div>
+
+          <div className="flex flex-col mt-[1rem] items-center">
+            <Button
+              className="rounded-[12px] w-[85%] p-[25px] bg-primary-color paragraph-7"
+              onClick={() => {
+                setIsModalOpen(true);
+                if (loggedin) {
+                  setStep(2);
+                } else {
+                  setStep(1);
+                }
+              }}
+            >
+              Donate now
+            </Button>
+            <Button className="rounded-[12px] text-custom-gray-250 border hover:text-white border-[#808081] w-[85%] mt-2 p-[25px] bg-white paragraph-7">
+              Share
+            </Button>
+          </div>
+
+          <div className="mt-8 h-[20rem] overflow-y-auto">
+            <ul className="space-y-2">
+              {paymentlist ? (
+                paymentlist.length > 0 ? (
+                  paymentlist.map((payment: any, index) => (
+                    <li
+                      className="flex items-center cursor-pointer bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 paragraph-1"
+                      key={payment._id || index}
+                    >
+                      <FaHandHoldingDollar className="mr-4 text-green-500" />{" "}
+                      <span className="text-gray-700">
+                        {payment.userId.guest ? "Anonymous" : payment.userId.fullName} donated
+                      </span>
+                      <span className="font-bold text-green-600 ms-2">
+                      &#8358;{payment.amount}
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500 italic">No payments found</li> // Fallback for empty array
+                )
+              ) : (
+                <li className="text-gray-500 italic">loading...</li>
+              )}
+            </ul>
+
+          </div>
+        </div>
+        {/* left grid */}
+
+
+
       </div>
 
       {/* <hr className="border-t-[3px] border-gray-300 mt-[4rem]" /> */}
 
-      <div className="grid lg:grid-cols-2 grid-cols-1">
+      {/* <div className="grid lg:grid-cols-2 grid-cols-1">
         <section>
           <div className="mt-[4rem]">
             <h2 className="paragraph-8 mb-[1rem]">About</h2>
@@ -401,7 +567,7 @@ const DonationSection = ({ project }: ProjectProps) => {
             <p className="paragraph-1">{project.budgetDetails}</p>
           </div>
         </section>
-      </div>
+      </div> */}
     </section>
   );
 };

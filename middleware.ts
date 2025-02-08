@@ -30,6 +30,12 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/', request.nextUrl))
     }
 
+    if (!publicPath && !role) {
+        return NextResponse.redirect(new URL('/auth/login', request.nextUrl))
+    }
+
+   
+
     // if (!publicPath && !token) {
     //     return NextResponse.redirect(new URL('/login', request.nextUrl))
     // }
@@ -37,5 +43,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/', '/auth/login', '/auth/register','/dashboard', '/donation'],
+    matcher: ['/', '/auth/login', '/auth/register','/dashboard', '/discovery'],
 }

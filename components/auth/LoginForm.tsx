@@ -53,7 +53,7 @@ const LoginForm = () => {
       if (res.status === 200) {
         setLoading(false);
         Cookies.set("user", res.data.user._id, { expires: 7 });
-       
+
         // console.log(res.data.user);
 
         router.push("/")
@@ -64,7 +64,7 @@ const LoginForm = () => {
     } catch (error: any) {
       setLoading(false);
       console.log(error.response.data.message);
-  
+
     }
   };
 
@@ -120,14 +120,14 @@ const LoginForm = () => {
                         type="password"
                       />
                     </FormControl>
-                    <Button
+                    {/* <Button
                       size="sm"
                       variant="link"
                       asChild
                       className="px-0 font-normal"
                     >
                       <Link href="/auth/reset">Forgot password?</Link>
-                    </Button>
+                    </Button> */}
                     <FormMessage />
                   </FormItem>
                 )}

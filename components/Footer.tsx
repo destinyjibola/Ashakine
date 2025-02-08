@@ -94,8 +94,9 @@ const Footer = () => {
                     </a>
                   </p>
                   <p className="leading-8">
-                    No, 4 , mobolaji anthony way lagos
-                    <br /> Nigeria
+                    456 Pineview Drive
+                    Toronto, ON M5V 3L9
+                    <br /> Canada
                   </p>
                 </div>
               </div>
@@ -109,7 +110,7 @@ const Footer = () => {
           </div>
 
           <div className="text-white">
-            Created by JibolaDestiny 
+            Created by JibolaDestiny
           </div>
         </div>
       </footer>

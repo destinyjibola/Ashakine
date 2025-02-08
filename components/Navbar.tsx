@@ -20,8 +20,8 @@ export default function Navbar() {
 
   const menus = [
     { title: "Discovery", path: "/discovery" },
-    { title: "About", path: "/" },
-    { title: "Help", path: "/" },
+    { title: "About", path: "/about" },
+    { title: "Help", path: "/help" },
   ];
 
   const handleLinkClick = () => {

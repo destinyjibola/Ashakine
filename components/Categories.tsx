@@ -36,7 +36,7 @@ const Categories = () => {
       {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-0">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
             <Link href={`/discovery?category=${category._id}`} key={category._id}>
               <div className="flex items-center space-x-3">

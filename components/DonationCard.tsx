@@ -53,7 +53,7 @@ const DonationCard: React.FC<ServiceCardProps> = ({
 
           <div className="flex justify-between paragraph-1">
          
-            <p>${currentAmount.toLocaleString()} raised</p>
+            <p>&#8358;{currentAmount.toLocaleString()} raised</p>
             <p>{formattedPercentage}% completed</p>
           </div>
         </div>
