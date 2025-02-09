@@ -1,47 +1,27 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import Cookies from 'js-cookie';
-// This function can be marked `async` if using `await` inside
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
 export function middleware(request: NextRequest) {
-    // const role: string | undefined = Cookies.get('role');
+    const path = request.nextUrl.pathname;
+    const publicPaths = ['/auth/login', '/auth/register'];
+    const protectedPaths = ['/dashboard'];
 
-    const path = request.nextUrl.pathname
-    const userPath = "/user"
-    const adminPath = "/admin"
-    const instructorPath = "/instructor"
-    const publicPath = path === '/auth/login' || path === "/auth/register"
-    // const token = request.cookies.get('token')?.value || ''
-    const role = request.cookies.get('user')?.value || null
+    const role = request.cookies.get('user')?.value || null;
 
-    // if ((path === userPath) && role !== "1") {
-    //     return NextResponse.redirect(new URL('/', request.nextUrl))
-    // } 
-
-    // if ((path === adminPath) && role !== "3") {
-    //     return NextResponse.redirect(new URL('/', request.nextUrl))
-    // }
-
-
-    // if ((path === instructorPath) && role !== "2") {
-    //     return NextResponse.redirect(new URL('/', request.nextUrl))
-    // }
-
-    if (publicPath && role) {
-        return NextResponse.redirect(new URL('/', request.nextUrl))
+    // If the user is on a public path and has a role, redirect to home
+    if (publicPaths.includes(path) && role) {
+        return NextResponse.redirect(new URL('/', request.nextUrl));
     }
 
-    if (!publicPath && !role) {
-        return NextResponse.redirect(new URL('/auth/login', request.nextUrl))
+    // If the user is on a protected path and does not have a role, redirect to login
+    if (protectedPaths.includes(path) && !role) {
+        return NextResponse.redirect(new URL('/auth/login', request.nextUrl));
     }
 
-   
-
-    // if (!publicPath && !token) {
-    //     return NextResponse.redirect(new URL('/login', request.nextUrl))
-    // }
-
+    // Allow the request to proceed if no conditions are met
+    return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/', '/auth/login', '/auth/register','/dashboard', '/discovery'],
-}
+    matcher: ['/', '/auth/login', '/auth/register', '/dashboard', '/discovery'],
+};
