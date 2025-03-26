@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import TanstackProvider from "@/providers/TanstackProviders";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner"
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -34,7 +35,9 @@ export default async function RootLayout({
           zIndex={5000}
           showAtBottom={false}
         />
-        <TanstackProvider>{children}</TanstackProvider>
+          <Navbar/>
+          {children}
+          <Footer/>
       </body>
     </html>
   );

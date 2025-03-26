@@ -39,10 +39,10 @@ html {
   }
 
   .card-shadow {
-    box-shadow: 0px 4px 24px 0px #0000000F;
+    box-shadow: 0px 4px 24px 0px #0000000f;
 
-    -webkit-box-shadow: 0px 4px 24px 0px #0000000F;
-    -moz-box-shadow:0px 4px 24px 0px #0000000F;
+    -webkit-box-shadow: 0px 4px 24px 0px #0000000f;
+    -moz-box-shadow: 0px 4px 24px 0px #0000000f;
   }
 
   .faq-border {
@@ -124,14 +124,14 @@ html {
 /* Custom component styles */
 @layer components {
   .paragraph-1 {
-    @apply font-normal text-base;
+    @apply font-medium text-base;
   }
 
-  .paragraph-2 {
+  /* .paragraph-2 {
     @apply font-semibold text-sm;
-  }
+  } */
 
-  .paragraph-3 {
+  /* .paragraph-3 {
     @apply font-semibold text-xs;
   }
 
@@ -151,23 +151,23 @@ html {
     @apply font-semibold  text-lg;
   }
 
-  .paragraph-7 {
-    @apply font-medium  text-2xl;
+  /*  */ 
+  .paragraph-3 {
+    @apply font-normal  text-xl;
   }
 
-
-  .paragraph-8 {
-    @apply font-semibold text-xl;
+  .paragraph-2 {
+    @apply font-light text-xl;
   }
 
   .paragraph-9 {
     @apply font-medium text-base;
   }
-  .secondaryheading-2 {
+  /* .secondaryheading-2 {
     @apply font-medium text-xl tracking-tight first:mt-0 scroll-m-20;
-  }
+  } */
 
-  .secondaryheading {
+  /* .secondaryheading {
     @apply font-medium text-[22px] md:text-2xl tracking-tight first:mt-0 scroll-m-20;
   }
 
@@ -181,13 +181,13 @@ html {
 
   .secondaryheading-5 {
     @apply font-bold text-xl tracking-tight first:mt-0 scroll-m-20;
-  }
+  } */
   .topheading {
-    @apply scroll-m-20 text-[45px] lg:text-[64px] font-semibold tracking-tight first:mt-0 leading-[65px] md:leading-[72px];
+    @apply scroll-m-20 text-[45px] lg:text-[48px] font-bold tracking-tight first:mt-0 leading-[65px] md:leading-[72px];
   }
 
   .primaryheading {
-    @apply scroll-m-20 text-[32px] lg:text-[40px] font-semibold tracking-tight first:mt-0 leading-[48px];
+    @apply scroll-m-20 text-[32px] lg:text-[38px] font-semibold tracking-tight first:mt-0 leading-[48px];
   }
 
   .primaryheading-2 {
@@ -195,7 +195,7 @@ html {
   }
 
   .smallheading {
-    @apply scroll-m-20 text-xl font-semibold tracking-tight first:mt-0;
+    @apply scroll-m-20 text-2xl font-light tracking-tight first:mt-0;
   }
 
   .section-spacing {
@@ -206,12 +206,6 @@ html {
     @apply px-2 md:px-[6rem] lg:px-[12rem];
   }
 }
-
-
-
-
-
-
 
 /* css loader */
 
@@ -251,7 +245,6 @@ html {
   }
 }
 
-
 .fixed-section {
   position: fixed;
   top: 100px; /* Adjust the top value based on your preference */
@@ -262,8 +255,6 @@ html {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visibility */
   z-index: 1000; /* Ensure it's above other elements */
 }
-
-
 
 /* switch */
 .switch {
@@ -287,7 +278,7 @@ html {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: .4s;
+  transition: 0.4s;
 }
 
 .slider:before {
@@ -298,11 +289,11 @@ html {
   left: 4px;
   bottom: 4px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
 }
 
 input:checked + .slider {
-  background-color: black ;
+  background-color: black;
 }
 
 input:focus + .slider {
@@ -324,15 +315,24 @@ input:checked + .slider:before {
 /* switch */
 
 /* Custom scrollbar styles */
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
   height: 8px;
-}
-
+} */
+/* 
 ::-webkit-scrollbar-thumb {
-  background: #812C81; /* Indigo-500 */
+  background: #812C81;
   border-radius: 4px;
-}
+} */
 
-::-webkit-scrollbar-track {
-  background: #e2e8f0; /* Gray-200 */
+/* ::-webkit-scrollbar-track {
+  background: #e2e8f0;
+} */
+
+/* hero background */
+.hero-background {
+  background: linear-gradient(
+    180deg,
+    rgba(251, 238, 0, 0) -3.25%,
+    red 47.34%
+  );
 }
