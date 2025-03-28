@@ -16,7 +16,7 @@ const Footer = () => {
         role="contentinfo"
         className="bg-primary-green-100 container-spacing "
       >
-        <div className="py-[3rem] text-white grid grid-cols-1 lg:gap-0 gap-10 lg:grid-cols-2">
+        <div className="py-[5rem] text-white grid grid-cols-1 lg:gap-0 gap-10 lg:grid-cols-2">
           <div className="flex flex-row">
             <div className="w-full lg:basis-[70%]">
               <Image

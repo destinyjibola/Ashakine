@@ -19,20 +19,6 @@ const config = {
     },
     extend: {
       colors: {
-        // "primary-dark": "#090909",
-        // "primary-white": "#FFFFFF",
-        // "primary-color": "#812C81",
-        // "tertiary-color": "#812C81",
-        // "secondary-color": "#812C8180",
-        // "primary-color-50": "#A787A7",
-        // "primary-color-100": "#561D56",
-        // "primary-color-150": "#A937A9",
-
-        // "custom-gray": "#808081",
-        // 'bordercolor': "#ECECEC", 
-
-        // "custom-gray-250": "#222222",
-        // "custom-gray-300": "#98989D",
 
         // uxr insider
         "primary-green": "#ADFC87",

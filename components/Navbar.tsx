@@ -55,7 +55,7 @@ export default function Navbar() {
             menuOpen ? "block" : "hidden"
           } lg:block`}
         >
-          <ul className="justify-center items-center  md-space-y-0 space-y-2 lg:space-x-6 lg:flex">
+          <ul className="justify-center items-center md:space-y-0 space-y-2 lg:space-x-6 lg:flex">
             {menus.map((item, idx) => (
               <li
                 key={idx}

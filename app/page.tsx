@@ -7,6 +7,8 @@ import Image from "next/image";
 import tomi from "../assets/images/tomi.svg";
 import { Button } from "@/components/ui/button";
 import GetInTouch from "@/components/GetInTouch";
+import Testimonial from "@/components/Testimonial";
+import ShopPreview from "@/components/Shop";
 
 // Initialize Montserrat with desired settings
 const montserrat = Montserrat({
@@ -59,9 +61,11 @@ const Page = () => {
         </div>
       </div>
 
+      <Testimonial />
 
-      <GetInTouch/>
+      {/* <ShopPreview/> */}
 
+      <GetInTouch />
     </main>
   );
 };
