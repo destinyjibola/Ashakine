@@ -39,19 +39,30 @@ const App = () => {
 
   const faqs = [
     {
-      question: "How quickly can guests get a response?",
+      question: "What makes VA Concierge different from a hotel concierge?",
       answer:
-        "Our virtual assistants respond within 15 minutes for standard requests, and immediately for urgent VIP requests.",
+        "Unlike traditional concierges who focus on in-house services, VA Concierge provides executive-level personal assistance. We handle business and lifestyle support, including meeting coordination, travel planning, social media management, and VIP reservations—ensuring an effortless stay for your guests",
     },
     {
-      question: "Is there a minimum contract for hotels?",
+      question: "How does this benefit my hotel or Airbnb business.",
       answer:
-        "No, we work on a flexible commission basis with no long-term contracts required.",
+        "We elevate your guest experience by offering premium concierge support, leading to higher satisfaction, better reviews, increased repeat bookings, and additional revenue through service partnerships.",
     },
     {
-      question: "What countries do you cover?",
+      question: "How do guests access the service?",
       answer:
-        "We currently provide services in over 50 countries worldwide, with local experts in each major city.",
+        "Guests can connect with their VA instantly via: QR code placed in the room (WhatsApp-based support) , Hotel-provided tablet or web link , Front desk request for seamless integration with your team",
+    },
+    {
+      question: "How is VA Concierge priced?",
+      answer:
+        "We offer flexible daily packages tailored to guest needs: ₦50K – Essential VA support for business & personal tasks, ₦80K – Priority service with VIP reservations & executive admin support, ₦250K – Full-scale business & lifestyle management for elite guests",
+    },
+
+    {
+      question: "How quickly do VAs respond?",
+      answer:
+        "VA Concierge operates with near-instant responsiveness, handling guest requests within 5–10 minutes, ensuring a world-class hospitality experience.",
     },
   ];
 

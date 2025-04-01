@@ -92,7 +92,6 @@ export default async function RootLayout({
         />
         <Navbar/>
         {children}
-        <Footer/>
       </body>
     </html>
   );
