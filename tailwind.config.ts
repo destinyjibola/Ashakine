@@ -19,19 +19,29 @@ const config = {
     },
     extend: {
       colors: {
+        // VAConcierge colors
+        navy: {
+          900: '#0A1A3A',
+          800: '#12264A',
+        },
+        gold: {
+          500: '#D4AF37',
+          400: '#E8C252',
+        },
+        platinum: '#E5E4E2',
 
-        // uxr insider
+        // uxr insider colors
         "primary-green": "#ADFC87",
         "primary-green-50": "#203815",
-        "primary-green-100" : "#1B5500", 
-        "primary-green-200" : "#0D1809",
+        "primary-green-100": "#1B5500", 
+        "primary-green-200": "#0D1809",
         "primary-green-300": "#7BB360", 
         "primary-green-400": "#E6FEDA",
         "primary-green-500": "#89FB54",
-        "custom-gray-50": " #E5E5E5",
+        "custom-gray-50": "#E5E5E5",
         "custom-gray-100": "#B2B2B2",
 
-
+        // Shadcn/ui colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -73,6 +83,10 @@ const config = {
           "5": "hsl(var(--chart-5))",
         },
       },
+      fontFamily: {
+        sans: ['Montserrat', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -95,14 +109,33 @@ const config = {
             height: "0",
           },
         },
+        "fadeIn": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "slideUp": {
+          from: { 
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+          to: { 
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fadeIn 1s ease-in-out",
+        "slide-up": "slideUp 0.8s ease-out",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Add any additional plugins here
+  ],
 } satisfies Config;
 
 export default config;

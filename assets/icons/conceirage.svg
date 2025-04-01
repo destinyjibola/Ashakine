@@ -1,0 +1,8 @@
+<svg width="180" height="50" viewBox="0 0 180 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="40" height="40" rx="8" fill="#D4AF37"/>
+  <text x="30" y="38" font-family="serif" font-size="24" font-weight="bold" fill="#1A2A3A" text-anchor="middle">VC</text>
+  <text x="70" y="28" font-family="serif" font-size="24" font-weight="bold" fill="white">VA</text>
+  <text x="100" y="28" font-family="serif" font-size="24" font-weight="bold" fill="white">Concierge</text>
+  <line x1="70" y1="32" x2="170" y2="32" stroke="#D4AF37" stroke-opacity="0.2" stroke-width="1"/>
+  <text x="120" y="42" font-family="sans-serif" font-size="8" letter-spacing="0.2em" fill="#D4AF37" text-anchor="middle">LUXURY SERVICES</text>
+</svg>
