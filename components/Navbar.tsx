@@ -12,8 +12,8 @@ export default function Navbar() {
 
   const sections = [
     { title: "Services", id: "services" },
-    { title: "For Hotels", id: "hotels" },
     { title: "Process", id: "process" },
+    { title: "Testimonials", id: "testimonials" },
     { title: "Contact us", id: "contact" },
   ];
 

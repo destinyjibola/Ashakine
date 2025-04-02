@@ -17,11 +17,16 @@ import {
   FiDollarSign,
   FiHome,
   FiUser,
+  FiClock,
+  FiSmile,
+  FiCompass,
+  FiCamera,
+  FiPhone,
 } from "react-icons/fi";
 import Navbar from "@/components/Navbar";
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState("guests");
+  const [activeTab, setActiveTab] = useState("business"); // Initialize with default tab
   const [openAccordion, setOpenAccordion] = useState(null);
 
   useEffect(() => {
@@ -37,38 +42,10 @@ const App = () => {
     setOpenAccordion(openAccordion === index ? null : index);
   };
 
-  const faqs = [
-    {
-      question: "What makes VA Concierge different from a hotel concierge?",
-      answer:
-        "Unlike traditional concierges who focus on in-house services, VA Concierge provides executive-level personal assistance. We handle business and lifestyle support, including meeting coordination, travel planning, social media management, and VIP reservations—ensuring an effortless stay for your guests",
-    },
-    {
-      question: "How does this benefit my hotel or Airbnb business.",
-      answer:
-        "We elevate your guest experience by offering premium concierge support, leading to higher satisfaction, better reviews, increased repeat bookings, and additional revenue through service partnerships.",
-    },
-    {
-      question: "How do guests access the service?",
-      answer:
-        "Guests can connect with their VA instantly via: QR code placed in the room (WhatsApp-based support) , Hotel-provided tablet or web link , Front desk request for seamless integration with your team",
-    },
-    {
-      question: "How is VA Concierge priced?",
-      answer:
-        "We offer flexible daily packages tailored to guest needs: ₦50K – Essential VA support for business & personal tasks, ₦80K – Priority service with VIP reservations & executive admin support, ₦250K – Full-scale business & lifestyle management for elite guests",
-    },
-
-    {
-      question: "How quickly do VAs respond?",
-      answer:
-        "VA Concierge operates with near-instant responsiveness, handling guest requests within 5–10 minutes, ensuring a world-class hospitality experience.",
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-navy-900">
       <Navbar />
+
       {/* Hero Section */}
       <section
         style={{
@@ -80,21 +57,37 @@ const App = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-navy-900/90 via-navy-800/70 to-navy-900/90" />
         <div className="relative z-10 text-center px-6 max-w-4xl">
-          <motion.h1
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="font-serif text-5xl md:text-6xl font-bold text-gold-500 mb-6"
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
           >
-            VAConcierge
-          </motion.h1>
+            <span className="text-white">Premium </span>
+            <span className="text-white">Virtual </span>
+            <span className="text-gold-500">Assistance </span>
+            <span className="text-white">for </span>
+            <span className="text-gold-500">Hospitality</span>
+          </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-sans text-xl md:text-2xl text-platinum mb-10"
+            className="font-sans text-2xl md:text-3xl text-platinum mb-8"
           >
-            Effortless Luxury, On Demand
+            Seamless Business & Leisure Support for Hotels & Guests
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="font-sans text-lg md:text-xl text-white mb-10 max-w-3xl mx-auto"
+          >
+            We provide a seamless virtual assistant experience tailored to hotel
+            and Airbnb guest stays. Whether they need business support or
+            exclusive lifestyle services, our vetted virtual assistants handle
+            every request, enhancing service quality without additional staffing
+            costs.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -123,7 +116,7 @@ const App = () => {
       </section>
 
       {/* Value Proposition */}
-      <section className="py-20 px-6 bg-navy-800" id="services">
+      <section className="py-20 px-6 bg-navy-800" id="">
         <div className="max-w-6xl mx-auto">
           <motion.h2
             initial={{ opacity: 0 }}
@@ -132,27 +125,27 @@ const App = () => {
             transition={{ duration: 0.8 }}
             className="font-serif text-3xl md:text-4xl text-center text-gold-500 mb-16"
           >
-            The Ultimate Concierge Experience
+            Why Partner with VAConcierge?
           </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
               {
-                icon: <FiStar className="text-3xl text-gold-500" />,
-                title: "For Guests",
+                icon: <FiUsers className="text-3xl text-gold-500" />,
+                title: "Expand Your Guest Offerings",
                 description:
-                  "A 24/7 virtual concierge for reservations, bookings, and VIP access.",
+                  "Provide high-end concierge services without additional staff costs.",
               },
               {
                 icon: <FiDollarSign className="text-3xl text-gold-500" />,
-                title: "For Hotels",
-                description:
-                  "Earn 20% commission on every guest request – no extra staff needed.",
+                title: "Increase Revenue",
+                description: "Hotels earn commissions on every service booked.",
               },
+
               {
-                icon: <FiCheck className="text-3xl text-gold-500" />,
-                title: "Discreet & Seamless",
+                icon: <FiClock className="text-3xl text-gold-500" />,
+                title: "24/7 Availability",
                 description:
-                  "Fully white-labeled to match your brand's aesthetic.",
+                  "Our VAs are always ready to assist, ensuring top-tier guest satisfaction.",
               },
             ].map((item, index) => (
               <motion.div
@@ -177,30 +170,55 @@ const App = () => {
       {/* Enhanced Services Showcase */}
       <section
         className="py-20 px-6 bg-navy-900/50 backdrop-blur-sm"
-        id="hotels"
+        id="services"
       >
         <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="font-serif text-4xl md:text-5xl font-bold text-gold-400 mb-4">
+              Our Services
+            </h2>
+            <p className="font-sans text-xl text-white max-w-3xl mx-auto">
+              Comprehensive support tailored for business, lifestyle, and travel
+              needs
+            </p>
+          </motion.div>
+
           <div className="flex justify-center mb-16">
             <div className="inline-flex rounded-full p-1 bg-navy-800 border border-gold-500/20">
               <button
-                onClick={() => setActiveTab("guests")}
+                onClick={() => setActiveTab("business")}
                 className={`px-6 py-3 rounded-full font-medium transition-all ${
-                  activeTab === "guests"
+                  activeTab === "business"
                     ? "bg-gold-500 text-navy-900 shadow-lg"
                     : "text-platinum hover:bg-navy-700"
                 }`}
               >
-                For Guests
+                Business Support
               </button>
               <button
-                onClick={() => setActiveTab("hotels")}
+                onClick={() => setActiveTab("lifestyle")}
                 className={`px-6 py-3 rounded-full font-medium transition-all ${
-                  activeTab === "hotels"
+                  activeTab === "lifestyle"
                     ? "bg-gold-500 text-navy-900 shadow-lg"
                     : "text-platinum hover:bg-navy-700"
                 }`}
               >
-                For Hotels
+                Lifestyle Services
+              </button>
+              <button
+                onClick={() => setActiveTab("travel")}
+                className={`px-6 py-3 rounded-full font-medium transition-all ${
+                  activeTab === "travel"
+                    ? "bg-gold-500 text-navy-900 shadow-lg"
+                    : "text-platinum hover:bg-navy-700"
+                }`}
+              >
+                Travel Assistance
               </button>
             </div>
           </div>
@@ -214,62 +232,92 @@ const App = () => {
               transition={{ duration: 0.3 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-8"
             >
-              {(activeTab === "guests"
+              {(activeTab === "business"
                 ? [
                     {
-                      icon: <FiBriefcase className="text-2xl" />,
-                      title: "Business & Productivity",
+                      icon: <FiMail className="text-2xl" />,
+                      title: "Email & Calendar",
                       items: [
+                        "Professional email management",
                         "Meeting scheduling",
-                        "Email management",
-                        "Workspace bookings",
+                        "Calendar optimization",
                       ],
                     },
                     {
-                      icon: <FiMapPin className="text-2xl" />,
-                      title: "Travel & Logistics",
+                      icon: <FiBriefcase className="text-2xl" />,
+                      title: "Administrative",
                       items: [
-                        "Flight bookings",
-                        "Luxury transportation",
-                        "VIP airport services",
+                        "Research assistance",
+                        "Document preparation",
+                        "Co-working space bookings",
                       ],
                     },
+                    {
+                      icon: <FiDollarSign className="text-2xl" />,
+                      title: "Executive Support",
+                      items: [
+                        "Presentation preparation",
+                        "Business travel coordination",
+                        "Virtual office management",
+                      ],
+                    },
+                  ]
+                : activeTab === "lifestyle"
+                ? [
                     {
                       icon: <FiStar className="text-2xl" />,
-                      title: "Lifestyle",
+                      title: "VIP Reservations",
                       items: [
-                        "Fine dining reservations",
-                        "Private spa",
-                        "Personal shopping",
+                        "Exclusive restaurant bookings",
+                        "Premium event access",
+                        "Private club arrangements",
+                      ],
+                    },
+                    {
+                      icon: <FiCamera className="text-2xl" />,
+                      title: "Transportation",
+                      items: [
+                        "Chauffeur services",
+                        "Luxury car rentals",
+                        "Private driver coordination",
+                      ],
+                    },
+                    {
+                      icon: <FiSmile className="text-2xl" />,
+                      title: "Personal Care",
+                      items: [
+                        "Spa & salon appointments",
+                        "Personal stylist coordination",
+                        "Wellness program booking",
                       ],
                     },
                   ]
                 : [
                     {
-                      icon: <FiDollarSign className="text-2xl" />,
-                      title: "Revenue Growth",
+                      icon: <FiMapPin className="text-2xl" />,
+                      title: "Accommodations",
                       items: [
-                        "20% commission",
-                        "Premium upsells",
-                        "No upfront costs",
+                        "Flight & hotel bookings",
+                        "Boutique property selection",
+                        "Last-minute reservations",
                       ],
                     },
                     {
-                      icon: <FiUsers className="text-2xl" />,
-                      title: "Guest Experience",
+                      icon: <FiCompass className="text-2xl" />,
+                      title: "Local Experiences",
                       items: [
-                        "24/7 concierge",
-                        "White-glove service",
-                        "Retention programs",
+                        "Personalized city guides",
+                        "Private tour arrangements",
+                        "Off-the-beaten-path recommendations",
                       ],
                     },
                     {
-                      icon: <FiCheck className="text-2xl" />,
-                      title: "Integration",
+                      icon: <FiClock className="text-2xl" />,
+                      title: "Concierge",
                       items: [
-                        "No tech setup",
-                        "QR code access",
-                        "White-labeled",
+                        "24/7 travel assistance",
+                        "Ticket & event bookings",
+                        "Custom itinerary planning",
                       ],
                     },
                   ]
@@ -328,7 +376,7 @@ const App = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            Our Seamless Process
+            How It Works
           </motion.h2>
 
           <div className="relative">
@@ -354,20 +402,20 @@ const App = () => {
             {[
               {
                 icon: <FiMessageSquare className="text-2xl" />,
-                title: "Make Your Request",
-                description: "Contact us via WhatsApp, email, or QR code",
+                title: "Guests Request a Service",
+                description: "Via WhatsApp or our platform",
                 accent: "from-gold-500/20 to-gold-500/40",
               },
               {
-                icon: <FiMail className="text-2xl" />,
-                title: "Personalize",
-                description: "We tailor solutions to your exact needs",
+                icon: <FiUsers className="text-2xl" />,
+                title: "Our Virtual Assistants Handle Everything",
+                description: "From bookings to scheduling",
                 accent: "from-gold-600/20 to-gold-600/40",
               },
               {
-                icon: <FiCalendar className="text-2xl" />,
-                title: "Experience Magic",
-                description: "Sit back while we handle every detail",
+                icon: <FiDollarSign className="text-2xl" />,
+                title: "The Hotel Earns a Commission",
+                description: "While we provide elite concierge support",
                 accent: "from-gold-700/20 to-gold-700/40",
               },
             ].map((step, index) => (
@@ -470,9 +518,162 @@ const App = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      {/* Testimonials Section */}
+      <section
+        className="py-24 px-6 bg-gradient-to-b from-navy-900 to-navy-800 relative overflow-hidden"
+        id="testimonials"
+      >
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-48 h-48 rounded-full bg-gold-500/10 blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-64 h-64 rounded-full bg-gold-500/5 blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="font-serif text-4xl md:text-5xl text-gold-500 mb-4">
+              Voices of Excellence
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-gold-500 to-transparent mx-auto mb-4"></div>
+            <p className="font-sans text-xl text-platinum/80 max-w-2xl mx-auto">
+              Trusted by hospitality professionals and discerning travelers
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Testimonial 1 - Traveler */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="relative group"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-br from-gold-500/20 to-transparent rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              <div className="relative bg-navy-800/80 backdrop-blur-sm p-8 rounded-xl border border-gold-500/20 h-full flex flex-col">
+                <div className="text-5xl font-serif text-gold-500/20 mb-4">
+                  &ldquo;
+                </div>
+                <blockquote className="font-sans text-platinum/90 italic mb-6 flex-grow">
+                  &ldquo;I needed urgent flight changes in Abuja, and
+                  VAConcierge handled everything in minutes. Their 24/7
+                  availability and attention to detail are unmatched - like
+                  having a personal assistant on demand!&rdquo;
+                </blockquote>
+                <div className="border-t border-gold-500/20 pt-4">
+                  <p className="font-sans font-medium text-gold-400">
+                    Henry T.
+                  </p>
+                  <p className="font-sans text-sm text-platinum/70">
+                    Frequent Traveler & Consultant
+                  </p>
+                </div>
+                <div className="absolute bottom-6 right-6 text-gold-500/10 group-hover:text-gold-500/30 transition-colors">
+                  <FiUser className="text-3xl" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Testimonial 2 - Hotel Manager */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="relative group"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-br from-gold-500/20 to-transparent rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              <div className="relative bg-navy-800/80 backdrop-blur-sm p-8 rounded-xl border border-gold-500/20 h-full flex flex-col">
+                <div className="text-5xl font-serif text-gold-500/20 mb-4">
+                  &ldquo;
+                </div>
+                <blockquote className="font-sans text-platinum/90 italic mb-6 flex-grow">
+                  &ldquo;VAConcierge transformed our guest services. From
+                  restaurant bookings to chauffeur arrangements, they handle
+                  everything professionally. Our satisfaction scores increased
+                  30% without additional staff costs.&rdquo;
+                </blockquote>
+                <div className="border-t border-gold-500/20 pt-4">
+                  <p className="font-sans font-medium text-gold-400">
+                    Adeola S.
+                  </p>
+                  <p className="font-sans text-sm text-platinum/70">
+                    Hotel Manager, Lagos
+                  </p>
+                </div>
+                <div className="absolute bottom-6 right-6 text-gold-500/10 group-hover:text-gold-500/30 transition-colors">
+                  <FiHome className="text-3xl" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Testimonial 3 - Corporate Client */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="relative group"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-br from-gold-500/20 to-transparent rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              <div className="relative bg-navy-800/80 backdrop-blur-sm p-8 rounded-xl border border-gold-500/20 h-full flex flex-col">
+                <div className="text-5xl font-serif text-gold-500/20 mb-4">
+                  &ldquo;
+                </div>
+                <blockquote className="font-sans text-platinum/90 italic mb-6 flex-grow">
+                  &ldquo;Planning our executive retreat went from stressful to
+                  seamless with VAConcierge. They coordinated venues, RSVPs, and
+                  local experiences flawlessly - allowing our team to focus on
+                  strategy.&rdquo;
+                </blockquote>
+                <div className="border-t border-gold-500/20 pt-4">
+                  <p className="font-sans font-medium text-gold-400">
+                    Chioma M.
+                  </p>
+                  <p className="font-sans text-sm text-platinum/70">
+                    Head of People, Multinational
+                  </p>
+                </div>
+                <div className="absolute bottom-6 right-6 text-gold-500/10 group-hover:text-gold-500/30 transition-colors">
+                  <FiBriefcase className="text-3xl" />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Trust indicators */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.8 }}
+            className="flex flex-wrap justify-center gap-6 mt-16 pt-8 border-t border-gold-500/20"
+          >
+            {[
+              "100% Response Rate",
+              "24/7 Availability",
+              "5-Star Rated",
+              "90% Repeat Clients",
+            ].map((item, index) => (
+              <div key={index} className="flex items-center">
+                <FiCheck className="text-gold-500 mr-2" />
+                <span className="font-sans text-platinum/90">{item}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section
-        id="contact"
+      
         className="min-h-[70vh] flex flex-col md:flex-row group"
       >
         {/* Guests Section */}
@@ -575,11 +776,67 @@ const App = () => {
       {/* FAQ */}
       <section
         id="faq"
-        className="py-24 px-6 bg-gradient-to-b from-navy-800/40 to-navy-900/80 relative overflow-hidden"
+        className="py-24 px-6 relative overflow-hidden bg-navy-900"
       >
-        {/* Decorative elements */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-gold-500/10 blur-3xl"></div>
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-gold-500/5 blur-2xl"></div>
+        {/* Luxury Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Diamond Grid Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="h-full w-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          </div>
+
+          {/* Animated Gold Particles */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(12)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{
+                  opacity: [0, 0.3, 0],
+                  y: [0, Math.random() * 100 - 50],
+                  x: [0, Math.random() * 100 - 50],
+                }}
+                transition={{
+                  duration: 15 + Math.random() * 20,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="absolute rounded-full bg-gold-500/30"
+                style={{
+                  width: `${Math.random() * 6 + 2}px`,
+                  height: `${Math.random() * 6 + 2}px`,
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Decorative Corner Accents */}
+          <div className="absolute top-0 left-0 w-32 h-32 border-t-2 border-l-2 border-gold-500/20"></div>
+          <div className="absolute bottom-0 right-0 w-32 h-32 border-b-2 border-r-2 border-gold-500/20"></div>
+
+          {/* Floating Luxury Elements */}
+          <motion.div
+            animate={{
+              rotate: [0, 360],
+            }}
+            transition={{
+              duration: 120,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute -right-40 -top-40 w-80 h-80 opacity-10"
+          >
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <path
+                fill="#D4AF37"
+                d="M45,-70.8C58.4,-61.7,69.6,-50.1,76.4,-36C83.2,-21.9,85.5,-5.3,81.7,8.1C77.9,21.5,68,32.8,56.1,42.9C44.2,53,30.3,61.9,14.4,70.3C-1.5,78.7,-19.5,86.6,-33.9,81.3C-48.3,76,-59.1,57.5,-68.4,38.9C-77.7,20.3,-85.5,1.6,-83.1,-15.9C-80.7,-33.4,-68.1,-49.7,-52.8,-58.5C-37.5,-67.2,-19.5,-68.4,-2.2,-65.8C15.2,-63.2,30.3,-56.8,45,-70.8Z"
+                transform="translate(100 100)"
+              />
+            </svg>
+          </motion.div>
+        </div>
 
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.div
@@ -598,7 +855,34 @@ const App = () => {
           </motion.div>
 
           <div className="space-y-4">
-            {faqs.map((faq, index) => (
+            {[
+              {
+                question: "How does this service work?",
+                answer:
+                  "Guests simply contact us via WhatsApp or the platform, and our team takes care of everything—from securing reservations to arranging personalized services.",
+              },
+              {
+                question: "Why should a hotel partner with VAConcierge?",
+                answer:
+                  "We help hotels provide luxury concierge services without hiring additional staff, while also generating commission-based revenue.",
+              },
+              {
+                question:
+                  "What makes VAConcierge different from an in-house concierge?",
+                answer:
+                  "Unlike traditional hotel concierges, we offer business support, executive assistance, and luxury lifestyle services beyond the hotel's premises.",
+              },
+              {
+                question: "How are virtual assistants vetted?",
+                answer:
+                  "Our VAs are highly trained professionals with expertise in executive assistance, travel coordination, and hospitality. Each assistant undergoes thorough screening before joining.",
+              },
+              {
+                question: "How do payments work?",
+                answer:
+                  "Hotels can opt for a commission-based model where they receive a percentage of each service booked, or guests can pay directly for their requested services.",
+              },
+            ].map((faq, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 10 }}
@@ -647,25 +931,56 @@ const App = () => {
             ))}
           </div>
 
-          {/* CTA at bottom */}
+          {/* Enhanced Contact CTA */}
           <motion.div
+          id="contact"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="text-center mt-16"
+            className="text-center mt-20"
           >
-            <p className="font-sans text-platinum/80 mb-6">
-              Still have questions?
-            </p>
-            <a
-              href="https://wa.me/2347015990636"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center border border-gold-500 hover:bg-gold-500/10 text-gold-500 font-sans font-medium py-3 px-8 rounded-full transition-colors duration-300"
-            >
-              Contact Us <FiArrowRight className="ml-2" />
-            </a>
+            <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                <motion.a
+                  whileHover={{ y: -2 }}
+                  href="https://wa.me/2347015990636"
+                  className="flex-1 flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-6 rounded-lg transition-all shadow-lg shadow-emerald-500/20"
+                >
+                  <FiMessageSquare className="text-xl" />
+                  WhatsApp
+                </motion.a>
+
+                <motion.a
+                  whileHover={{ y: -2 }}
+                  href="mailto:concierge@vaconcierge.com"
+                  className="flex-1 flex items-center justify-center gap-3 bg-navy-700 hover:bg-navy-600 border border-gold-500/30 text-gold-400 font-medium py-3 px-6 rounded-lg transition-all shadow-lg shadow-gold-500/10"
+                >
+                  <FiMail className="text-xl" />
+                  Email
+                </motion.a>
+              </div>
+
+              <div className="relative w-full max-w-xs">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gold-500/20"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-navy-900 px-3 text-sm text-platinum/50">
+                    Direct line to our concierge
+                  </span>
+                </div>
+              </div>
+
+              <a
+                href="tel:+2347015990636"
+                className="group flex items-center gap-2 text-gold-400 hover:text-gold-300 transition-colors"
+              >
+                <FiPhone className="text-lg" />
+                <span className="font-medium">+234 701 599 0636</span>
+                <FiArrowRight className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+            </div>
           </motion.div>
         </div>
       </section>
