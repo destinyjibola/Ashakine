@@ -53,7 +53,7 @@ const App = () => {
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
-        className="relative h-screen flex items-center justify-center overflow-hidden mt-[4rem]"
+        className="relative flex py-[7rem] justify-center overflow-hidden mt-[6rem]"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-navy-900/90 via-navy-800/70 to-navy-900/90" />
         <div className="relative z-10 text-center px-6 max-w-4xl">
@@ -61,7 +61,7 @@ const App = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
+            className="font-sans text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
           >
             <span className="text-white">Premium </span>
             <span className="text-white">Virtual </span>
