@@ -188,38 +188,73 @@ const App = () => {
             </p>
           </motion.div>
 
-          <div className="flex justify-center mb-16">
-            <div className="inline-flex rounded-full p-1 bg-navy-800 border border-gold-500/20">
-              <button
-                onClick={() => setActiveTab("business")}
-                className={`px-6 py-3 rounded-full font-medium transition-all ${
-                  activeTab === "business"
-                    ? "bg-gold-500 text-navy-900 shadow-lg"
-                    : "text-platinum hover:bg-navy-700"
-                }`}
-              >
-                Business Support
-              </button>
-              <button
-                onClick={() => setActiveTab("lifestyle")}
-                className={`px-6 py-3 rounded-full font-medium transition-all ${
-                  activeTab === "lifestyle"
-                    ? "bg-gold-500 text-navy-900 shadow-lg"
-                    : "text-platinum hover:bg-navy-700"
-                }`}
-              >
-                Lifestyle Services
-              </button>
-              <button
-                onClick={() => setActiveTab("travel")}
-                className={`px-6 py-3 rounded-full font-medium transition-all ${
-                  activeTab === "travel"
-                    ? "bg-gold-500 text-navy-900 shadow-lg"
-                    : "text-platinum hover:bg-navy-700"
-                }`}
-              >
-                Travel Assistance
-              </button>
+          <div className="mb-12 md:mb-16">
+            {/* Desktop - Original Horizontal Tabs */}
+            <div className="hidden md:flex justify-center">
+              <div className="inline-flex rounded-full p-1 bg-navy-800 border border-gold-500/20">
+                <button
+                  onClick={() => setActiveTab("business")}
+                  className={`px-6 py-3 rounded-full font-medium transition-all ${
+                    activeTab === "business"
+                      ? "bg-gold-500 text-navy-900 shadow-lg"
+                      : "text-platinum hover:bg-navy-700"
+                  }`}
+                >
+                  Business Support
+                </button>
+                <button
+                  onClick={() => setActiveTab("lifestyle")}
+                  className={`px-6 py-3 rounded-full font-medium transition-all ${
+                    activeTab === "lifestyle"
+                      ? "bg-gold-500 text-navy-900 shadow-lg"
+                      : "text-platinum hover:bg-navy-700"
+                  }`}
+                >
+                  Lifestyle Services
+                </button>
+                <button
+                  onClick={() => setActiveTab("travel")}
+                  className={`px-6 py-3 rounded-full font-medium transition-all ${
+                    activeTab === "travel"
+                      ? "bg-gold-500 text-navy-900 shadow-lg"
+                      : "text-platinum hover:bg-navy-700"
+                  }`}
+                >
+                  Travel Assistance
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile - Creative Vertical Selector */}
+            <div className="md:hidden relative">
+              <div className="absolute -inset-1 bg-gold-500/10 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative bg-navy-800 border border-gold-500/20 rounded-xl overflow-hidden">
+                {["business", "lifestyle", "travel"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`w-full px-6 py-4 text-left flex items-center transition-all ${
+                      activeTab === tab
+                        ? "bg-gold-500/10 text-gold-400"
+                        : "text-platinum hover:bg-navy-700/50"
+                    }`}
+                  >
+                    <div
+                      className={`w-2 h-2 rounded-full mr-3 ${
+                        activeTab === tab ? "bg-gold-500" : "bg-gold-500/30"
+                      }`}
+                    ></div>
+                    <span className="font-medium">
+                      {tab === "business" && "Business Support"}
+                      {tab === "lifestyle" && "Lifestyle Services"}
+                      {tab === "travel" && "Travel Assistance"}
+                    </span>
+                    {activeTab === tab && (
+                      <FiChevronDown className="ml-auto text-gold-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -672,10 +707,7 @@ const App = () => {
       </section>
 
       {/* CTA Section */}
-      <section
-      
-        className="min-h-[70vh] flex flex-col md:flex-row group"
-      >
+      <section className="min-h-[70vh] flex flex-col md:flex-row group">
         {/* Guests Section */}
         <div className="w-full md:w-1/2 bg-navy-800 flex items-center justify-center p-12 relative overflow-hidden transition-all duration-500 hover:md:w-[55%]">
           {/* Animated background elements */}
@@ -933,7 +965,7 @@ const App = () => {
 
           {/* Enhanced Contact CTA */}
           <motion.div
-          id="contact"
+            id="contact"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -953,7 +985,7 @@ const App = () => {
 
                 <motion.a
                   whileHover={{ y: -2 }}
-                  href="mailto:concierge@vaconcierge.com"
+                  href="mailto:creativetorchagency@gmail.com"
                   className="flex-1 flex items-center justify-center gap-3 bg-navy-700 hover:bg-navy-600 border border-gold-500/30 text-gold-400 font-medium py-3 px-6 rounded-lg transition-all shadow-lg shadow-gold-500/10"
                 >
                   <FiMail className="text-xl" />
