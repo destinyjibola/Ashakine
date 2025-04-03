@@ -75,7 +75,7 @@ const App = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-sans text-2xl md:text-3xl text-platinum mb-8"
           >
-            Seamless Business & Leisure Support for Hotels & aAirbnb Guests
+            Seamless Business & Leisure Support for Hotels & Airbnb Guests
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
