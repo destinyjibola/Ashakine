@@ -8,10 +8,10 @@ import Navbar from "@/components/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VAConcierge | Premium Luxury Concierge Services for Hotels & Guests",
+  title: "VAConcierge | Premium Executive Concierge Services for Hotels & Guests",
   description: "24/7 white-label concierge services elevating hospitality experiences. For hotels: boost revenue with our commission-based solutions. For guests: access VIP services worldwide.",
   keywords: [
-    "luxury concierge",
+    "Executive concierge",
     "hotel concierge services",
     "VIP travel assistance",
     "white-label concierge",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "premium guest services"
   ],
   openGraph: {
-    title: "VAConcierge | Luxury Concierge Services",
+    title: "VAConcierge | Executive Concierge Services",
     description: "Elevating hospitality through seamless, white-labeled executive assistance for hotels and discerning guests.",
     url: "https://vaconcierge.com",
     siteName: "VAConcierge",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
         url: "https://res.cloudinary.com/destiny1233/image/upload/v1743677577/heroimage_tqfrf0.jpg",
         width: 1200,
         height: 630,
-        alt: "VAConcierge Luxury Services",
+        alt: "VAConcierge Executive Services",
       },
     ],
     locale: "en_US",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "VAConcierge | Luxury Concierge Services",
+    title: "VAConcierge | Executive Concierge Services",
     description: "Premium white-label concierge solutions for hotels and VIP guests",
     images: ["https://vaconcierge.com/twitter-image.jpg"],
   },
