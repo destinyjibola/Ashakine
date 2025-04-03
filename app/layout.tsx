@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "VAConcierge",
     images: [
       {
-        url: "https://vaconcierge.com/og-image.jpg",
+        url: "https://res.cloudinary.com/destiny1233/image/upload/v1743677577/heroimage_tqfrf0.jpg",
         width: 1200,
         height: 630,
         alt: "VAConcierge Luxury Services",
