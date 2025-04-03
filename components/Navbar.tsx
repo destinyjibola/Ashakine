@@ -93,7 +93,7 @@ export default function Navbar() {
                 </div>
                 <div className="h-[1px] w-full bg-gold-500/30 mt-1"></div>
                 <span className="text-[0.65rem] text-gold-400 tracking-[0.2em] mt-1">
-                  LUXURY SERVICES
+                  EXECUTIVE SERVICES
                 </span>
               </div>
             </div>

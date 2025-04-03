@@ -75,7 +75,7 @@ const App = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-sans text-2xl md:text-3xl text-platinum mb-8"
           >
-            Seamless Business & Leisure Support for Hotels & Guests
+            Seamless Business & Leisure Support for Hotels & aAirbnb Guests
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -1118,7 +1118,7 @@ const App = () => {
               className="font-sans text-platinum/80"
               whileHover={{ scale: 1.02 }}
             >
-              VAConcierge © {new Date().getFullYear()} – Powered by Excellence
+              VAConcierge © {new Date().getFullYear()} 
             </motion.p>
           </div>
         </div>
