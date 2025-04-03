@@ -985,7 +985,7 @@ const App = () => {
 
                 <motion.a
                   whileHover={{ y: -2 }}
-                  href="mailto:creativetorchagency@gmail.com"
+                  href="mailto:vaconciergeng@gmail.com"
                   className="flex-1 flex items-center justify-center gap-3 bg-navy-700 hover:bg-navy-600 border border-gold-500/30 text-gold-400 font-medium py-3 px-6 rounded-lg transition-all shadow-lg shadow-gold-500/10"
                 >
                   <FiMail className="text-xl" />
