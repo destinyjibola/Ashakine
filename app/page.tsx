@@ -249,9 +249,9 @@ const App = () => {
                       {tab === "lifestyle" && "Lifestyle Services"}
                       {tab === "travel" && "Travel Assistance"}
                     </span>
-                    {activeTab === tab && (
+                    {/* {activeTab === tab && (
                       <FiChevronDown className="ml-auto text-gold-500" />
-                    )}
+                    )} */}
                   </button>
                 ))}
               </div>
