@@ -19,6 +19,8 @@ const config = {
     },
     extend: {
       colors: {
+        primarycolor: '#1A237E',  // Deep navy blue
+        secondarycolor: '#FFC107', // Vibrant amber
         // VAConcierge colors
         navy: {
           900: '#0A1A3A',
