@@ -14,7 +14,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-20">
           {/* Your preferred logo implementation */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="" className="flex items-center gap-3 group">
             <div className="relative">
               <div className="w-10 h-10 rounded-full border-4 border-secondarycolor/80 flex items-center justify-center transition-all duration-300 group-hover:rotate-45">
                 <div className="w-5 h-5 rounded-full bg-secondarycolor/20 border border-secondarycolor/50"></div>
