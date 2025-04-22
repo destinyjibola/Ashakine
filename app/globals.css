@@ -152,6 +152,7 @@ html {
   }
 }
 
+
 .containers {
   position: relative;
   width: 400px;
@@ -161,7 +162,8 @@ html {
   align-items: center;
 }
 
-.containers .spinBtn {
+
+/* .containers .spinBtn {
   position: absolute;
   width: 60px;
   height: 60px;
@@ -176,6 +178,31 @@ html {
   border: 4px solid rgba(0, 0, 0, 0, 0.75);
   cursor: pointer;
   user-select: none;
+} */
+
+
+.containers .spinBtn {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  border-radius: 50%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black;
+  font-weight: bold;
+  letter-spacing: 0.1rem;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto; /* Ensure it's clickable */
+}
+
+.containers .spinBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .containers .spinBtn::before {
@@ -185,11 +212,13 @@ html {
   width: 20px;
   height: 30px;
   background-color: white;
-
   clip-path: polygon(50% 0, 15% 100%, 85% 100%);
+  /* //new */
+  transform: rotate(0deg);
+  left: calc(50% - 10px); /* Center the pointer */
 }
 
-.containers .wheel {
+/* .containers .wheel {
   position: absolute;
   top: 0;
   left: 0;
@@ -200,6 +229,21 @@ html {
   overflow: hidden;
   box-shadow: 0 0 0 5px #333, 0 0 0 15px #fff, 0 0 0 18px;
   transition: transform 5s ease-in-out;
+} */
+
+.containers .wheel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #333;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 5px #333, 0 0 0 15px #fff, 0 0 0 18px #111;
+  transition: transform 5s cubic-bezier(0.17, 0.85, 0.45, 1);
+  transform: rotate(0deg); /* Initialize rotation */
+  will-change: transform; /* Optimize animation performance */
 }
 
 .containers .wheel .number {
@@ -224,4 +268,57 @@ html {
   font-size: 1rem;
   color: white;
   text-shadow: 3px 5px 2px rgba(0, 0, 0, 0, 0.15);
+}
+
+
+/* Add these to enhance your existing CSS */
+.spinBtn {
+  transition: all 0.3s ease;
+}
+
+.spinBtn:active {
+  transform: scale(0.95);
+}
+
+.wheel {
+  transition: transform 5s cubic-bezier(0.17, 0.85, 0.45, 1);
+  transform: rotate(-22.5deg);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+
+/* ///////////// */
+/* .number.highlight {
+  box-shadow: 0 0 20px 5px gold;
+  transform: scale(1.05) rotate(calc(45deg * var(--i)));
+  z-index: 5;
+} */
+
+.number {
+  /* Ensure segments are perfectly aligned */
+  transform-origin: bottom right;
+  transform: rotate(calc(45deg * var(--i))) translateZ(0);
+}
+
+.number.highlight {
+  /* More visible highlight */
+  box-shadow: 0 0 25px 10px rgba(255, 215, 0, 0.8);
+  z-index: 10;
 }
