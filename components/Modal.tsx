@@ -1,43 +1,55 @@
-import React, { ReactNode } from "react";
+'use client';
+import { X } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
-  toggleModal: () => void;
-  children: ReactNode;
-  clear?: () => void; // Make it optional
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, toggleModal, children , clear = () => {}}) => {
-  const handleCloseModal = () => {
+export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+
     if (isOpen) {
-      toggleModal();
-      clear(); // Now safe to call
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
     }
-  };
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return (
-    <div
-      className={`fixed inset-0 z-50 ${
-        isOpen ? "flex" : "hidden"
-      } justify-center items-center bg-black bg-opacity-50 transition-opacity overflow-y-auto`} // Add overflow-y-auto to make the backdrop scrollable
-    >
-      <div
-        className="bg-white relative rounded-lg p-4 md:w-[50%] w-11/12 transition-transform transform max-h-[90vh] overflow-y-auto" // Add max-h-[90vh] and overflow-y-auto to make the modal content scrollable
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          onClick={handleCloseModal}
-          className="absolute bg-red-500 right-[6px] cursor-pointer top-[6px] text-white w-[25px] h-[25px] rounded-full flex items-center justify-center"
-        >
-          X
-        </div>
-        {children}
-        <div className="mt-4 flex justify-end">
-          {/* You can add a close button here if needed */}
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md relative">
+        {/* Animated glow bar */}
+        <div className="h-0.5 bg-gradient-to-r from-blue-500/0 via-blue-500 to-blue-500/0 animate-pulse"></div>
+        
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">{title}</h2>
+            <button 
+              onClick={onClose}
+              className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          
+          {children}
         </div>
       </div>
     </div>
   );
-};
-
-export default Modal;
+}

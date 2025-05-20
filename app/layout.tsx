@@ -89,7 +89,6 @@ export default async function RootLayout({
           zIndex={5000}
           showAtBottom={false}
         />
-        <Navbar/>
         {children}
       </body>
     </html>

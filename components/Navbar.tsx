@@ -7,7 +7,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="w-full bg-primarycolor/95 backdrop-blur-md border-b border-secondarycolor/15 fixed top-0 z-50">
+    <nav className="w-full bg-primarycolor/95 backdrop-blur-md border-b border-secondarycolor/15">
       {/* Animated glow bar */}
       <div className="h-0.5 bg-gradient-to-r from-secondarycolor/0 via-secondarycolor to-secondarycolor/0 animate-pulse"></div>
 
