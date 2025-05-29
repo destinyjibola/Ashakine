@@ -5,11 +5,10 @@ import { useEffect } from 'react';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
   children: React.ReactNode;
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, children }: ModalProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -38,7 +37,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">{title}</h2>
+     
             <button 
               onClick={onClose}
               className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
