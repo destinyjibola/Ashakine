@@ -1,22 +1,34 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
-// Mock data - replace with your actual data fetching
-async function getEventPrizes(eventId) {
-  const prizesByEvent = {
+type Prize = {
+  id: string;
+  name: string;
+  value: string;
+  quantity: number;
+};
+
+type Params = {
+  params: {
+    eventId: string;
+  };
+};
+
+async function getEventPrizes(eventId: string): Promise<Prize[]> {
+  const prizesByEvent: Record<string, Prize[]> = {
     techhub123355: [
       { id: 'prize1', name: 'MacBook Pro', value: '$1999', quantity: 1 },
       { id: 'prize2', name: 'AirPods Pro', value: '$249', quantity: 5 },
     ],
     designsummit2023: [
       { id: 'prize3', name: 'Wacom Tablet', value: '$499', quantity: 3 },
-    ]
+    ],
   };
 
   return prizesByEvent[eventId] || [];
 }
 
-export default async function EventPrizesPage({ params }) {
+export default async function EventPrizesPage({ params }: Params) {
   const prizes = await getEventPrizes(params.eventId);
 
   return (
@@ -61,7 +73,7 @@ export default async function EventPrizesPage({ params }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
-                {prizes.map((prize) => (
+                {prizes.map((prize: Prize) => (
                   <tr key={prize.id}>
                     <td className="px-6 py-4 whitespace-nowrap">{prize.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-300">{prize.value}</td>
