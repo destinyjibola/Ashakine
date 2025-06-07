@@ -64,7 +64,7 @@ export default function Home() {
           <p className="text-sm mt-1">
             {error.includes("NEXT_PUBLIC_API_URL") ? (
               <>
-                Ensure <code>NEXT_PUBLIC_API_URL</code> is set in Vercel Dashboard under Settings > Environment Variables for the Production environment, then redeploy.
+                Ensure <code>NEXT_PUBLIC_API_URL</code> is set in Vercel Dashboard under  Environment Variables for the Production environment, then redeploy.
               </>
             ) : error.includes("CORS error") ? (
               <>
