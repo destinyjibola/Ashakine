@@ -12,10 +12,12 @@ export default function Home() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  console.log(process.env.NEXT_PUBLIC_API_URL)
+
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events`);
+        const response = await fetch(`https://ashakine.onrender.com/api/events`);
         if (!response.ok) throw new Error("Failed to fetch events");
         const events: Event[] = await response.json();
         setEvent(events[0] || null); // Set the first event
