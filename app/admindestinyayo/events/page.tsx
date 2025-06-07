@@ -108,7 +108,7 @@ export default function EventsPage() {
               <tr key={event._id}>
                 <td className="px-4 py-4 text-sm sm:px-6">
                   <Link
-                    href={`/admin/events/${event._id}`}
+                    href={`/admindestinyayo/events/${event._id}`}
                     className="text-blue-400 hover:text-blue-300 hover:underline"
                   >
                     {event.name}
@@ -122,7 +122,7 @@ export default function EventsPage() {
                 </td>
                 <td className="px-4 py-4 text-sm sm:px-6">
                   <button
-                    onClick={() => router.push(`/admin/events/${event._id}`)}
+                    onClick={() => router.push(`/admindestinyayo/events/${event._id}`)}
                     className="text-green-400 hover:text-green-300"
                   >
                     Manage

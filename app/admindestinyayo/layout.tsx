@@ -35,9 +35,9 @@ export default function AdminLayout({
 
   // Navigation items
   const navItems = [
-    { href: '/admin', label: 'Dashboard' },
-    { href: '/admin/events', label: 'Events' },
-    { href: '/admin/prizes', label: 'Prizes' },
+    { href: '/admindestinyayo', label: 'Dashboard' },
+    { href: '/admindestinyayo/events', label: 'Events' },
+    { href: '/admindestinyayo/prizes', label: 'Prizes' },
   ];
 
   return (

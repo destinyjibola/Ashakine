@@ -190,7 +190,7 @@ export default function EventDetailsPage({
       {/* Header Section */}
       <div className="flex items-center">
         <button
-          onClick={() => router.push("/admin/events")}
+          onClick={() => router.push("/admindestinyayo/events")}
           className="text-gray-300 hover:text-white mr-4 transition-colors duration-200"
         >
           ← All Events

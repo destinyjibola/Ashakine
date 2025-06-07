@@ -4,7 +4,9 @@ import { Wheel } from "react-custom-roulette";
 import Modal from "../../../components/Modal";
 import Confetti from "react-confetti";
 import { useParams } from "next/navigation";
-import hero from "../../../assets/images/heroimage.jpg";
+import sponsor1 from "../../../assets/images/sponsor1.jpg";
+import sponsor2 from "../../../assets/images/sponsor2.jpg";
+import sponsor3 from "../../../assets/images/sponsor3.jpg";
 import Image from "next/image";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -74,9 +76,9 @@ interface ImageItem {
 }
 
 const images: ImageItem[] = [
-  { src: hero, alt: "Image 1" },
-  { src: hero, alt: "Image 2" },
-  { src: hero, alt: "Image 3" },
+  { src: sponsor1, alt: "Image 1" },
+  { src: sponsor2, alt: "Image 2" },
+  { src: sponsor3, alt: "Image 3" },
   // Add more images as needed
 ];
 
@@ -279,7 +281,7 @@ function App() {
 
       <div className="w-full mb-[3rem]">
         {/* Mobile: Carousel */}
-        <div className="lg:hidden w-full h-[10rem] relative overflow-hidden">
+        <div className="lg:hidden w-full h-[15rem] relative overflow-hidden">
           {images.map((image, index) => (
             <div
               key={index}
