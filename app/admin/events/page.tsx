@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Event } from "@/types";
-import Modal from "@/components/Modal"; // Import your modal component
+import Modal from "@/components/Modal";
 import useSound from "use-sound";
 
 export default function EventsPage() {
@@ -21,7 +21,9 @@ export default function EventsPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("http://localhost:7000/api/events");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events`
+        );
         if (!response.ok) throw new Error("Failed to fetch events");
         const data: Event[] = await response.json();
         setEvents(data);
@@ -42,13 +44,16 @@ export default function EventsPage() {
 
     setIsCreating(true);
     try {
-      const response = await fetch("http://localhost:7000/api/events", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: newEventName }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: newEventName }),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to create event");
 
@@ -56,7 +61,6 @@ export default function EventsPage() {
       setEvents([...events, data]);
       setIsModalOpen(false);
       setNewEventName("");
-      // router.push(`/admin/events/${data._id}`);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -66,35 +70,35 @@ export default function EventsPage() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading events...</div>;
-  if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
+  if (loading) return <div className="p-4 sm:p-6">Loading events...</div>;
+  if (error) return <div className="p-4 sm:p-6 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="p-6 relative">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Events Management</h1>
+    <div className="p-4 sm:p-6 relative">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+        <h1 className="text-xl sm:text-2xl font-bold">Events Management</h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full sm:w-auto text-sm sm:text-base"
         >
           Create New Event
         </button>
       </div>
 
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
+      <div className="bg-gray-800 rounded-lg overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sm:px-6">
                 Event Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Prizes Count
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sm:px-6">
+                Prizes
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sm:px-6 hidden sm:table-cell">
                 Created At
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sm:px-6">
                 Actions
               </th>
             </tr>
@@ -102,7 +106,7 @@ export default function EventsPage() {
           <tbody className="divide-y divide-gray-700">
             {events.map((event) => (
               <tr key={event._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 text-sm sm:px-6">
                   <Link
                     href={`/admin/events/${event._id}`}
                     className="text-blue-400 hover:text-blue-300 hover:underline"
@@ -110,16 +114,16 @@ export default function EventsPage() {
                     {event.name}
                   </Link>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                <td className="px-4 py-4 text-sm text-gray-300 sm:px-6">
                   {event.prizes.length}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                <td className="px-4 py-4 text-sm text-gray-300 sm:px-6 hidden sm:table-cell">
                   {new Date(event.createdAt).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 text-sm sm:px-6">
                   <button
                     onClick={() => router.push(`/admin/events/${event._id}`)}
-                    className="text-green-400 hover:text-green-300 mr-3"
+                    className="text-green-400 hover:text-green-300"
                   >
                     Manage
                   </button>
@@ -130,7 +134,6 @@ export default function EventsPage() {
         </table>
       </div>
 
-      {/* Create Event Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
