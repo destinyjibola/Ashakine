@@ -19,12 +19,17 @@ export default function Home() {
         if (!process.env.NEXT_PUBLIC_API_URL) {
           throw new Error("Environment variable NEXT_PUBLIC_API_URL is not defined. Please check Vercel environment settings.");
         }
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
         if (!response.ok) {
           if (response.status === 404) {
-            throw new Error("API endpoint not found. Verify the API URL and endpoint.");
+            throw new Error("API endpoint not found. Verify the /api/events endpoint exists on the backend.");
           } else if (response.status >= 500) {
             throw new Error("Server error. The API server may be down or misconfigured.");
+          } else if (response.status === 0) {
+            throw new Error("CORS error: The backend may not allow requests from this domain.");
           } else {
             throw new Error(`Failed to fetch events: HTTP ${response.status} ${response.statusText}`);
           }
@@ -33,9 +38,9 @@ export default function Home() {
         if (!Array.isArray(events)) {
           throw new Error("Invalid API response: Expected an array of events.");
         }
-        setEvent(events[0] || null); // Set the first event
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred while fetching events.");
+        setEvent(events[0] || null);
+      } catch (err: any) {
+        setError(err.message || "An unexpected error occurred while fetching events.");
         console.error("Fetch error:", err);
       } finally {
         setLoading(false);
@@ -48,7 +53,6 @@ export default function Home() {
     <div className="text-white container-spacing mt-8">
       <h1 className="text-3xl font-bold mb-6">Ashakhine Wheel</h1>
       <p className="mb-4">Welcome! Spin the wheel for a chance to win exciting prizes!</p>
-      {/* Display API URL for debugging */}
       <p className="mb-4 text-sm text-gray-400">
         API URL: {process.env.NEXT_PUBLIC_API_URL || "Not defined"}
       </p>
@@ -60,19 +64,23 @@ export default function Home() {
           <p className="text-sm mt-1">
             {error.includes("NEXT_PUBLIC_API_URL") ? (
               <>
-                Ensure <code>NEXT_PUBLIC_API_URL</code> is set in Vercel Dashboard under Settings &gt; Environment Variables for the Production environment, then redeploy.
+                Ensure <code>NEXT_PUBLIC_API_URL</code> is set in Vercel Dashboard under Settings > Environment Variables for the Production environment, then redeploy.
+              </>
+            ) : error.includes("CORS error") ? (
+              <>
+                The backend at <code>{process.env.NEXT_PUBLIC_API_URL}</code> may not allow requests from this domain. Add CORS middleware to allow <code>{window.location.origin}</code>.
               </>
             ) : error.includes("API endpoint not found") ? (
               <>
-                Check if the API server is running and the endpoint <code>/api/events</code> exists. Verify CORS settings on the backend.
+                Check if the <code>/api/events</code> endpoint exists on <code>{process.env.NEXT_PUBLIC_API_URL}</code>. Test it in a browser or Postman.
               </>
             ) : error.includes("Server error") ? (
               <>
-                The API server may be experiencing issues. Check the server logs or contact your API provider.
+                The API server may be down. Check Render’s dashboard logs for <code>ashakine</code> or restart the service.
               </>
             ) : (
               <>
-                Try refreshing the page. If the issue persists, check the API configuration or contact support.
+                Try refreshing the page. If the issue persists, test <code>{process.env.NEXT_PUBLIC_API_URL}/api/events</code> in a browser or contact support.
               </>
             )}
           </p>
@@ -80,7 +88,13 @@ export default function Home() {
       ) : event ? (
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
           <h2 className="text-2xl font-semibold mb-2">{event.name}</h2>
-     
+          {event.images && event.images[0] && (
+            <img
+              src={event.images[0].url}
+              alt={event.name}
+              className="w-full h-48 object-cover rounded-md mb-4"
+            />
+          )}
           <p className="text-gray-300 mb-4">Join the fun and spin the wheel to win!</p>
           <Link
             href={`/${event._id}`}
