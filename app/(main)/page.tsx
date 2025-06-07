@@ -51,7 +51,7 @@ export default function Home() {
 
   return (
     <div className="text-white container-spacing mt-8">
-      <h1 className="text-3xl font-bold mb-6">Ashakhine Wheel</h1>
+      <h1 className="text-3xl font-bold mb-6">Ashakhine Wheels</h1>
       <p className="mb-4">Welcome! Spin the wheel for a chance to win exciting prizes!</p>
       <p className="mb-4 text-sm text-gray-400">
         API URL: {process.env.NEXT_PUBLIC_API_URL || "Not defined"}
