@@ -4,10 +4,19 @@ import { Wheel } from "react-custom-roulette";
 import Modal from "../../../components/Modal";
 import Confetti from "react-confetti";
 import { useParams } from "next/navigation";
-import sponsor1 from "../../../assets/images/sponsor1.jpg";
-import sponsor2 from "../../../assets/images/sponsor2.jpg";
-import sponsor3 from "../../../assets/images/sponsor3.jpg";
-import Image from "next/image";
+
+// const tickingSound = "/audio/spin-wheel-sound.mp3";
+// const applaudSound = "/audio/applause.mp3";
+// const booSound = "/audio/boo.mp3";
+
+// const ticTicSound: HTMLAudioElement | null =
+//   typeof window !== "undefined" ? new Audio(tickingSound) : null;
+
+// const appSound: HTMLAudioElement | null =
+//   typeof window !== "undefined" ? new Audio(applaudSound) : null;
+
+// const bSound: HTMLAudioElement | null =
+//   typeof window !== "undefined" ? new Audio(booSound) : null;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -65,36 +74,46 @@ function shuffleArray(array: PrizeData[]): PrizeData[] {
   return newArray;
 }
 
+interface PrizeData {
+  option: string;
+  segColor: string;
+  emoji: string;
+}
+
+// const data: PrizeData[] = [
+//   { option: "iPhone 15 Pro", segColor: "#0071e3", emoji: "📱" },
+//   { option: '75" Smart TV', segColor: "#4b0082", emoji: "📺" },
+//   { option: "Tesla Model 3", segColor: "#e82127", emoji: "🚗" },
+//   { option: "Dream House", segColor: "#ff8c00", emoji: "🏠" },
+//   { option: "MacBook Pro", segColor: "#999999", emoji: "💻" },
+//   { option: "Better luck next time!", segColor: "#333333", emoji: "😢" },
+//   { option: "$10,000 Cash", segColor: "#ffd700", emoji: "💰" },
+//   { option: "World Cruise", segColor: "#1e90ff", emoji: "🛳️" },
+//   { option: "Luxury Watch", segColor: "#b8860b", emoji: "⌚" },
+//   { option: "Trip to Maldives", segColor: "#00bfff", emoji: "🏝️" },
+//   { option: "Opps, Almost!", segColor: "#a9a9a9", emoji: "😅" },
+//   { option: "Shopping Spree", segColor: "#ff69b4", emoji: "🛍️" },
+//   { option: "Gourmet Dinner", segColor: "#8b0000", emoji: "🍽️" },
+// ];
+
 interface WindowSize {
   width: number;
   height: number;
 }
 
-interface ImageItem {
-  src: any;
-  alt: string;
-}
-
-const images: ImageItem[] = [
-  { src: sponsor1, alt: "Image 1" },
-  { src: sponsor2, alt: "Image 2" },
-  { src: sponsor3, alt: "Image 3" },
-  // Add more images as needed
-];
-
 function App() {
   const params = useParams();
   const eventId = params?.eventId as string;
   const [data, setData] = useState<PrizeData[]>([]);
+  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
+  const [winnerCode, setWinnerCode] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
   const [wonPrize, setWonPrize] = useState<PrizeData | null>(null);
-  const [winnerCode, setWinnerCode] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [windowSize, setWindowSize] = useState<WindowSize>({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -103,22 +122,24 @@ function App() {
   const [appSound, setAppSound] = useState<HTMLAudioElement | null>(null);
   const [bSound, setBSound] = useState<HTMLAudioElement | null>(null);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       setTicTicSound(new Audio("/audio/spin-wheel-sound.mp3"));
       setAppSound(new Audio("/audio/applause.mp3"));
       setBSound(new Audio("/audio/boo.mp3"));
     }
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -157,98 +178,33 @@ function App() {
     fetchPrizes();
   }, [eventId]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const handleSpinClick = async () => {
-    if (mustSpin || isLoading) return;
-
-    setPrizeNumber(0);
-    setWonPrize(null);
-    setShowConfetti(false);
-    setIsModalOpen(false);
-    setIsRedeemModalOpen(false);
-    setWinnerCode(null);
-
-    ticTicSound?.play();
+  const handleSpinClick = () => {
+    if (mustSpin) return;
+    // ticTicSound?.play();
 
     const newPrizeNumber = Math.floor(Math.random() * data.length);
-    const selectedPrize = data[newPrizeNumber];
-
-    if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/events/${eventId}/check-and-record-prize`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prizeId: selectedPrize._id }),
-          }
-        );
-        if (!response.ok) throw new Error("Failed to check and record prize");
-        const result = await response.json();
-
-        if (!result.available) {
-          const loseIndex = data.findIndex((p) =>
-            fakeSegments.some((s) => s.option === p.option)
-          );
-          setPrizeNumber(loseIndex);
-          setWonPrize(data[loseIndex]);
-        } else {
-          const code = generateRandomCode();
-          setWinnerCode(code);
-          await fetch(`${API_BASE_URL}/api/winners`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              code,
-              prizeId: selectedPrize._id,
-              eventId,
-            }),
-          });
-          setPrizeNumber(newPrizeNumber);
-          setWonPrize(selectedPrize);
-        }
-      } catch (error) {
-        setError(
-          error instanceof Error ? error.message : "Failed to record prize"
-        );
-        const loseIndex = data.findIndex((p) =>
-          fakeSegments.some((s) => s.option === p.option)
-        );
-        setPrizeNumber(loseIndex);
-        setWonPrize(data[loseIndex]);
-      }
-    } else {
-      setPrizeNumber(newPrizeNumber);
-      setWonPrize(selectedPrize);
-    }
-
+    setPrizeNumber(newPrizeNumber);
     setMustSpin(true);
+    setIsModalOpen(false);
+    setShowConfetti(false);
   };
-
   const onStopSpinning = () => {
     setMustSpin(false);
     const prize = data[prizeNumber];
     setWonPrize(prize);
-    if (!fakeSegments.some((fake) => fake.option === prize.option)) {
+    setIsModalOpen(true);
+
+    if (!prize.option.toLowerCase().includes("better luck")) {
       setShowConfetti(true);
-      appSound?.play();
-      setIsRedeemModalOpen(true);
+      appSound?.play(); // Play applause sound on win
       setTimeout(() => setShowConfetti(false), 5000);
     } else {
-      bSound?.play();
-      setIsModalOpen(true);
+      bSound?.play(); // Play boo sound on loss
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 to-indigo-800 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 to-indigo-800 p-4 relative overflow-hidden">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -277,47 +233,6 @@ function App() {
 
       <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
-      </div>
-
-      <div className="w-full mb-[3rem]">
-        {/* Mobile: Carousel */}
-        <div className="lg:hidden w-full h-[15rem] relative overflow-hidden">
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${
-                index === currentIndex ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                className="h-full w-full"
-                width={1000}
-                height={500}
-                style={{ objectFit: "cover" }}
-                priority={index === 0}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop: Three-column grid */}
-        <div className="hidden lg:grid lg:grid-cols-3 gap-4">
-          {images.map((image, index) => (
-            <div key={index} className="w-full h-[10rem] relative">
-              <Image
-                src={image.src}
-                alt={image.alt}
-                className="h-full w-full"
-                width={1000}
-                height={500}
-                style={{ objectFit: "cover" }}
-                priority={index === 0}
-              />
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="relative z-10 mb-12">
@@ -349,16 +264,14 @@ function App() {
 
       <button
         onClick={handleSpinClick}
-        disabled={mustSpin || isLoading}
+        disabled={mustSpin}
         className={`relative z-10 px-8 py-4 text-xl font-bold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-          mustSpin || isLoading
+          mustSpin
             ? "bg-gray-500 cursor-not-allowed"
             : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
         }`}
       >
-        {isLoading ? (
-          "Loading..."
-        ) : mustSpin ? (
+        {mustSpin ? (
           <span className="flex items-center">
             <svg
               className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -389,8 +302,7 @@ function App() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="text-center p-6 md:p-10">
-          {wonPrize &&
-          fakeSegments.some((fake) => fake.option === wonPrize.option) ? (
+          {wonPrize?.option.toLowerCase().includes("better luck") ? (
             <div className="space-y-6">
               <div className="text-7xl mb-4">😢</div>
               <h2 className="text-3xl font-bold text-red-500 mb-2">Oh no!</h2>
@@ -401,7 +313,7 @@ function App() {
                 {wonPrize.option}
               </div>
               <p className="text-xl text-gray-600 mb-6">
-                Do not worry, you can try again!
+                Dont worry, you can try again!
               </p>
               <button
                 onClick={() => {
@@ -428,54 +340,22 @@ function App() {
                 {wonPrize?.option}
               </div>
               <p className="text-xl text-gray-600 mb-6">
-                You have won an amazing prize!
+                Youve won an amazing prize!
               </p>
               <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setIsRedeemModalOpen(true);
-                }}
-                className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full font-bold hover:from-green-600 hover:to-teal-600 transition-all transform hover:scale-105 shadow-lg"
+                onClick={() => setIsModalOpen(false)}
+                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full font-bold hover:from-purple-600 hover:to-indigo-600 transition-all transform hover:scale-105 shadow-lg"
               >
-                Redeem Prize
+                Claim Your Prize
               </button>
             </div>
           )}
         </div>
       </Modal>
 
-      <Modal
-        isOpen={isRedeemModalOpen}
-        onClose={() => setIsRedeemModalOpen(false)}
-      >
-        <div className="text-center p-6 md:p-10">
-          <h2 className="text-3xl font-bold text-purple-600 mb-4">
-            Your Prize!
-          </h2>
-          {winnerCode && (
-            <div className="text-2xl font-mono bg-gray-100 p-3 rounded-md mb-6">
-              {winnerCode}
-            </div>
-          )}
-          <h3 className="text-xl font-semibold mb-2">{wonPrize?.option}</h3>
-          <p className="text-gray-600 mb-6">{wonPrize?.redeemInfo}</p>
-          <button
-            onClick={() => {
-              setIsRedeemModalOpen(false);
-              setTimeout(handleSpinClick, 300);
-            }}
-            className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full font-bold hover:from-purple-600 hover:to-indigo-600 transition-all transform hover:scale-105 shadow-lg"
-          >
-            Spin Again
-          </button>
-        </div>
-      </Modal>
-
-      {!isLoading && !error && (
-        <div className="mt-12 text-purple-200 text-sm z-10">
-          <p>Spin the wheel for a chance to win incredible prizes!</p>
-        </div>
-      )}
+      <div className="mt-12 text-purple-200 text-sm z-10">
+        <p>Spin the wheel for a chance to win incredible prizes!</p>
+      </div>
     </div>
   );
 }
