@@ -130,17 +130,83 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setWindowSize({
+  //       width: window.innerWidth,
+  //       height: window.innerHeight,
+  //     });
+  //   };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
+  const handleSpinClick = async () => {
+    if (mustSpin || isLoading) return;
+
+    setPrizeNumber(0);
+    setWonPrize(null);
+    setShowConfetti(false);
+    setIsModalOpen(false);
+    setIsRedeemModalOpen(false);
+    setWinnerCode(null);
+
+    ticTicSound?.play();
+
+    const newPrizeNumber = Math.floor(Math.random() * data.length);
+    const selectedPrize = data[newPrizeNumber];
+
+    if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/events/${eventId}/check-and-record-prize`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prizeId: selectedPrize._id }),
+          }
+        );
+        if (!response.ok) throw new Error("Failed to check and record prize");
+        const result = await response.json();
+
+        if (!result.available) {
+          const loseIndex = data.findIndex((p) =>
+            fakeSegments.some((s) => s.option === p.option)
+          );
+          setPrizeNumber(loseIndex);
+          setWonPrize(data[loseIndex]);
+        } else {
+          const code = generateRandomCode();
+          setWinnerCode(code);
+          await fetch(`${API_BASE_URL}/api/winners`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              code,
+              prizeId: selectedPrize._id,
+              eventId,
+            }),
+          });
+          setPrizeNumber(newPrizeNumber);
+          setWonPrize(selectedPrize);
+        }
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "Failed to record prize"
+        );
+        const loseIndex = data.findIndex((p) =>
+          fakeSegments.some((s) => s.option === p.option)
+        );
+        setPrizeNumber(loseIndex);
+        setWonPrize(data[loseIndex]);
+      }
+    } else {
+      setPrizeNumber(newPrizeNumber);
+      setWonPrize(selectedPrize);
+    }
+
+    setMustSpin(true);
+  };
 
   useEffect(() => {
     const fetchPrizes = async () => {
@@ -178,28 +244,43 @@ function App() {
     fetchPrizes();
   }, [eventId]);
 
-  const handleSpinClick = () => {
-    if (mustSpin) return;
-    // ticTicSound?.play();
+  // const handleSpinClick = () => {
+  //   if (mustSpin) return;
 
-    const newPrizeNumber = Math.floor(Math.random() * data.length);
-    setPrizeNumber(newPrizeNumber);
-    setMustSpin(true);
-    setIsModalOpen(false);
-    setShowConfetti(false);
-  };
+  //   const newPrizeNumber = Math.floor(Math.random() * data.length);
+  //   setPrizeNumber(newPrizeNumber);
+  //   setMustSpin(true);
+  //   setIsModalOpen(false);
+  //   setShowConfetti(false);
+  // };
+  // const onStopSpinning = () => {
+  //   setMustSpin(false);
+  //   const prize = data[prizeNumber];
+  //   setWonPrize(prize);
+  //   setIsModalOpen(true);
+
+  //   if (!prize.option.toLowerCase().includes("better luck")) {
+  //     setShowConfetti(true);
+  //     appSound?.play();
+  //     setTimeout(() => setShowConfetti(false), 5000);
+  //   } else {
+  //     bSound?.play();
+  //   }
+  // };
+
   const onStopSpinning = () => {
     setMustSpin(false);
     const prize = data[prizeNumber];
     setWonPrize(prize);
-    setIsModalOpen(true);
-
-    if (!prize.option.toLowerCase().includes("better luck")) {
+    if (!fakeSegments.some((fake) => fake.option === prize.option)) {
+      setIsModalOpen(true);
       setShowConfetti(true);
-      appSound?.play(); // Play applause sound on win
+      appSound?.play();
+      setIsRedeemModalOpen(true);
       setTimeout(() => setShowConfetti(false), 5000);
     } else {
-      bSound?.play(); // Play boo sound on loss
+      bSound?.play();
+      setIsModalOpen(true);
     }
   };
 
