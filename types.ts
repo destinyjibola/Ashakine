@@ -32,3 +32,35 @@ export interface NewPrizeData {
   eventId: string;
   winCount: number
 }
+
+
+
+export interface PrizeData {
+  _id?: string;
+  option: string;
+  segColor: string;
+  emoji: string;
+  redeemInfo?: string;
+}
+
+export interface Prize {
+  _id: string;
+  prize: string;
+  redeemInfo?: string;
+}
+
+export interface WinnerData {
+  code: string;
+  prizeId: string;
+  eventId: string;
+}
+
+export interface WindowSize {
+  width: number;
+  height: number;
+}
+
+export interface ImageItem {
+  src: any;
+  alt: string;
+}

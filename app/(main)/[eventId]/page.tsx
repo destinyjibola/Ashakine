@@ -1,44 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Wheel } from "react-custom-roulette";
-import Modal from "../../../components/Modal";
 import Confetti from "react-confetti";
 import { useParams } from "next/navigation";
 
-// const tickingSound = "/audio/spin-wheel-sound.mp3";
-// const applaudSound = "/audio/applause.mp3";
-// const booSound = "/audio/boo.mp3";
+import { PrizeData, Prize, WinnerData, WindowSize } from "@/types";
+import ImageSlider from "@/components/ImageSlider";
+import SpinWheel from "@/components/SpinWheel";
+import Modal from "@/components/Modal";
 
-// const ticTicSound: HTMLAudioElement | null =
-//   typeof window !== "undefined" ? new Audio(tickingSound) : null;
-
-// const appSound: HTMLAudioElement | null =
-//   typeof window !== "undefined" ? new Audio(applaudSound) : null;
-
-// const bSound: HTMLAudioElement | null =
-//   typeof window !== "undefined" ? new Audio(booSound) : null;
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface PrizeData {
-  _id?: string;
-  option: string;
-  segColor: string;
-  emoji: string;
-  redeemInfo?: string;
-}
-
-interface Prize {
-  _id: string;
-  prize: string;
-  redeemInfo?: string;
-}
-
-interface WinnerData {
-  code: string;
-  prizeId: string;
-  eventId: string;
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 const fakeSegments: PrizeData[] = [
   { option: "Oops!", segColor: "#444444", emoji: "😢" },
@@ -74,46 +44,19 @@ function shuffleArray(array: PrizeData[]): PrizeData[] {
   return newArray;
 }
 
-interface PrizeData {
-  option: string;
-  segColor: string;
-  emoji: string;
-}
-
-// const data: PrizeData[] = [
-//   { option: "iPhone 15 Pro", segColor: "#0071e3", emoji: "📱" },
-//   { option: '75" Smart TV', segColor: "#4b0082", emoji: "📺" },
-//   { option: "Tesla Model 3", segColor: "#e82127", emoji: "🚗" },
-//   { option: "Dream House", segColor: "#ff8c00", emoji: "🏠" },
-//   { option: "MacBook Pro", segColor: "#999999", emoji: "💻" },
-//   { option: "Better luck next time!", segColor: "#333333", emoji: "😢" },
-//   { option: "$10,000 Cash", segColor: "#ffd700", emoji: "💰" },
-//   { option: "World Cruise", segColor: "#1e90ff", emoji: "🛳️" },
-//   { option: "Luxury Watch", segColor: "#b8860b", emoji: "⌚" },
-//   { option: "Trip to Maldives", segColor: "#00bfff", emoji: "🏝️" },
-//   { option: "Opps, Almost!", segColor: "#a9a9a9", emoji: "😅" },
-//   { option: "Shopping Spree", segColor: "#ff69b4", emoji: "🛍️" },
-//   { option: "Gourmet Dinner", segColor: "#8b0000", emoji: "🍽️" },
-// ];
-
-interface WindowSize {
-  width: number;
-  height: number;
-}
-
 function App() {
   const params = useParams();
   const eventId = params?.eventId as string;
   const [data, setData] = useState<PrizeData[]>([]);
-  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
-  const [winnerCode, setWinnerCode] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [mustSpin, setMustSpin] = useState(false);
-  const [prizeNumber, setPrizeNumber] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mustSpin, setMustSpin] = useState<boolean>(false);
+  const [prizeNumber, setPrizeNumber] = useState<number>(0);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
   const [wonPrize, setWonPrize] = useState<PrizeData | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [winnerCode, setWinnerCode] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [windowSize, setWindowSize] = useState<WindowSize>({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -130,17 +73,50 @@ function App() {
     }
   }, []);
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setWindowSize({
-  //       width: window.innerWidth,
-  //       height: window.innerHeight,
-  //     });
-  //   };
+  useEffect(() => {
+    const fetchPrizes = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const eventData = await response.json();
 
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
+        if (!eventData.prizes || !Array.isArray(eventData.prizes)) {
+          throw new Error("Invalid prizes data");
+        }
+
+        const realPrizes: PrizeData[] = eventData.prizes.map((p: Prize) => ({
+          _id: p._id,
+          option: p.prize,
+          segColor: getRandomColor(),
+          emoji: "🎁",
+          redeemInfo:
+            p.redeemInfo ||
+            "Please contact the event organizer to redeem your prize.",
+        }));
+
+        setData(shuffleArray([...realPrizes, ...fakeSegments]));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load prizes");
+        setData(fakeSegments);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPrizes();
+  }, [eventId]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleSpinClick = async () => {
     if (mustSpin || isLoading) return;
 
@@ -151,7 +127,7 @@ function App() {
     setIsRedeemModalOpen(false);
     setWinnerCode(null);
 
-    ticTicSound?.play();
+    // ticTicSound?.play();
 
     const newPrizeNumber = Math.floor(Math.random() * data.length);
     const selectedPrize = data[newPrizeNumber];
@@ -208,72 +184,11 @@ function App() {
     setMustSpin(true);
   };
 
-  useEffect(() => {
-    const fetchPrizes = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-        const eventData = await response.json();
-
-        if (!eventData.prizes || !Array.isArray(eventData.prizes)) {
-          throw new Error("Invalid prizes data");
-        }
-
-        const realPrizes: PrizeData[] = eventData.prizes.map((p: Prize) => ({
-          _id: p._id,
-          option: p.prize,
-          segColor: getRandomColor(),
-          emoji: "🎁",
-          redeemInfo:
-            p.redeemInfo ||
-            "Please contact the event organizer to redeem your prize.",
-        }));
-
-        setData(shuffleArray([...realPrizes, ...fakeSegments]));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load prizes");
-        setData(fakeSegments);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPrizes();
-  }, [eventId]);
-
-  // const handleSpinClick = () => {
-  //   if (mustSpin) return;
-
-  //   const newPrizeNumber = Math.floor(Math.random() * data.length);
-  //   setPrizeNumber(newPrizeNumber);
-  //   setMustSpin(true);
-  //   setIsModalOpen(false);
-  //   setShowConfetti(false);
-  // };
-  // const onStopSpinning = () => {
-  //   setMustSpin(false);
-  //   const prize = data[prizeNumber];
-  //   setWonPrize(prize);
-  //   setIsModalOpen(true);
-
-  //   if (!prize.option.toLowerCase().includes("better luck")) {
-  //     setShowConfetti(true);
-  //     appSound?.play();
-  //     setTimeout(() => setShowConfetti(false), 5000);
-  //   } else {
-  //     bSound?.play();
-  //   }
-  // };
-
   const onStopSpinning = () => {
     setMustSpin(false);
     const prize = data[prizeNumber];
     setWonPrize(prize);
     if (!fakeSegments.some((fake) => fake.option === prize.option)) {
-      setIsModalOpen(true);
       setShowConfetti(true);
       appSound?.play();
       setIsRedeemModalOpen(true);
@@ -285,7 +200,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 to-indigo-800 p-4 relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 to-indigo-800 p-4 relative overflow-hidden">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -316,43 +231,28 @@ function App() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
       </div>
 
-      <div className="relative z-10 mb-12">
-        <div className="absolute -inset-4 bg-purple-600 rounded-full blur-lg opacity-70 animate-pulse"></div>
-        <div className="relative">
-          {!isLoading && (
-            <Wheel
-              mustStartSpinning={mustSpin}
-              prizeNumber={prizeNumber}
-              data={data}
-              outerBorderColor="#ffffff"
-              outerBorderWidth={10}
-              innerBorderColor="#302e2e"
-              radiusLineColor="#ffffff"
-              radiusLineWidth={2}
-              fontSize={14}
-              textColors={["#ffffff"]}
-              backgroundColors={data.map((item) => item.segColor)}
-              onStopSpinning={onStopSpinning}
-              spinDuration={0.6}
-              perpendicularText={false}
-            />
-          )}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl border-4 border-yellow-400">
-            <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-b-[40px] border-l-transparent border-r-transparent border-b-red-600 absolute -top-12"></div>
-          </div>
-        </div>
-      </div>
+      <ImageSlider />
+
+      <SpinWheel
+        mustSpin={mustSpin}
+        prizeNumber={prizeNumber}
+        data={data}
+        onStopSpinning={onStopSpinning}
+        isLoading={isLoading}
+      />
 
       <button
         onClick={handleSpinClick}
-        disabled={mustSpin}
+        disabled={mustSpin || isLoading}
         className={`relative z-10 px-8 py-4 text-xl font-bold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-          mustSpin
+          mustSpin || isLoading
             ? "bg-gray-500 cursor-not-allowed"
             : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
         }`}
       >
-        {mustSpin ? (
+        {isLoading ? (
+          "Loading..."
+        ) : mustSpin ? (
           <span className="flex items-center">
             <svg
               className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -383,7 +283,8 @@ function App() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="text-center p-6 md:p-10">
-          {wonPrize?.option.toLowerCase().includes("better luck") ? (
+          {wonPrize &&
+          fakeSegments.some((fake) => fake.option === wonPrize.option) ? (
             <div className="space-y-6">
               <div className="text-7xl mb-4">😢</div>
               <h2 className="text-3xl font-bold text-red-500 mb-2">Oh no!</h2>
@@ -394,7 +295,7 @@ function App() {
                 {wonPrize.option}
               </div>
               <p className="text-xl text-gray-600 mb-6">
-                Dont worry, you can try again!
+                Do not worry, you can try again!
               </p>
               <button
                 onClick={() => {
@@ -421,22 +322,54 @@ function App() {
                 {wonPrize?.option}
               </div>
               <p className="text-xl text-gray-600 mb-6">
-                Youve won an amazing prize!
+                You have won an amazing prize!
               </p>
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full font-bold hover:from-purple-600 hover:to-indigo-600 transition-all transform hover:scale-105 shadow-lg"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setIsRedeemModalOpen(true);
+                }}
+                className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full font-bold hover:from-green-600 hover:to-teal-600 transition-all transform hover:scale-105 shadow-lg"
               >
-                Claim Your Prize
+                Redeem Prize
               </button>
             </div>
           )}
         </div>
       </Modal>
 
-      <div className="mt-12 text-purple-200 text-sm z-10">
-        <p>Spin the wheel for a chance to win incredible prizes!</p>
-      </div>
+      <Modal
+        isOpen={isRedeemModalOpen}
+        onClose={() => setIsRedeemModalOpen(false)}
+      >
+        <div className="text-center p-6 md:p-10">
+          <h2 className="text-3xl font-bold text-purple-600 mb-4">
+            Your Prize!
+          </h2>
+          {winnerCode && (
+            <div className="text-2xl font-mono bg-gray-100 p-3 rounded-md mb-6">
+              {winnerCode}
+            </div>
+          )}
+          <h3 className="text-xl font-semibold mb-2">{wonPrize?.option}</h3>
+          <p className="text-gray-600 mb-6">{wonPrize?.redeemInfo}</p>
+          <button
+            onClick={() => {
+              setIsRedeemModalOpen(false);
+              setTimeout(handleSpinClick, 300);
+            }}
+            className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full font-bold hover:from-purple-600 hover:to-indigo-600 transition-all transform hover:scale-105 shadow-lg"
+          >
+            Spin Again
+          </button>
+        </div>
+      </Modal>
+
+      {!isLoading && !error && (
+        <div className="mt-12 text-purple-200 text-sm z-10">
+          <p>Spin the wheel for a chance to win incredible prizes!</p>
+        </div>
+      )}
     </div>
   );
 }
