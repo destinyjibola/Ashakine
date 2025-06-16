@@ -4,12 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Event } from "@/types";
 import Modal from "@/components/Modal";
-import useSound from "use-sound";
+import { useAuth } from "@/hooks/AuthContext";
 
 export default function EventsPage() {
-  const [playApplause] = useSound("/sounds/applause.mp3");
-  const [playBoo] = useSound("/sounds/boo.mp3");
-  const [playTick] = useSound("/sounds/tick.mp3");
+  const { token } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,26 +16,30 @@ export default function EventsPage() {
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/events`
-        );
-        if (!response.ok) throw new Error("Failed to fetch events");
-        const data: Event[] = await response.json();
-        setEvents(data);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/userevents`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch events");
+      const data: Event[] = await response.json();
+      setEvents(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchEvents();
-  }, []);
+  if (token) fetchEvents(); // wait for token before fetching
+}, [token]);
+
 
   const handleCreateEvent = async () => {
     if (!newEventName.trim()) return;
@@ -50,6 +52,7 @@ export default function EventsPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ name: newEventName }),
         }
@@ -71,7 +74,8 @@ export default function EventsPage() {
   };
 
   if (loading) return <div className="p-4 sm:p-6">Loading events...</div>;
-  if (error) return <div className="p-4 sm:p-6 text-red-500">Error: {error}</div>;
+  if (error)
+    return <div className="p-4 sm:p-6 text-red-500">Error: {error}</div>;
 
   return (
     <div className="p-4 sm:p-6 relative">
@@ -108,7 +112,7 @@ export default function EventsPage() {
               <tr key={event._id}>
                 <td className="px-4 py-4 text-sm sm:px-6">
                   <Link
-                    href={`/admindestinyayo/events/${event._id}`}
+                    href={`/admin/events/${event._id}`}
                     className="text-blue-400 hover:text-blue-300 hover:underline"
                   >
                     {event.name}
@@ -122,7 +126,9 @@ export default function EventsPage() {
                 </td>
                 <td className="px-4 py-4 text-sm sm:px-6">
                   <button
-                    onClick={() => router.push(`/admindestinyayo/events/${event._id}`)}
+                    onClick={() =>
+                      router.push(`/admin/events/${event._id}`)
+                    }
                     className="text-green-400 hover:text-green-300"
                   >
                     Manage

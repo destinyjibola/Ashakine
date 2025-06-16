@@ -32,17 +32,6 @@ const config = {
         },
         platinum: '#E5E4E2',
 
-        // uxr insider colors
-        "primary-green": "#ADFC87",
-        "primary-green-50": "#203815",
-        "primary-green-100": "#1B5500", 
-        "primary-green-200": "#0D1809",
-        "primary-green-300": "#7BB360", 
-        "primary-green-400": "#E6FEDA",
-        "primary-green-500": "#89FB54",
-        "custom-gray-50": "#E5E5E5",
-        "custom-gray-100": "#B2B2B2",
-
         // Shadcn/ui colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

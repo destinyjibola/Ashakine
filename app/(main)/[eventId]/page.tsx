@@ -78,7 +78,7 @@ function App() {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
+        const response = await fetch(`${API_BASE_URL}/api/spinwheel/${eventId}`);
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const eventData = await response.json();

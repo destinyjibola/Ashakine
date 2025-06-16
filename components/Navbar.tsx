@@ -12,7 +12,7 @@ export default function Navbar() {
       <div className="h-0.5 bg-gradient-to-r from-secondarycolor/0 via-secondarycolor to-secondarycolor/0 animate-pulse"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-[6rem]">
           {/* Your preferred logo implementation */}
           <Link href="" className="flex items-center gap-3 group">
             <div className="relative">
@@ -29,20 +29,12 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {['About', 'Prizes', 'How It Works', 'Contact'].map((item) => (
-              <button
-                key={item}
-                className="relative text-white/90 hover:text-white font-medium text-sm uppercase tracking-wider group transition-colors duration-200"
-              >
-                {item}
-                <span className="absolute -bottom-1 left-0 h-0.5 bg-secondarycolor transition-all duration-300 origin-left scale-x-0 group-hover:scale-x-100 w-full"></span>
+            <Link href="/auth/register">
+              <button className="py-3 px-6 bg-secondarycolor rounded-full text-primarycolor font-bold hover:bg-secondarycolor/90 transition-colors shadow-lg hover:shadow-secondarycolor/30">
+                Get started
               </button>
-            ))}
-            <button className="px-5 py-2 bg-secondarycolor rounded-full text-primarycolor font-bold hover:bg-secondarycolor/90 transition-colors shadow-lg hover:shadow-secondarycolor/30">
-              Play Now
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -58,17 +50,11 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-primarycolor/95 backdrop-blur-lg px-4 py-3 space-y-3 border-t border-secondarycolor/10">
-          {['About', 'Prizes', 'How It Works', 'Contact'].map((item) => (
-            <button
-              key={item}
-              className="block w-full text-left text-white py-2.5 px-3 rounded-md hover:bg-secondarycolor/10 hover:text-secondarycolor transition-colors uppercase text-sm tracking-wider"
-            >
-              {item}
+          <Link href="/auth/register">
+            <button className="w-full mt-2 py-3 px-6 bg-secondarycolor text-primarycolor font-bold rounded-md">
+              Get started
             </button>
-          ))}
-          <button className="w-full mt-2 py-2.5 bg-secondarycolor text-primarycolor font-bold rounded-md">
-            Play Now
-          </button>
+          </Link>
         </div>
       )}
     </nav>

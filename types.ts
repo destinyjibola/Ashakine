@@ -12,6 +12,17 @@ export interface Prize {
   __v: number;
 }
 
+
+export interface Winner {
+  _id: string;
+  code: string;
+  prizeId: Prize; // Can be populated or just ID
+  eventId: string;
+  redeemed: boolean;
+  createdAt: string;
+  // Remove the prize property since it's not in the API response
+}
+
 export interface Event {
   _id: string;
   name: string;

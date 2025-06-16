@@ -23,9 +23,9 @@ function ImageSlider() {
   }, []);
 
   return (
-    <div className="w-full mb-[3rem]">
+    <div className="lg:w-[70%] w-full mb-[3rem]">
       {/* Mobile: Carousel */}
-      <div className="lg:hidden w-full h-[15rem] relative overflow-hidden">
+      <div className="lg:hidden w-full h-[6rem] lg:h-[6rem] relative overflow-hidden">
         {images.map((image, index) => (
           <div
             key={index}

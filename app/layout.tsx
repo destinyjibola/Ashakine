@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/hooks/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
-
 
 export default async function RootLayout({
   children,
@@ -31,7 +31,7 @@ export default async function RootLayout({
           zIndex={5000}
           showAtBottom={false}
         />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
