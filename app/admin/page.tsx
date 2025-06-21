@@ -1,17 +1,33 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+"use client";
 
-export default function Dashboard() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      <div className="bg-gray-800 p-6 rounded-lg">
-        <p>Welcome to the admin dashboard!</p>
+import { useAuth } from "@/hooks/AuthContext";
+import Overview from "@/components/Overview";
+import AdminOverview from "@/components/AdminOverview";
+
+const AdminDashboard = () => {
+  const { user, loading } = useAuth();
+  console.log(user);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
+    );
+  }
 
-      <Link href={"/admin/events"} >
-        <Button className="mt-[1rem] bg-green-700 hover:bg-green-800">Create Spinwheel for events/promtions</Button>
-      </Link>
+  if (!user || !user.isAdmin) {
+    return (
+      <div className="p-4">
+        <Overview />
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4">
+      <AdminOverview />
     </div>
   );
-}
+};
+
+export default AdminDashboard;

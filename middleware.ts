@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect logged-in users away from login/register pages
   if (publicPaths.includes(path) && role) {
-    return NextResponse.redirect(new URL('/', request.nextUrl));
+    return NextResponse.redirect(new URL('/admin', request.nextUrl));
   }
 
   // Protect all /admin routes

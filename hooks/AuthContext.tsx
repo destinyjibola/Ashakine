@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 type UserType = {
   _id: string;
   name?: string;
   email?: string;
-  image?: string;
+  isAdmin: boolean
+  
 };
 
 type AuthContextType = {
@@ -24,6 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Initialize as true
+  const router = useRouter();
 
   useEffect(() => {
     const storedUser = Cookies.get("user");
