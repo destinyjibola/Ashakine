@@ -74,13 +74,7 @@ export default function AdminLayout({
         {/* Mobile user profile - Always visible on mobile */}
         {user && (
           <Link href="/admin/profile" className="flex items-center gap-2">
-            {user.image && (
-              <img 
-                src={user.image} 
-                alt={user.name || "User"} 
-                className="w-8 h-8 rounded-full"
-              />
-            )}
+     
             <span className="hidden sm:inline">{user.name || user.email}</span>
           </Link>
         )}
