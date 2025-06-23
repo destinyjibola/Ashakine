@@ -8,14 +8,13 @@ type UserType = {
   _id: string;
   name?: string;
   email?: string;
-  isAdmin: boolean
-  
+  isAdmin: boolean;
 };
 
 type AuthContextType = {
   user: UserType | null;
   token: string | null;
-  loading: boolean; // Added loading state
+  loading: boolean;
   setAuth: (user: UserType, token: string) => void;
   logout: () => void;
 };
@@ -25,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // Initialize as true
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,23 +43,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         Cookies.remove("token");
       }
     }
-    setLoading(false); // Set loading to false after checking cookies
+    setLoading(false);
   }, []);
 
   const setAuth = (user: UserType, token: string) => {
     Cookies.set("user", JSON.stringify(user), { expires: 7 });
     Cookies.set("token", token, { expires: 7 });
-    console.log("setAuth - User:", user);
-    console.log("setAuth - Token:", token);
     setUser(user);
     setToken(token);
   };
 
   const logout = () => {
+        router.refresh(); // Added router refresh
     Cookies.remove("user");
     Cookies.remove("token");
     setUser(null);
     setToken(null);
+    router.refresh(); // Added router refresh
   };
 
   return (
