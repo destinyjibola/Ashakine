@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -12,60 +14,50 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { LoginSchema } from "@/schema/route";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import CardWrapper from "./CardWrapper";
-import { useAuth } from "@/hooks/AuthContext";
-import Link from "next/link";
 
-const LoginForm = () => {
-  const { setAuth } = useAuth();
+// Zod schema for email input
+const ForgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+const ForgotPasswordForm = () => {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ForgotPasswordSchema>>({
+    resolver: zodResolver(ForgotPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof ForgotPasswordSchema>) => {
     setError("");
     setSuccess("");
     setLoading(true);
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`,
         values
       );
 
       if (res.status === 200) {
         setLoading(false);
-        setAuth(res.data.user, res.data.token);
+        setSuccess("OTP sent to your email for password reset.");
         startTransition(() => {
-          router.push("/admin");
+          router.push(`/auth/verify-forgotpassword/${encodeURIComponent(values.email)}`);
         });
       }
     } catch (error: any) {
       setLoading(false);
-      if (error.response?.status === 403 && error.response?.data?.verificationSent) {
-        // Handle unverified email
-        setSuccess(error.response.data.message);
-        startTransition(() => {
-          router.push(error.response.data.redirect); // Use backend-provided redirect
-        });
-      } else {
-        setError(error.response?.data?.message || "Something went wrong");
-      }
+      setError(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -74,13 +66,13 @@ const LoginForm = () => {
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
 
-      {/* Login Form */}
+      {/* Forgot Password Form */}
       <div className="relative z-10">
         <CardWrapper
-          headerLabel="Welcome back"
-          backButtonLabel="Don't have an account?"
-          backButtonHref="/auth/register"
-          showSocial
+          headerLabel="Reset Your Password"
+          backButtonLabel="Back to Login"
+          backButtonHref="/auth/login"
+          showSocial={false}
         >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -104,33 +96,6 @@ const LoginForm = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="py-[1.3rem]"
-                          disabled={isPending || loading}
-                          placeholder="*****"
-                          {...field}
-                          type="password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      <div className="text-right">
-                        <Link
-                          href="/auth/forgot-password"
-                          className="text-sm text-primarycolor hover:underline"
-                        >
-                          Forgot Password?
-                        </Link>
-                      </div>
-                    </FormItem>
-                  )}
-                />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               {success && <p className="text-green-500 text-sm">{success}</p>}
@@ -139,7 +104,7 @@ const LoginForm = () => {
                 type="submit"
                 className="w-full rounded-[12px] py-[1.3rem] bg-primarycolor text-white paragraph-7"
               >
-                {loading ? "Logging In" : "Log In"}
+                {loading ? "Sending OTP..." : "Send OTP"}
                 {loading && <div className="lds-hourglass ms-3"></div>}
               </Button>
             </form>
@@ -150,4 +115,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default ForgotPasswordForm;

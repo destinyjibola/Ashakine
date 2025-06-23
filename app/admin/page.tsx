@@ -6,7 +6,6 @@ import AdminOverview from "@/components/AdminOverview";
 
 const AdminDashboard = () => {
   const { user, loading } = useAuth();
-  console.log(user);
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">

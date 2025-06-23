@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
+import { useRouter, useParams } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -12,60 +14,68 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { LoginSchema } from "@/schema/route";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import CardWrapper from "./CardWrapper";
-import { useAuth } from "@/hooks/AuthContext";
-import Link from "next/link";
 
-const LoginForm = () => {
-  const { setAuth } = useAuth();
+// Zod schema for password reset
+const SetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      ),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+const SetPasswordForm = () => {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
+  const router = useRouter();
+  const params = useParams();
+  const email = params?.email as string;
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof SetPasswordSchema>>({
+    resolver: zodResolver(SetPasswordSchema),
     defaultValues: {
-      email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof SetPasswordSchema>) => {
+    setLoading(true);
     setError("");
     setSuccess("");
-    setLoading(true);
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-        values
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/set-password`,
+        {
+          email: decodeURIComponent(email), // Decode URL-encoded email
+          newPassword: values.password,
+        }
       );
 
       if (res.status === 200) {
         setLoading(false);
-        setAuth(res.data.user, res.data.token);
+        setSuccess("Password reset successful!");
         startTransition(() => {
-          router.push("/admin");
+          router.push("/auth/login");
         });
       }
     } catch (error: any) {
       setLoading(false);
-      if (error.response?.status === 403 && error.response?.data?.verificationSent) {
-        // Handle unverified email
-        setSuccess(error.response.data.message);
-        startTransition(() => {
-          router.push(error.response.data.redirect); // Use backend-provided redirect
-        });
-      } else {
-        setError(error.response?.data?.message || "Something went wrong");
-      }
+      setError(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -74,36 +84,18 @@ const LoginForm = () => {
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
 
-      {/* Login Form */}
+      {/* Set Password Form */}
       <div className="relative z-10">
         <CardWrapper
-          headerLabel="Welcome back"
-          backButtonLabel="Don't have an account?"
-          backButtonHref="/auth/register"
-          showSocial
+          headerLabel="Set New Password"
+          backButtonLabel="Back to Login"
+          backButtonHref="/auth/login" // Fixed: Correct prop name
+          showSocial={false}
         >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="py-[1.3rem]"
-                          disabled={isPending || loading}
-                          placeholder="example@email.com"
-                          {...field}
-                          type="email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              
                 <FormField
                   control={form.control}
                   name="password"
@@ -114,20 +106,31 @@ const LoginForm = () => {
                         <Input
                           className="py-[1.3rem]"
                           disabled={isPending || loading}
-                          placeholder="*****"
+                          placeholder="Enter new password"
                           {...field}
                           type="password"
                         />
                       </FormControl>
                       <FormMessage />
-                      <div className="text-right">
-                        <Link
-                          href="/auth/forgot-password"
-                          className="text-sm text-primarycolor hover:underline"
-                        >
-                          Forgot Password?
-                        </Link>
-                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="py-[1.3rem]"
+                          disabled={isPending || loading}
+                          placeholder="Confirm new password"
+                          {...field}
+                          type="password"
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -139,8 +142,8 @@ const LoginForm = () => {
                 type="submit"
                 className="w-full rounded-[12px] py-[1.3rem] bg-primarycolor text-white paragraph-7"
               >
-                {loading ? "Logging In" : "Log In"}
-                {loading && <div className="lds-hourglass ms-3"></div>}
+                {loading ? "Resetting Password..." : "Reset Password"}
+                {loading && <div className="ms-3 lds-hourglass"></div>}
               </Button>
             </form>
           </Form>
@@ -150,4 +153,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default SetPasswordForm;
