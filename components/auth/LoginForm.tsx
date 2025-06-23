@@ -20,14 +20,17 @@ import { Input } from "../ui/input";
 import CardWrapper from "./CardWrapper";
 import { useAuth } from "@/hooks/AuthContext";
 import Link from "next/link";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import react-icons
 
 const LoginForm = () => {
   const { setAuth } = useAuth();
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false); // State for toggle
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -58,15 +61,18 @@ const LoginForm = () => {
     } catch (error: any) {
       setLoading(false);
       if (error.response?.status === 403 && error.response?.data?.verificationSent) {
-        // Handle unverified email
         setSuccess(error.response.data.message);
         startTransition(() => {
-          router.push(error.response.data.redirect); // Use backend-provided redirect
+          router.push(error.response.data.redirect);
         });
       } else {
         setError(error.response?.data?.message || "Something went wrong");
       }
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -111,13 +117,23 @@ const LoginForm = () => {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
-                          className="py-[1.3rem]"
-                          disabled={isPending || loading}
-                          placeholder="*****"
-                          {...field}
-                          type="password"
-                        />
+                        <div className="relative">
+                          <Input
+                            className="py-[1.3rem] pr-10"
+                            disabled={isPending || loading}
+                            placeholder="******"
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                          />
+                          <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                       <div className="text-right">

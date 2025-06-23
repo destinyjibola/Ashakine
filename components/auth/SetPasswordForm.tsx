@@ -17,6 +17,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import CardWrapper from "./CardWrapper";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import react-icons
 
 // Zod schema for password reset
 const SetPasswordSchema = z
@@ -40,6 +41,8 @@ const SetPasswordForm = () => {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false); // State for password toggle
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for confirm password toggle
   const router = useRouter();
   const params = useParams();
   const email = params?.email as string;
@@ -79,6 +82,14 @@ const SetPasswordForm = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <main className="flex h-[100vh] flex-col items-center justify-center bg-gray-500">
       {/* Dark Overlay */}
@@ -89,13 +100,12 @@ const SetPasswordForm = () => {
         <CardWrapper
           headerLabel="Set New Password"
           backButtonLabel="Back to Login"
-          backButtonHref="/auth/login" // Fixed: Correct prop name
+          backButtonHref="/auth/login"
           showSocial={false}
         >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-              
                 <FormField
                   control={form.control}
                   name="password"
@@ -103,13 +113,23 @@ const SetPasswordForm = () => {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
-                          className="py-[1.3rem]"
-                          disabled={isPending || loading}
-                          placeholder="Enter new password"
-                          {...field}
-                          type="password"
-                        />
+                        <div className="relative">
+                          <Input
+                            className="py-[1.3rem] pr-10"
+                            disabled={isPending || loading}
+                            placeholder="Enter new password"
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                          />
+                          <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -122,13 +142,23 @@ const SetPasswordForm = () => {
                     <FormItem>
                       <FormLabel>Confirm Password</FormLabel>
                       <FormControl>
-                        <Input
-                          className="py-[1.3rem]"
-                          disabled={isPending || loading}
-                          placeholder="Confirm new password"
-                          {...field}
-                          type="password"
-                        />
+                        <div className="relative">
+                          <Input
+                            className="py-[1.3rem] pr-10"
+                            disabled={isPending || loading}
+                            placeholder="Confirm new password"
+                            {...field}
+                            type={showConfirmPassword ? "text" : "password"}
+                          />
+                          <button
+                            type="button"
+                            onClick={toggleConfirmPasswordVisibility}
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                          >
+                            {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -4,11 +4,8 @@ import CardWrapper from "./CardWrapper";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-// import heroimage from "../../assets/crowdfund/hero-image.svg";
-import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
 import {
   Form,
   FormControl,
@@ -22,16 +19,17 @@ import { Button } from "../ui/button";
 import FormError from "../FormError";
 import FormSuccess from "../FormSuccess";
 import { useState, useTransition } from "react";
-import Cookies from "js-cookie";
 import { RegisterSchema } from "@/schema/route";
-// import { register } from "@/actions/register";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import react-icons
+
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false); // State for toggle
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
@@ -42,13 +40,10 @@ const RegisterForm = () => {
     },
   });
 
-
-
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     setError("");
     setSuccess("");
     setLoading(true);
-    // console.log(values)
 
     try {
       const res = await axios.post(
@@ -57,25 +52,22 @@ const RegisterForm = () => {
       );
       if (res.status === 200) {
         setLoading(false);
-        console.log(res.data.user);
-        router.push("/auth/login");
-      } else {
-        console.log("other error", res);
+        startTransition(() => {
+          router.push("/auth/login");
+        });
       }
     } catch (error: any) {
       setLoading(false);
-      console.log(error.response.data.message);
+      setError(error.response?.data?.message || "Something went wrong");
     }
   };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <main
-      //   style={{
-      //     backgroundImage: `url(${heroimage.src})`,
-      //     backgroundSize: "cover",
-      //     position: "relative",
-      //   }}
-      className="flex h-[100vh] flex-col items-center justify-center bg-gray-500"
-    >
+    <main className="flex h-[100vh] flex-col items-center justify-center bg-gray-500">
       <CardWrapper
         headerLabel="Create an account"
         backButtonLabel="Already have an account?"
@@ -94,8 +86,8 @@ const RegisterForm = () => {
                     <FormControl>
                       <Input
                         className="py-[1.3rem]"
-                        disabled={loading}
-                        placeholder="john doe"
+                        disabled={loading || isPending}
+                        placeholder="John Doe"
                         {...field}
                         type="text"
                       />
@@ -103,7 +95,7 @@ const RegisterForm = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              ></FormField>
+              />
               <FormField
                 control={form.control}
                 name="email"
@@ -113,7 +105,7 @@ const RegisterForm = () => {
                     <FormControl>
                       <Input
                         className="py-[1.3rem]"
-                        disabled={loading}
+                        disabled={loading || isPending}
                         placeholder="example@email.com"
                         {...field}
                         type="email"
@@ -122,7 +114,7 @@ const RegisterForm = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              ></FormField>
+              />
               <FormField
                 control={form.control}
                 name="password"
@@ -130,27 +122,37 @@ const RegisterForm = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        className="py-[1.3rem]"
-                        disabled={loading}
-                        placeholder="*****"
-                        {...field}
-                        type="password"
-                      />
+                      <div className="relative">
+                        <Input
+                          className="py-[1.3rem] pr-10"
+                          disabled={loading || isPending}
+                          placeholder="******"
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
-              ></FormField>
+              />
             </div>
             <FormError message={error} />
             <FormSuccess message={success} />
             <Button
-              disabled={loading}
+              disabled={loading || isPending}
               type="submit"
-              className="w-full rounded-[12px]  py-[1.3rem] bg-primarycolor text-white paragraph-7"
+              className="w-full rounded-[12px] py-[1.3rem] bg-primarycolor text-white paragraph-7"
             >
-              {loading ? "Registering" : "Register"}{" "}
+              {loading ? "Registering" : "Register"}
               {loading && <div className="lds-hourglass ms-3"></div>}
             </Button>
           </form>
