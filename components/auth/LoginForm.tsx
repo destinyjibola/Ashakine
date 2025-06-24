@@ -63,7 +63,7 @@ const LoginForm = () => {
       if (error.response?.status === 403 && error.response?.data?.verificationSent) {
         setSuccess(error.response.data.message);
         startTransition(() => {
-          router.push(error.response.data.redirect);
+          router.push(`/auth/verify-email/${values.email}`);
         });
       } else {
         setError(error.response?.data?.message || "Something went wrong");
