@@ -31,16 +31,16 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md relative">
+      <div className="bg-white rounded-lg border border-gray-700 w-full max-w-md relative">
         {/* Animated glow bar */}
         <div className="h-0.5 bg-gradient-to-r from-blue-500/0 via-blue-500 to-blue-500/0 animate-pulse"></div>
         
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-     
+             <div></div>
             <button 
               onClick={onClose}
-              className="text-red-900 hover:text-white p-1 rounded-full hover:bg-gray-700"
+              className="text-white w-8 h-8 bg-red-700 p-1 rounded-full "
             >
              X
             </button>

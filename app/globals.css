@@ -28,7 +28,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
-  /* overflow: hidden; */
+  overflow-x: hidden;
 }
 
 .font-serif {
@@ -148,7 +148,7 @@ html {
   }
 
   .container-spacing {
-    @apply px-2 md:px-[6rem] lg:px-[12rem];
+    @apply px-2 md:px-[6rem] ;
   }
 }
 

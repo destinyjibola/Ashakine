@@ -18,21 +18,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
 import Link from "next/link";
+import spin from "../assets/icons/spin.svg";
+import winner from "../assets/icons/winners.svg";
+import redemption from "../assets/icons/redemption.svg";
+import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
-// Define types based on API response
 interface Prize {
   _id: string;
   prize: string;
@@ -48,7 +47,7 @@ interface Prize {
 interface Winner {
   _id: string;
   code: string;
-  prizeId: Prize;
+  prizeId: Prize | null;
   redeemed: boolean;
   eventId: Event | null;
   createdAt: string;
@@ -76,24 +75,11 @@ interface Overview {
   spinActivity: Array<{ _id: string; count: number }>;
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
-
-// Custom date formatting function
 const formatDate = (date: string, formatStr = "MMM d, yyyy") => {
   const d = new Date(date);
   const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
 
   const day = d.getDate();
@@ -111,12 +97,16 @@ const formatDate = (date: string, formatStr = "MMM d, yyyy") => {
 };
 
 export default function Overview() {
-  const { token, loading: authLoading } = useAuth();
-  const userdata = useAuth()
+  const { token, loading: authLoading, logout } = useAuth();
   const router = useRouter();
   const [overview, setOverview] = useState<Overview | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [redeemModalOpen, setRedeemModalOpen] = useState(false);
+  const [currentWinner, setCurrentWinner] = useState<Winner | null>(null);
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeemError, setRedeemError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -154,6 +144,69 @@ export default function Overview() {
     }
   };
 
+  const handleRedeemPrize = async (winner: Winner) => {
+    setCurrentWinner(winner);
+    setRedeemModalOpen(true);
+    setRedeemCode(winner.code);
+    setRedeemError(null);
+  };
+
+  const confirmRedeemPrize = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRedeemError(null);
+
+    if (!currentWinner) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/winners/${currentWinner._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ redeemed: true }),
+        }
+      );
+
+      if (response.status === 401) {
+        logout();
+        setRedeemError("Session expired. Please log in again.");
+        router.push("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to redeem prize");
+      }
+
+      const updatedWinner = await response.json();
+
+      if (overview) {
+        setOverview({
+          ...overview,
+          recentWinners: overview.recentWinners.map((w) =>
+            w._id === updatedWinner._id ? updatedWinner : w
+          ),
+          redeemedPrizes: overview.redeemedPrizes + 1,
+        });
+      }
+
+      setRedeemModalOpen(false);
+      setCurrentWinner(null);
+    } catch (err) {
+      setRedeemError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    }
+  };
+
+  const filteredWinners = overview?.recentWinners?.filter((winner) =>
+    winner.code.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
   if (authLoading) return <div className="p-6">Loading...</div>;
   if (loading)
     return (
@@ -164,293 +217,185 @@ export default function Overview() {
   if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="space-y-6 p-4">
-      <h1 className="text-2xl font-bold">Overview</h1>
-
-      {/* Summary Cards */}
+    <div className="">
       <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold mb-[2rem]">Overview</h1>
         <Link href={"/admin/events"}>
-          <Button className=" text-black bg-white hover:bg-white">
-            Create Events +
-          </Button>
-        </Link>
-
-        <Link href={"/admin/events"}>
-          <Button className="text-black bg-white hover:bg-white">
-            View all events
+          <Button className="text-sm font-normal bg-primarys-100 text-white">
+            Create spinwheel
           </Button>
         </Link>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
+
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
+        <Card className="bg-gradient-to-r from-[#FFB600] to-[#FF9400] text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Events</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+            <CardTitle className="text-base font-medium">Total Spins</CardTitle>
+            <Image width={53} height={53} alt="spin" src={spin.src} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {overview?.totalEvents ?? 0}
-            </div>
-            <p className="text-xs text-muted-foreground">All your events</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spins</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              <path d="M12 2v4" />
-              <path d="m5.6 5.6 2.8 2.8" />
-              <path d="M12 20v-2" />
-              <path d="m18.4 18.4-2.8-2.8" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-[50px] font-bold">
               {overview?.totalSpins ?? 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Spins across all events
-            </p>
+            <p className="text-xs text-white">Spins across all events</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-r from-[#3D8CE7] to-[#3DAF34] text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Winners</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v4" />
-              <path d="m5 5 2 2" />
-              <path d="M19 5l-2 2" />
-              <path d="M5 19l2-2" />
-              <path d="M22 12h-4" />
-              <path d="m5 11 2 2" />
-              <path d="m15 11-2 2" />
-              <path d="M19 19l-2-2" />
-              <path d="M12 22v-4" />
-            </svg>
+            <CardTitle className="text-base font-medium">
+              Total Winners
+            </CardTitle>
+            <Image width={53} height={53} alt="spin" src={winner.src} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-[53px] font-bold">
               {overview?.totalWinners ?? 0}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white">
               {overview?.redeemedPrizes ?? 0} prizes redeemed
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-r from-[#6D5CF1] to-[#8F8EF2] text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Prizes</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v4" />
-              <path d="m5 5 2 2" />
-              <path d="M19 5l-2 2" />
-              <path d="M5 19l2-2" />
-              <path d="M22 12h-4" />
-              <path d="m5 11 2 2" />
-              <path d="m15 11-2 2" />
-              <path d="M19 19l-2-2" />
-              <path d="M12 22v-4" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {overview?.activePrizes ?? 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Currently available prizes
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-base font-medium">
               Redeemed Prizes
             </CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M5 13l4 4L19 7" />
-            </svg>
+            <Image width={53} height={53} alt="spin" src={redemption.src} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-[53px] font-bold">
               {overview?.redeemedPrizes ?? 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total redeemed prizes
-            </p>
+            <p className="text-xs text-white">Total redeemed prizes</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Spin Activity Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Spin Activity</CardTitle>
-            <CardDescription>Spins over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={overview?.spinActivity ?? []}
-                  margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="_id"
-                    tickFormatter={(value) => formatDate(value, "MMM d")}
-                  />
-                  <YAxis />
-                  <Tooltip labelFormatter={(value) => formatDate(value)} />
-                  <Line
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex md:flex-row flex-col mt-[4rem] mb-[1rem] justify-between items-center">
+        <h2 className="mb-[1rem] md:mb-0">Recent Winners</h2>
+        <div className="relative w-full md:w-64">
+          <Input
+            type="text"
+            placeholder="Search redemption codes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-4 py-2 w-full"
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 text-gray-400 absolute left-3 top-2.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+      </div>
 
-        {/* Prize Distribution Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Prize Distribution</CardTitle>
-            <CardDescription>Wins by prize type</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={overview?.prizeDistribution ?? []}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="count"
-                    nameKey="_id"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
+      <Table>
+        <TableHeader className="bg-[#CAC9CE2E] h-[50px]">
+          <TableRow className="">
+            <TableHead className="">Winner Code</TableHead>
+            <TableHead>Prize</TableHead>
+            <TableHead>Date Won</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="">
+          {filteredWinners.length > 0 ? (
+            filteredWinners.map((winner) => (
+              <TableRow key={winner._id} className="h-[50px]">
+                <TableCell className="font-medium">{winner.code}</TableCell>
+                <TableCell>{winner.prizeId?.prize || "No prize"}</TableCell>
+                <TableCell>{formatDate(winner.createdAt)}</TableCell>
+                <TableCell>
+                  <span
+                    className={`px-2 py-1 rounded-full text-[10px] ${
+                      winner.redeemed
+                        ? "bg-green-100 text-green-800"
+                        : "bg-[#FF000033] text-[#FF0000]"
+                    }`}
                   >
-                    {overview?.prizeDistribution.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value, name) => [`${value} wins`, name]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Winners Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Winners</CardTitle>
-          <CardDescription>The most recent prize winners</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Winner Code</TableHead>
-                <TableHead>Prize</TableHead>
-                {/* <TableHead>Event</TableHead> */}
-                <TableHead>Date Won</TableHead>
-                <TableHead>Status</TableHead>
+                    {winner.redeemed ? "Redeemed" : "Pending"}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    onClick={() => handleRedeemPrize(winner)}
+                    disabled={winner.redeemed}
+                    className={winner.redeemed ? "bg-gray-400" : "bg-primarys-100"}
+                  >
+                    {winner.redeemed ? "Redeemed" : "Mark as Redeem"}
+                  </Button>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {overview?.recentWinners?.map((winner) => (
-                <TableRow key={winner._id}>
-                  <TableCell className="font-medium">{winner.code}</TableCell>
-                  <TableCell>{winner.prizeId.prize}</TableCell>
-                  {/* <TableCell>{winner.eventId?.name || "N/A"}</TableCell> */}
-                  <TableCell>{formatDate(winner.createdAt)}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        winner.redeemed
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {winner.redeemed ? "Redeemed" : "Pending"}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              )) ?? (
-                <TableRow>
-                  <TableCell colSpan={5}>No winners available</TableCell>
-                </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center">
+                {searchTerm ? "No matching winners found" : "No winners available"}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      <Dialog open={redeemModalOpen} onOpenChange={setRedeemModalOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Redeem Prize</DialogTitle>
+            <DialogDescription>
+              Confirm redemption for winner code: {currentWinner?.code}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={confirmRedeemPrize}>
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">Winner Code:</p>
+                <Input
+                  value={redeemCode}
+                  onChange={(e) => setRedeemCode(e.target.value)}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+              <div>
+                <p className="font-medium">Prize:</p>
+                <p className="text-gray-700">{currentWinner?.prizeId?.prize || "No prize"}</p>
+              </div>
+
+              {redeemError && (
+                <p className="text-red-500 text-sm">{redeemError}</p>
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setRedeemModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-gradient-to-r from-[#FFB600] to-[#FF9400] text-white hover:from-[#FF9400] hover:to-[#FFB600]"
+                >
+                  Confirm Redemption
+                </Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -30,6 +30,9 @@ const config = {
           500: '#D4AF37',
           400: '#E8C252',
         },
+        primarys:{
+         100: "#3DAF34"
+        },
         platinum: '#E5E4E2',
 
         // Shadcn/ui colors

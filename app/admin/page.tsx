@@ -15,18 +15,10 @@ const AdminDashboard = () => {
   }
 
   if (!user || !user.isAdmin) {
-    return (
-      <div className="p-4">
-        <Overview />
-      </div>
-    );
+    return <Overview />;
   }
 
-  return (
-    <div className="p-4">
-      <AdminOverview />
-    </div>
-  );
+  return <AdminOverview />;
 };
 
 export default AdminDashboard;

@@ -15,7 +15,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-900`}>
+      <body className={`${inter.className} bg-white`}>
         <Toaster />
         <NextTopLoader
           color="#D4AF37" // Changed to match your gold color scheme

@@ -3,15 +3,45 @@ export interface Prize {
   _id: string;
   prize: string;
   maxWins: number;
-  winCount: number;
   redeemInfo?: string;
+  winCount: number;
   event: string;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  vendor?: string; // Vendor ID
+}
+
+export interface Vendor {
+  _id: string;
+  name: string;
+  url: string;
+  email?: string;
+  event: string | Event; // Can be event ID or populated Event
+
+  prizes?: Prize[]; // Populated prizes
+  image?: string | null;
   createdAt: string;
   updatedAt: string;
   __v: number;
 }
 
+export interface Event {
+  _id: string;
+  name: string;
+  type: "Single" | "Vendor";
+  prizes: Prize[];
+  user: string;
+  spinCount: number;
+  images: string[];
+  spinLog: string[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  vendors?: string[] | Vendor[]; // Can be vendor IDs or populated Vendor objects
+  totalWins?: number;
+  redeemedCount?: number;
+}
 
 export interface Winner {
   _id: string;
@@ -23,15 +53,6 @@ export interface Winner {
   // Remove the prize property since it's not in the API response
 }
 
-export interface Event {
-  _id: string;
-  name: string;
-  prizes: Prize[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}
-
 export interface NewEventData {
   name: string;
 }
@@ -39,24 +60,24 @@ export interface NewEventData {
 export interface NewPrizeData {
   prize: string;
   maxWins: number;
+  winCount: number;
   redeemInfo?: string;
   eventId: string;
-  winCount: number
+  vendorId?: string; // Add vendorId for associating prizes with vendors
 }
 
-
+export interface NewVendorData {
+  name: string;
+  url: string;
+  email?: string;
+  eventId: string;
+}
 
 export interface PrizeData {
   _id?: string;
   option: string;
   segColor: string;
   emoji: string;
-  redeemInfo?: string;
-}
-
-export interface Prize {
-  _id: string;
-  prize: string;
   redeemInfo?: string;
 }
 
