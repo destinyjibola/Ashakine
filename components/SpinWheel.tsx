@@ -21,8 +21,8 @@ function SpinWheel({
   isLoading,
 }: SpinWheelProps) {
   return (
-    <div className="relative z-10 mb-12">
-      <div className="absolute -inset-4 bg-purple-600 rounded-full blur-lg opacity-70 animate-pulse"></div>
+    <div className="relative z-10">
+      <div className="absolute inset-[1px] bg-gradient-to-r from-purple-600 to-pink-500 rounded-full blur-lg opacity-70 animate-pulse"></div>
       <div className="relative">
         {!isLoading && (
           <MemoizedWheel

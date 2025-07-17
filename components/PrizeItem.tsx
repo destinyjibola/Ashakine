@@ -27,72 +27,100 @@ const PrizeItem = ({
   setEditingPrizeId: (value: string | null) => void;
   vendors: Vendor[];
 }) => (
-  <div className="bg-gray-100 p-4 rounded-lg border border-gray-300">
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     {editingPrizeId === prize._id ? (
-      <form
-        onSubmit={(e) => handleEditPrize(e, prize._id)}
-        className="flex flex-col gap-4"
-      >
-        <div className="flex flex-col md:flex-row gap-3">
-          <input
-            type="text"
-            value={editPrizeName}
-            onChange={(e) => setEditPrizeName(e.target.value)}
-            placeholder="Prize name"
-            className="flex-1 bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            required
+      // Edit Mode
+      <form onSubmit={(e) => handleEditPrize(e, prize._id)} className="p-4 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Prize Name *
+            </label>
+            <input
+              type="text"
+              value={editPrizeName}
+              onChange={(e) => setEditPrizeName(e.target.value)}
+              placeholder="e.g. $50 Gift Card"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Max Wins *
+            </label>
+            <input
+              type="number"
+              value={editMaxWins}
+              onChange={(e) => setEditMaxWins(Number(e.target.value))}
+              placeholder="e.g. 10"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              min="1"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Redemption Instructions
+          </label>
+          <textarea
+            value={editRedeemInfo}
+            onChange={(e) => setEditRedeemInfo(e.target.value)}
+            placeholder="Provide details on how to redeem this prize..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
+            rows={3}
           />
-          <input
-            type="number"
-            value={editMaxWins}
-            onChange={(e) => setEditMaxWins(Number(e.target.value))}
-            placeholder="Max Wins"
-            className="w-24 bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            min="1"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition-colors duration-200"
-          >
-            Save
-          </button>
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-2">
           <button
             type="button"
             onClick={() => setEditingPrizeId(null)}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-md transition-colors duration-200"
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Cancel
           </button>
+          <button
+            type="submit"
+            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Save Changes
+          </button>
         </div>
-        <textarea
-          value={editRedeemInfo}
-          onChange={(e) => setEditRedeemInfo(e.target.value)}
-          placeholder="Instructions for redeeming this prize"
-          className="w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
-          rows={3}
-        />
       </form>
     ) : (
-      <>
+      // View Mode
+      <div className="p-4">
         <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium text-lg text-gray-900">
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium text-gray-900">
               {prize.prize || "Unnamed Prize"}
             </h3>
-            <div className="flex flex-col gap-2 mt-1 text-sm">
-              <span className="text-gray-500">Max Wins: {prize.maxWins}</span>
-              <span className="text-gray-500">Wins: {prize.winCount || 0}</span>
+            
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              <div className="flex items-center">
+                <span className="text-gray-500 mr-1">Max Wins:</span>
+                <span className="font-medium">{prize.maxWins}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-gray-500 mr-1">Wins:</span>
+                <span className="font-medium">{prize.winCount || 0}</span>
+              </div>
               {prize.vendor && (
-                <span className="text-gray-500">
-                  Vendor:{" "}
-                  {vendors.find((v) => v._id === prize.vendor)?.name ||
-                    "Unknown"}
-                </span>
+                <div className="flex items-center">
+                  <span className="text-gray-500 mr-1">Vendor:</span>
+                  <span className="font-medium">
+                    {vendors.find((v) => v._id === prize.vendor)?.name || "Unknown"}
+                  </span>
+                </div>
               )}
             </div>
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex space-x-2">
             <button
               onClick={() => {
                 setEditingPrizeId(prize._id);
@@ -100,31 +128,32 @@ const PrizeItem = ({
                 setEditMaxWins(prize.maxWins);
                 setEditRedeemInfo(prize.redeemInfo || "");
               }}
-              className="text-blue-500 hover:text-blue-700"
+              className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
             >
               Edit
             </button>
             <button
               onClick={() => handleDeletePrize(prize._id)}
-              className="text-red-500 hover:text-red-700"
+              className="text-red-600 hover:text-red-800 px-2 py-1 rounded hover:bg-red-50 transition-colors"
             >
               Delete
             </button>
           </div>
         </div>
+
         {prize.redeemInfo && (
-          <div className="mt-4 bg-gray-50 p-3 rounded-md">
-            <h4 className="text-gray-600 text-sm font-medium mb-1">
-              Redeem Information:
+          <div className="mt-4 bg-gray-50 p-3 rounded-md border border-gray-100">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              Redemption Instructions
             </h4>
-            <p className="text-gray-800 whitespace-pre-line">
+            <p className="text-gray-800 whitespace-pre-line text-sm">
               {prize.redeemInfo}
             </p>
           </div>
         )}
-      </>
+      </div>
     )}
   </div>
 );
 
-export default PrizeItem
+export default PrizeItem;

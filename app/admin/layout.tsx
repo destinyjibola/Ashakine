@@ -67,7 +67,7 @@ export default function AdminLayout({
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-white container-spacing">
+    <div className="flex flex-col bg-white container-spacing">
       {/* Navbar */}
       <nav className="py-6 h-[100px] px-4 flex justify-between items-center z-10 relative bg-[#FFB60014] border-b border-[#FFB60030]">
         <Link href="" className="hidden lg:flex items-center gap-3">
@@ -165,7 +165,7 @@ export default function AdminLayout({
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-8">{children}</main>
+      <main className="flex-1 pt-8 overflow-hidden">{children}</main>
     </div>
   );
 }

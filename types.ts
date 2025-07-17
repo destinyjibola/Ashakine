@@ -14,13 +14,17 @@ export interface Prize {
 
 export interface Vendor {
   _id: string;
+  invite: boolean;
   name: string;
   url: string;
   email?: string;
   event: string | Event; // Can be event ID or populated Event
-
+  logo?: {
+    url: string;
+    public_id: string;
+    altText?: string;
+  };
   prizes?: Prize[]; // Populated prizes
-  image?: string | null;
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -38,19 +42,23 @@ export interface Event {
   createdAt: string;
   updatedAt: string;
   __v: number;
-  vendors?: string[] | Vendor[]; // Can be vendor IDs or populated Vendor objects
+  vendors?: string[] | Vendor[];
   totalWins?: number;
   redeemedCount?: number;
+  logo?: {
+    url: string;
+    public_id: string;
+    altText?: string;
+  };
 }
 
 export interface Winner {
   _id: string;
   code: string;
-  prizeId: Prize; // Can be populated or just ID
-  eventId: string;
+  prizeId: Prize | null; // Allow null for prizeId
+  eventId: string | null; // Allow null for eventId to match API response
   redeemed: boolean;
   createdAt: string;
-  // Remove the prize property since it's not in the API response
 }
 
 export interface NewEventData {
@@ -95,4 +103,6 @@ export interface WindowSize {
 export interface ImageItem {
   src: any;
   alt: string;
+  title: string
+
 }

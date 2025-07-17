@@ -2,11 +2,21 @@
 import { useState, useEffect } from "react";
 import Confetti from "react-confetti";
 import { useParams } from "next/navigation";
-
-import { PrizeData, Prize, WinnerData, WindowSize } from "@/types";
 import ImageSlider from "@/components/ImageSlider";
 import SpinWheel from "@/components/SpinWheel";
 import Modal from "@/components/Modal";
+import VendorSection from "@/components/VendorSection";
+import {
+  PrizeData,
+  Prize,
+  WinnerData,
+  WindowSize,
+  Vendor,
+  Event,
+  Winner,
+} from "@/types";
+import Image from "next/image";
+import Leaderboard from "@/components/LeaderBoard";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -48,6 +58,8 @@ function App() {
   const params = useParams();
   const eventId = params?.eventId as string;
   const [data, setData] = useState<PrizeData[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [event, setEvent] = useState<Event>();
   const [mustSpin, setMustSpin] = useState<boolean>(false);
   const [prizeNumber, setPrizeNumber] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -57,6 +69,7 @@ function App() {
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [recentWinners, setRecentWinners] = useState<Winner[]>([]);
   const [windowSize, setWindowSize] = useState<WindowSize>({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -74,22 +87,38 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const fetchPrizes = async () => {
+    const fetchEventData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch(
+
+        const eventResponse = await fetch(
+          `${API_BASE_URL}/api/events/${eventId}`,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (!eventResponse.ok)
+          throw new Error(`HTTP error! status: ${eventResponse.status}`);
+        const eventData = await eventResponse.json();
+        setEvent(eventData);
+
+        if (eventData.vendors && Array.isArray(eventData.vendors)) {
+          setVendors(eventData.vendors);
+        }
+
+        const prizeResponse = await fetch(
           `${API_BASE_URL}/api/spinwheel/${eventId}`
         );
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-        const eventData = await response.json();
+        if (!prizeResponse.ok)
+          throw new Error(`HTTP error! status: ${prizeResponse.status}`);
+        const prizeData = await prizeResponse.json();
 
-        if (!eventData.prizes || !Array.isArray(eventData.prizes)) {
+        if (!prizeData.prizes || !Array.isArray(prizeData.prizes)) {
           throw new Error("Invalid prizes data");
         }
 
-        const realPrizes: PrizeData[] = eventData.prizes.map((p: Prize) => ({
+        const realPrizes: PrizeData[] = prizeData.prizes.map((p: Prize) => ({
           _id: p._id,
           option: p.prize,
           segColor: getRandomColor(),
@@ -100,15 +129,25 @@ function App() {
         }));
 
         setData(shuffleArray([...realPrizes, ...fakeSegments]));
+
+        const winnersResponse = await fetch(
+          `${API_BASE_URL}/api/winners/${eventId}`
+        );
+        if (!winnersResponse.ok)
+          throw new Error(`HTTP error! status: ${winnersResponse.status}`);
+        const winnersData = await winnersResponse.json();
+        setRecentWinners(
+          winnersData.filter((winner: Winner) => winner.prizeId).slice(0, 5)
+        );
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load prizes");
+        setError(err instanceof Error ? err.message : "Failed to load data");
         setData(fakeSegments);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPrizes();
+    fetchEventData();
   }, [eventId]);
 
   useEffect(() => {
@@ -128,8 +167,6 @@ function App() {
     setIsModalOpen(false);
     setIsRedeemModalOpen(false);
     setWinnerCode(null);
-
-    // ticTicSound?.play();
 
     const newPrizeNumber = Math.floor(Math.random() * data.length);
     const selectedPrize = data[newPrizeNumber];
@@ -202,7 +239,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 to-indigo-800 p-4 relative overflow-hidden">
+    <div className="flex bg-gray-100 flex-col items-center justify-center p-4 relative overflow-hidden">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -217,7 +254,7 @@ function App() {
         <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500 mx-auto mb-4"></div>
-            <h2 className="text-white text-2xl font-bold">Loading Prizes...</h2>
+            <h2 className="text-white text-2xl font-bold">Loading...</h2>
             <p className="text-purple-200 mt-2">Preparing your chance to win</p>
           </div>
         </div>
@@ -233,55 +270,88 @@ function App() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
       </div>
 
-      <ImageSlider />
+      {/* Header Section */}
+      {/* <header className="w-auto mx-auto mb-6 p-2 bg-gradient-to-r from-[#FFB600] to-[#FF9400] rounded-full shadow-lg flex items-center justify-center space-x-2"> */}
+        <header className="w-auto mx-auto mb-6 p-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full shadow-lg flex items-center justify-center space-x-2">
+        {event?.logo?.url ? (
+          <Image
+            src={event.logo.url}
+            alt={event.logo.altText || `${event.name} logo`}
+            width={50}
+            height={50}
+            className="object-contain rounded-full"
+          />
+        ) : (
+          <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+            <span className="text-2xl">🎉</span>
+          </div>
+        )}
+        <h1 className="text-2xl font-bold text-white text-center">
+          {event?.name || "Event Name"}
+        </h1>
+      </header>
 
-      <SpinWheel
-        mustSpin={mustSpin}
-        prizeNumber={prizeNumber}
-        data={data}
-        onStopSpinning={onStopSpinning}
+      {/* ads banner */}
+      <ImageSlider />
+      {/* ads banner */}
+
+      <div className="relative">
+        <SpinWheel
+          mustSpin={mustSpin}
+          prizeNumber={prizeNumber}
+          data={data}
+          onStopSpinning={onStopSpinning}
+          isLoading={isLoading}
+        />
+
+        <button
+          onClick={handleSpinClick}
+          disabled={mustSpin || isLoading}
+          className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
+            mustSpin || isLoading
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
+          }`}
+        >
+          {isLoading ? (
+            "Loading..."
+          ) : mustSpin ? (
+            <span className="flex items-center">
+              <svg
+                className="animate-spin h-8 w-8 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </span>
+          ) : (
+            "SPIN"
+          )}
+        </button>
+      </div>
+
+      <VendorSection
+        vendors={vendors}
+        eventType={event?.type || ""}
         isLoading={isLoading}
+        error={error}
       />
 
-      <button
-        onClick={handleSpinClick}
-        disabled={mustSpin || isLoading}
-        className={`relative z-10 px-8 py-4 text-xl font-bold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-          mustSpin || isLoading
-            ? "bg-gray-500 cursor-not-allowed"
-            : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
-        }`}
-      >
-        {isLoading ? (
-          "Loading..."
-        ) : mustSpin ? (
-          <span className="flex items-center">
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            Spinning...
-          </span>
-        ) : (
-          "SPIN TO WIN!"
-        )}
-      </button>
+      <Leaderboard winners={recentWinners} vendors={vendors} />
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="text-center p-6 md:p-10">
@@ -366,12 +436,6 @@ function App() {
           </button>
         </div>
       </Modal>
-
-      {!isLoading && !error && (
-        <div className="mt-12 text-purple-200 text-sm z-10">
-          <p>Spin the wheel for a chance to win incredible prizes!</p>
-        </div>
-      )}
     </div>
   );
 }

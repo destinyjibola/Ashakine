@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Event, NewPrizeData, Winner, Vendor } from "@/types";
@@ -20,12 +20,6 @@ import WinnersList from "@/components/WinnersList";
 import RedeemPrizeModal from "@/components/RedeemPrizeModal";
 import QRCodePreviewModal from "@/components/QRCodePreviewModal";
 
-// Redeem Prize Modal Component (unchanged)
-
-
-// QR Code Preview Modal Component
-
-// Main EventDetailsPage Component
 export default function EventDetailsPage({
   params,
 }: {
@@ -119,72 +113,87 @@ export default function EventDetailsPage({
     }
   };
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const [eventResponse, winnersResponse] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }),
-      ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [eventResponse, winnersResponse] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }),
+        ]);
 
-      if (eventResponse.status === 401 || winnersResponse.status === 401) {
-        logout();
-        setError("Session expired. Please log in again.");
-        router.push("/login");
-        return;
-      }
+        if (eventResponse.status === 401 || winnersResponse.status === 401) {
+          logout();
+          setError("Session expired. Please log in again.");
+          router.push("/login");
+          return;
+        }
 
-      if (!eventResponse.ok) {
-        const errorData = await eventResponse.json();
-        throw new Error(errorData.message || "Failed to fetch event");
-      }
-      if (!winnersResponse.ok) {
-        const errorData = await winnersResponse.json();
-        throw new Error(errorData.message || "Failed to fetch winners");
-      }
+        if (!eventResponse.ok) {
+          const errorData = await eventResponse.json();
+          throw new Error(errorData.message || "Failed to fetch event");
+        }
+        if (!winnersResponse.ok) {
+          const errorData = await winnersResponse.json();
+          throw new Error(errorData.message || "Failed to fetch winners");
+        }
 
-      const eventData: Event = await eventResponse.json();
-      const winnersData: Winner[] = await winnersResponse.json();
-      setEvent(eventData);
-      // Ensure vendors is Vendor[] or empty array
-      setVendors(Array.isArray(eventData.vendors) && eventData.vendors.every(v => typeof v !== "string") ? eventData.vendors : []);
-      setWinners(winnersData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
-    } finally {
+        const eventData: Event = await eventResponse.json();
+        const winnersData: Winner[] = await winnersResponse.json();
+        setEvent(eventData);
+        setVendors(
+          Array.isArray(eventData.vendors) &&
+          eventData.vendors.every((v) => typeof v !== "string")
+            ? eventData.vendors
+            : []
+        );
+        setWinners(winnersData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An unknown error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!authLoading && token) {
+      fetchData();
+    } else if (!authLoading && !token) {
+      setError("No authentication token available");
       setLoading(false);
+      router.push("/login");
     }
-  };
+  }, [params.eventId, token, authLoading, router, logout]);
 
-  if (!authLoading && token) {
-    fetchData();
-  } else if (!authLoading && !token) {
-    setError("No authentication token available");
-    setLoading(false);
-    router.push("/login");
-  }
-}, [params.eventId, token, authLoading, router, logout]);
-
-  const handleAddVendor = async (e: React.FormEvent) => {
+  const handleAddVendor = async (e: React.FormEvent, logo: File | null, resetLogo: () => void) => {
     e.preventDefault();
     setVendorLoading(true);
     setVendorError(null);
 
     try {
+      if (!logo) {
+        throw new Error("Vendor logo is required");
+      }
+
+      const reader = new FileReader();
+      const logoBase64 = await new Promise<string>((resolve) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(logo);
+      });
+
       const vendorData = {
         name: newVendor.name,
         url: newVendor.url,
         email: newVendor.email,
+        logo: logoBase64,
         eventId: params.eventId,
       };
 
@@ -215,6 +224,7 @@ useEffect(() => {
       const newVendorData: Vendor = await response.json();
       setVendors([...vendors, newVendorData]);
       setNewVendor({ name: "", url: "", email: "" });
+      resetLogo();
     } catch (err) {
       setVendorError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -456,7 +466,7 @@ useEffect(() => {
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("//login");
+        router.push("/login");
         return;
       }
 
@@ -547,7 +557,7 @@ useEffect(() => {
       />
       <EventDetails event={event} vendors={vendors} winners={winners} />
       {event.type === "Vendor" && (
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+        <div className="bg-white p-4  md:p-6 rounded-lg shadow-md border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Vendors ({vendors.length})
           </h2>
@@ -588,7 +598,7 @@ useEffect(() => {
             </div>
           ) : (
             <PrizeForm
-            event={event}
+              event={event}
               newPrize={newPrize}
               setNewPrize={setNewPrize}
               newMaxWins={newMaxWins}
