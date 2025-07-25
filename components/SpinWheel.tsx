@@ -22,7 +22,9 @@ function SpinWheel({
 }: SpinWheelProps) {
   return (
     <div className="relative z-10">
-      <div className="absolute inset-[1px] bg-gradient-to-r from-purple-600 to-pink-500 rounded-full blur-lg opacity-70 animate-pulse"></div>
+      <div className="absolute inset-[1px] rounded-full blur-lg opacity-70 animate-pulse"></div>
+      {/* <div className="absolute inset-[1px] bg-gradient-to-r from-purple-600 to-pink-500 rounded-full blur-lg opacity-70 animate-pulse"></div> */}
+
       <div className="relative">
         {!isLoading && (
           <MemoizedWheel
@@ -51,3 +53,4 @@ function SpinWheel({
 }
 
 export default SpinWheel;
+ 

@@ -36,6 +36,7 @@ export interface Event {
   type: "Single" | "Vendor";
   prizes: Prize[];
   user: string;
+  slug: string;
   spinCount: number;
   images: string[];
   spinLog: string[];

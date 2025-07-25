@@ -33,7 +33,7 @@ function ImageSlider() {
 
       {/* Mobile: Carousel */}
       <div
-        className="lg:hidden w-full h-[10rem] relative overflow-hidden rounded-xl shadow-lg"
+        className="w-full h-[10rem] md:h-[12rem] relative overflow-hidden rounded-xl shadow-lg"
         role="region"
         aria-label="Image carousel"
       >
@@ -83,32 +83,7 @@ function ImageSlider() {
 
     {/* Mobile: Carousel */}
       {/* Desktop: Three-column grid */}
-      <div className="hidden lg:grid lg:grid-cols-3 gap-4">
-        {images.map((image, index) => (
-          <div
-            key={index}
-            className="w-full h-[12rem] relative overflow-hidden rounded-xl shadow-md group"
-            role="figure"
-            aria-label={`Sponsor image ${image.alt}`}
-          >
-            <Image
-              src={image.src}
-              alt={image.alt}
-              className="h-full w-full transition-transform duration-300 group-hover:scale-105"
-              width={1000}
-              height={500}
-              style={{ objectFit: "cover" }}
-              priority={index === 0}
-            />
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
-              <span className="text-white text-lg font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {image.title}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+  
     </div>
   );
 }

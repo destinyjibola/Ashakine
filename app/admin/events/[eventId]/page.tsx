@@ -1,8 +1,7 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Event, NewPrizeData, Winner, Vendor } from "@/types";
-import Modal from "@/components/Modal";
 import { useAuth } from "@/hooks/AuthContext";
 import { FiCopy, FiShare2, FiRotateCw, FiImage } from "react-icons/fi";
 import Link from "next/link";
@@ -11,7 +10,8 @@ import jsPDF from "jspdf";
 import EventHeader from "@/components/EventHeader";
 import EventDetails from "@/components/EventDetails";
 import VendorForm from "@/components/VendorForm";
-import VendorItem from "@/components/VendorItem";
+import EditVendorModal from "@/components/EditVendorModal";
+
 import VendorsList from "@/components/VendorsList";
 import PrizeForm from "@/components/PrizeForm";
 import PrizeItem from "@/components/PrizeItem";
@@ -19,6 +19,7 @@ import PrizesList from "@/components/PrizesList";
 import WinnersList from "@/components/WinnersList";
 import RedeemPrizeModal from "@/components/RedeemPrizeModal";
 import QRCodePreviewModal from "@/components/QRCodePreviewModal";
+import { createSearchParamsBailoutProxy } from "next/dist/client/components/searchparams-bailout-proxy";
 
 export default function EventDetailsPage({
   params,
@@ -44,14 +45,17 @@ export default function EventDetailsPage({
     url: "",
     email: "",
   });
+  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
   const [editingPrizeId, setEditingPrizeId] = useState<string | null>(null);
   const [editPrizeName, setEditPrizeName] = useState<string>("");
   const [editMaxWins, setEditMaxWins] = useState<number>(1);
   const [editRedeemInfo, setEditRedeemInfo] = useState<string>("");
   const [prizeLoading, setPrizeLoading] = useState<boolean>(false);
   const [prizeError, setPrizeError] = useState<string | null>(null);
-  const [vendorLoading, setVendorLoading] = useState<boolean>(false);
-  const [vendorError, setVendorError] = useState<string | null>(null);
+  const [addVendorLoading, setAddVendorLoading] = useState<boolean>(false);
+  const [addVendorError, setAddVendorError] = useState<string | null>(null);
+  const [editVendorLoading, setEditVendorLoading] = useState<boolean>(false);
+  const [editVendorError, setEditVendorError] = useState<string | null>(null);
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
   const [redeemCode, setRedeemCode] = useState<string>("");
   const [redeemError, setRedeemError] = useState<string | null>(null);
@@ -74,7 +78,7 @@ export default function EventDetailsPage({
     : 0;
 
   const copySpinWheelLink = () => {
-    const spinWheelUrl = `${window.location.origin}/${params.eventId}`;
+    const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
     navigator.clipboard.writeText(spinWheelUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -175,8 +179,8 @@ export default function EventDetailsPage({
 
   const handleAddVendor = async (e: React.FormEvent, logo: File | null, resetLogo: () => void) => {
     e.preventDefault();
-    setVendorLoading(true);
-    setVendorError(null);
+    setAddVendorLoading(true);
+    setAddVendorError(null);
 
     try {
       if (!logo) {
@@ -211,13 +215,14 @@ export default function EventDetailsPage({
 
       if (response.status === 401) {
         logout();
-        setVendorError("Session expired. Please log in again.");
+        setAddVendorError("Session expired. Please log in again.");
         router.push("/login");
         return;
       }
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.log(errorData)
         throw new Error(errorData.message || "Failed to add vendor");
       }
 
@@ -226,18 +231,85 @@ export default function EventDetailsPage({
       setNewVendor({ name: "", url: "", email: "" });
       resetLogo();
     } catch (err) {
-      setVendorError(
+      setAddVendorError(
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
-      setVendorLoading(false);
+      setAddVendorLoading(false);
+    }
+  };
+
+  const handleUpdateVendor = async (
+    e: React.FormEvent,
+    vendorId: string,
+    data: { name: string; url: string; email?: string },
+    logo: File | null,
+    resetLogo: () => void
+  ) => {
+    e.preventDefault();
+    setEditVendorLoading(true);
+    setEditVendorError(null);
+
+    try {
+      let logoBase64: string | null = null;
+      if (logo) {
+        const reader = new FileReader();
+        logoBase64 = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(logo);
+        });
+      }
+
+      const vendorData = {
+        name: data.name,
+        url: data.url,
+        email: data.email || undefined,
+        image: logoBase64,
+      };
+
+      console.log("Sending vendorData:", vendorData); // Debug log
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(vendorData),
+        }
+      );
+
+      if (response.status === 401) {
+        logout();
+        setEditVendorError("Session expired. Please log in again.");
+        router.push("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update vendor");
+      }
+
+      const updatedVendor: Vendor = await response.json();
+      setVendors(vendors.map((v) => (v._id === vendorId ? updatedVendor : v)));
+      resetLogo();
+      setEditingVendor(null); // Close modal after successful update
+    } catch (err) {
+      setEditVendorError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setEditVendorLoading(false);
     }
   };
 
   const handleDeleteVendor = async (vendorId: string) => {
-    setVendorLoading(true);
-    setVendorError(null);
-
+    setAddVendorLoading(true);
+    setAddVendorError(null); 
+    
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
@@ -249,7 +321,7 @@ export default function EventDetailsPage({
 
       if (response.status === 401) {
         logout();
-        setVendorError("Session expired. Please log in again.");
+        setAddVendorError("Session expired. Please log in again.");
         router.push("/login");
         return;
       }
@@ -269,7 +341,7 @@ export default function EventDetailsPage({
 
       if (updatedResponse.status === 401) {
         logout();
-        setVendorError("Session expired. Please log in again.");
+        setAddVendorError("Session expired. Please log in again.");
         router.push("/login");
         return;
       }
@@ -282,11 +354,11 @@ export default function EventDetailsPage({
       const updatedData: Event = await updatedResponse.json();
       setEvent(updatedData);
     } catch (err) {
-      setVendorError(
+      setAddVendorError(
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
-      setVendorLoading(false);
+      setAddVendorLoading(false);
     }
   };
 
@@ -339,7 +411,7 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("//login");
         return;
       }
 
@@ -447,7 +519,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("//login");
         return;
       }
 
@@ -466,7 +538,7 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("//login");
         return;
       }
 
@@ -511,7 +583,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setRedeemError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("//login");
         return;
       }
 
@@ -557,23 +629,35 @@ export default function EventDetailsPage({
       />
       <EventDetails event={event} vendors={vendors} winners={winners} />
       {event.type === "Vendor" && (
-        <div className="bg-white p-4  md:p-6 rounded-lg shadow-md border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Vendors ({vendors.length})
           </h2>
           <VendorForm
             newVendor={newVendor}
             setNewVendor={setNewVendor}
-            vendorError={vendorError}
-            vendorLoading={vendorLoading}
+            vendorError={addVendorError}
+            vendorLoading={addVendorLoading}
             handleAddVendor={handleAddVendor}
           />
           <VendorsList
             event={event}
             vendors={vendors}
             handleDeleteVendor={handleDeleteVendor}
+            setEditingVendor={setEditingVendor}
           />
         </div>
+      )}
+      {editingVendor && (
+        <EditVendorModal
+          isOpen={editingVendor !== null}
+          onClose={() => setEditingVendor(null)}
+          vendor={editingVendor}
+          vendorError={editVendorError}
+          vendorLoading={editVendorLoading}
+          handleUpdateVendor={handleUpdateVendor}
+          setEditingVendor={setEditingVendor}
+        />
       )}
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
         <div className="flex flex-col gap-6">

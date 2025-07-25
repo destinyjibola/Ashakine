@@ -148,7 +148,7 @@ html {
   }
 
   .container-spacing {
-    @apply px-2 md:px-[6rem] ;
+    @apply px-2 md:px-[6rem];
   }
 }
 
@@ -316,3 +316,6 @@ html {
     transform: translateY(-10px);
   }
 }
+
+/* spinwheel */
+ 

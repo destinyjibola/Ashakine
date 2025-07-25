@@ -29,11 +29,11 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
         aria-label="Recent Winners"
       >
         <div className="flex items-center justify-center gap-2 mb-6">
-          <Trophy className="w-8 h-8 text-yellow-500" />
-          <h2 className="text-3xl font-bold text-center text-purple-700">
+          <Trophy className="w-4 h-4 text-yellow-500" />
+          <h2 className="md:text-3xl text-2xl font-bold text-center text-purple-700">
             Recent Winners
           </h2>
-          <Trophy className="w-8 h-8 text-yellow-500" />
+          <Trophy className="w-4 h-4 text-yellow-500" />
         </div>
         <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-purple-100">
           <div className="flex flex-col items-center justify-center">

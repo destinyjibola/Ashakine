@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
 import { debounce } from "lodash";
+import { Vendor } from "@/types";
 
 interface VendorFormData {
   name: string;
@@ -11,29 +12,29 @@ interface VendorFormData {
   logo?: FileList;
 }
 
-interface VendorFormProps {
-  newVendor: { name: string; url: string; email: string };
-  setNewVendor: React.Dispatch<
-    React.SetStateAction<{ name: string; url: string; email: string }>
-  >;
+interface EditVendorFormProps {
+  vendor: Vendor;
   vendorError: string | null;
   vendorLoading: boolean;
-  handleAddVendor: (
+  handleUpdateVendor: (
     e: React.FormEvent,
+    vendorId: string,
+    data: VendorFormData,
     logo: File | null,
     resetLogo: () => void
   ) => void;
+  setEditingVendor: (vendor: Vendor | null) => void;
 }
 
-const VendorForm = ({
-  newVendor,
-  setNewVendor,
+const EditVendorForm = ({
+  vendor,
   vendorError,
   vendorLoading,
-  handleAddVendor,
-}: VendorFormProps) => {
+  handleUpdateVendor,
+  setEditingVendor,
+}: EditVendorFormProps) => {
   const [newVendorLogo, setNewVendorLogo] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(vendor.logo?.url || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -44,9 +45,9 @@ const VendorForm = ({
     reset,
   } = useForm<VendorFormData>({
     defaultValues: {
-      name: newVendor.name,
-      url: newVendor.url,
-      email: newVendor.email || "",
+      name: vendor.name,
+      url: vendor.url,
+      email: vendor.email || "",
       logo: undefined,
     },
     mode: "onChange",
@@ -54,42 +55,44 @@ const VendorForm = ({
 
   const resetLogo = useCallback(() => {
     setNewVendorLogo(null);
-    setLogoPreview(null);
+    setLogoPreview(vendor.logo?.url || null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
     setValue("logo", undefined as any, { shouldValidate: true });
-  }, [setValue]);
+  }, [setValue, vendor.logo?.url]);
 
   const handleInputChange = useCallback(
     (field: keyof VendorFormData, value: string) => {
       const debounced = debounce(() => {
-        setNewVendor((prev) => ({ ...prev, [field]: value }));
         setValue(field, value, { shouldValidate: true });
       }, 50);
       debounced();
     },
-    [setNewVendor, setValue]
+    [setValue]
   );
 
   const onSubmit = (data: VendorFormData) => {
-    handleAddVendor(
+    handleUpdateVendor(
       { preventDefault: () => {} } as React.FormEvent,
+      vendor._id,
+      data,
       newVendorLogo,
       resetLogo
     );
     reset();
     resetLogo();
+    // Removed setEditingVendor(null) to close modal only after success
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4"
-      aria-labelledby="add-vendor-form-title"
+      className=""
+      aria-labelledby="edit-vendor-form-title"
     >
-      <h2 id="add-vendor-form-title" className="text-lg font-medium text-gray-800 mb-4">
-        Add New Vendor
+      <h2 id="edit-vendor-form-title" className="text-lg font-medium text-gray-800 mb-4">
+        Edit Vendor
       </h2>
 
       <div className="space-y-2">
@@ -125,12 +128,12 @@ const VendorForm = ({
                   errors.name ? "border-red-500" : "border-gray-300"
                 }`}
                 aria-invalid={!!errors.name}
-                aria-describedby={errors.name ? "vendorName-err" : undefined}
+                aria-describedby={errors.name ? "vendorName-error" : undefined}
               />
             )}
           />
           {errors.name && (
-            <p id="vendorName-err" className="mt-1 text-sm text-red-600">
+            <p id="vendorName-error" className="mt-1 text-sm text-red-600">
               {errors.name.message}
             </p>
           )}
@@ -168,12 +171,12 @@ const VendorForm = ({
                   errors.url ? "border-red-500" : "border-gray-300"
                 }`}
                 aria-invalid={!!errors.url}
-                aria-describedby={errors.url ? "vendorUrl-err" : undefined}
+                aria-describedby={errors.url ? "vendorUrl-error" : undefined}
               />
             )}
           />
           {errors.url && (
-            <p id="vendorUrl-err" className="mt-1 text-sm text-red-600">
+            <p id="vendorUrl-error" className="mt-1 text-sm text-red-600">
               {errors.url.message}
             </p>
           )}
@@ -210,12 +213,12 @@ const VendorForm = ({
                   errors.email ? "border-red-500" : "border-gray-300"
                 }`}
                 aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "vendorEmail-err" : undefined}
+                aria-describedby={errors.email ? "vendorEmail-error" : undefined}
               />
             )}
           />
           {errors.email && (
-            <p id="vendorEmail-err" className="mt-1 text-sm text-red-600">
+            <p id="vendorEmail-error" className="mt-1 text-sm text-red-600">
               {errors.email.message}
             </p>
           )}
@@ -227,7 +230,7 @@ const VendorForm = ({
             htmlFor="vendorLogo"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Logo *
+            Logo
           </label>
           <div className="space-y-2">
             <label
@@ -262,7 +265,6 @@ const VendorForm = ({
                 name="logo"
                 control={control}
                 rules={{
-                  required: "Vendor logo is required",
                   validate: {
                     fileType: (files) =>
                       !files ||
@@ -291,17 +293,17 @@ const VendorForm = ({
                         reader.onload = () => setLogoPreview(reader.result as string);
                         reader.readAsDataURL(file);
                       } else {
-                        setLogoPreview(null);
+                        setLogoPreview(vendor.logo?.url || null);
                       }
                     }}
                     className="sr-only"
-                    aria-describedby={errors.logo ? "vendorLogo-err" : undefined}
+                    aria-describedby={errors.logo ? "vendorLogo-error" : undefined}
                   />
                 )}
               />
             </label>
             {errors.logo && (
-              <p id="vendorLogo-err" className="mt-1 text-sm text-red-600">
+              <p id="vendorLogo-error" className="mt-1 text-sm text-red-600">
                 {errors.logo.message}
               </p>
             )}
@@ -327,12 +329,12 @@ const VendorForm = ({
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="pt-2">
+        {/* Submit and Cancel Buttons */}
+        <div className="pt-2 flex space-x-4">
           <button
             type="submit"
             disabled={vendorLoading || !isValid}
-            className={`w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors duration-200 ${
+            className={`flex-1 flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors duration-200 ${
               vendorLoading || !isValid
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -360,11 +362,21 @@ const VendorForm = ({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Adding Vendor...
+                Updating Vendor...
               </>
             ) : (
-              "Add Vendor"
+              "Update Vendor"
             )}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditingVendor(null);
+              resetLogo();
+            }}
+            className="flex-1 py-2.5 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Cancel
           </button>
         </div>
 
@@ -382,4 +394,4 @@ const VendorForm = ({
   );
 };
 
-export default VendorForm;
+export default EditVendorForm;

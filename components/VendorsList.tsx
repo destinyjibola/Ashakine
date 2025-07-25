@@ -7,10 +7,12 @@ const VendorsList = ({
   event,
   vendors,
   handleDeleteVendor,
+  setEditingVendor,
 }: {
   event: Event | null;
   vendors: Vendor[];
   handleDeleteVendor: (vendorId: string) => void;
+  setEditingVendor: (vendor: Vendor | null) => void;
 }) => (
   <>
     {!event ? (
@@ -30,6 +32,7 @@ const VendorsList = ({
               key={vendor._id}
               vendor={vendor}
               handleDeleteVendor={handleDeleteVendor}
+              setEditingVendor={setEditingVendor} 
             />
           ))}
         </div>

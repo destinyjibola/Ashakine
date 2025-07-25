@@ -4,8 +4,10 @@ import Confetti from "react-confetti";
 import { useParams } from "next/navigation";
 import ImageSlider from "@/components/ImageSlider";
 import SpinWheel from "@/components/SpinWheel";
-import Modal from "@/components/Modal";
 import VendorSection from "@/components/VendorSection";
+import Leaderboard from "@/components/LeaderBoard";
+import WonPrizeModal from "@/components/WonPrizeModal";
+import RedeemModal from "@/components/RedeemModal";
 import {
   PrizeData,
   Prize,
@@ -15,17 +17,16 @@ import {
   Event,
   Winner,
 } from "@/types";
-import Image from "next/image";
-import Leaderboard from "@/components/LeaderBoard";
+import EventHeaders from "@/components/EventHeaders";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 const fakeSegments: PrizeData[] = [
   { option: "Oops!", segColor: "#444444", emoji: "😢" },
   { option: "Try Again", segColor: "#555555", emoji: "😞" },
-  { option: "Come Back Later", segColor: "#666666", emoji: "😴" },
-  { option: "Keep Trying", segColor: "#777777", emoji: "😅" },
-  { option: "Just an Inch", segColor: "#888888", emoji: "😬" },
+  // { option: "Come Back Later", segColor: "#666666", emoji: "😴" },
+  // { option: "Keep Trying", segColor: "#777777", emoji: "😅" },
+  // { option: "Just an Inch", segColor: "#888888", emoji: "😬" },
 ];
 
 function getRandomColor(): string {
@@ -74,13 +75,11 @@ function App() {
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
-  const [ticTicSound, setTicTicSound] = useState<HTMLAudioElement | null>(null);
   const [appSound, setAppSound] = useState<HTMLAudioElement | null>(null);
   const [bSound, setBSound] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setTicTicSound(new Audio("/audio/spin-wheel-sound.mp3"));
       setAppSound(new Audio("/audio/applause.mp3"));
       setBSound(new Audio("/audio/boo.mp3"));
     }
@@ -174,7 +173,7 @@ function App() {
     if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/events/${eventId}/check-and-record-prize`,
+          `${API_BASE_URL}/api/events/${event?._id}/check-and-record-prize`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -270,30 +269,9 @@ function App() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
       </div>
 
-      {/* Header Section */}
-      {/* <header className="w-auto mx-auto mb-6 p-2 bg-gradient-to-r from-[#FFB600] to-[#FF9400] rounded-full shadow-lg flex items-center justify-center space-x-2"> */}
-        <header className="w-auto mx-auto mb-6 p-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full shadow-lg flex items-center justify-center space-x-2">
-        {event?.logo?.url ? (
-          <Image
-            src={event.logo.url}
-            alt={event.logo.altText || `${event.name} logo`}
-            width={50}
-            height={50}
-            className="object-contain rounded-full"
-          />
-        ) : (
-          <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
-            <span className="text-2xl">🎉</span>
-          </div>
-        )}
-        <h1 className="text-2xl font-bold text-white text-center">
-          {event?.name || "Event Name"}
-        </h1>
-      </header>
+      <EventHeaders event={event} />
 
-      {/* ads banner */}
       <ImageSlider />
-      {/* ads banner */}
 
       <div className="relative">
         <SpinWheel
@@ -304,44 +282,67 @@ function App() {
           isLoading={isLoading}
         />
 
-        <button
-          onClick={handleSpinClick}
-          disabled={mustSpin || isLoading}
-          className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-            mustSpin || isLoading
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
-          }`}
-        >
-          {isLoading ? (
-            "Loading..."
-          ) : mustSpin ? (
-            <span className="flex items-center">
-              <svg
-                className="animate-spin h-8 w-8 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            </span>
-          ) : (
-            "SPIN"
-          )}
-        </button>
+<button
+  onClick={handleSpinClick}
+  disabled={mustSpin || isLoading}
+  className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
+    mustSpin || isLoading
+      ? "bg-gray-500 cursor-not-allowed"
+      : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
+  }`}
+>
+  {isLoading ? (
+    <div className="flex flex-col items-center justify-center gap-1">
+      <svg
+        className="animate-spin h-6 w-6 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <span className="text-xs">Loading</span>
+    </div>
+  ) : mustSpin ? (
+    <div className="flex flex-col items-center justify-center gap-1">
+      <svg
+        className="animate-spin h-6 w-6 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <span className="text-xs">Spinning</span>
+    </div>
+  ) : (
+    <span className="animate-pulse">SPIN</span>
+  )}
+</button>
       </div>
 
       <VendorSection
@@ -353,89 +354,21 @@ function App() {
 
       <Leaderboard winners={recentWinners} vendors={vendors} />
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="text-center p-6 md:p-10">
-          {wonPrize &&
-          fakeSegments.some((fake) => fake.option === wonPrize.option) ? (
-            <div className="space-y-6">
-              <div className="text-7xl mb-4">😢</div>
-              <h2 className="text-3xl font-bold text-red-500 mb-2">Oh no!</h2>
-              <div
-                className="text-4xl font-extrabold mb-6"
-                style={{ color: wonPrize.segColor }}
-              >
-                {wonPrize.option}
-              </div>
-              <p className="text-xl text-gray-600 mb-6">
-                Do not worry, you can try again!
-              </p>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setTimeout(handleSpinClick, 300);
-                }}
-                className="px-8 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-bold hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg"
-              >
-                Spin Again
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="text-7xl mb-4 animate-bounce">
-                {wonPrize?.emoji}
-              </div>
-              <h2 className="text-3xl font-bold text-purple-600 mb-2">
-                Congratulations! 🎉
-              </h2>
-              <div
-                className="text-4xl font-extrabold mb-6 animate-pulse"
-                style={{ color: wonPrize?.segColor }}
-              >
-                {wonPrize?.option}
-              </div>
-              <p className="text-xl text-gray-600 mb-6">
-                You have won an amazing prize!
-              </p>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setIsRedeemModalOpen(true);
-                }}
-                className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full font-bold hover:from-green-600 hover:to-teal-600 transition-all transform hover:scale-105 shadow-lg"
-              >
-                Redeem Prize
-              </button>
-            </div>
-          )}
-        </div>
-      </Modal>
+      <WonPrizeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        wonPrize={wonPrize}
+        handleSpinClick={handleSpinClick}
+        setIsRedeemModalOpen={setIsRedeemModalOpen}
+      />
 
-      <Modal
+      <RedeemModal
         isOpen={isRedeemModalOpen}
         onClose={() => setIsRedeemModalOpen(false)}
-      >
-        <div className="text-center p-6 md:p-10">
-          <h2 className="text-3xl font-bold text-purple-600 mb-4">
-            Your Prize!
-          </h2>
-          {winnerCode && (
-            <div className="text-2xl font-mono bg-gray-100 p-3 rounded-md mb-6">
-              {winnerCode}
-            </div>
-          )}
-          <h3 className="text-xl font-semibold mb-2">{wonPrize?.option}</h3>
-          <p className="text-gray-600 mb-6">{wonPrize?.redeemInfo}</p>
-          <button
-            onClick={() => {
-              setIsRedeemModalOpen(false);
-              setTimeout(handleSpinClick, 300);
-            }}
-            className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full font-bold hover:from-purple-600 hover:to-indigo-600 transition-all transform hover:scale-105 shadow-lg"
-          >
-            Spin Again
-          </button>
-        </div>
-      </Modal>
+        winnerCode={winnerCode}
+        wonPrize={wonPrize}
+        handleSpinClick={handleSpinClick}
+      />
     </div>
   );
 }
