@@ -1,10 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Vendor } from "@/types";
 import { useAuth } from "@/hooks/AuthContext";
-import { FiTrash2, FiEdit, FiExternalLink, FiMail } from "react-icons/fi";
+import { FiTrash2, FiEdit, FiExternalLink, FiMail, FiRefreshCw } from "react-icons/fi";
 
 interface VendorItemProps {
   vendor: Vendor;
@@ -22,7 +22,13 @@ const VendorItem = ({
   const [invitationMessage, setInvitationMessage] = useState<string | null>(null);
   const [invitationError, setInvitationError] = useState<string | null>(null);
   const [isInvited, setIsInvited] = useState(vendor.invite || false);
+  const [showResend, setShowResend] = useState(vendor.invite || false);
   const router = useRouter();
+
+  useEffect(() => {
+    // Initialize showResend based on vendor.invite status
+    setShowResend(vendor.invite || false);
+  }, [vendor.invite]);
 
   const handleSendInvitation = async () => {
     setIsSendingInvitation(true);
@@ -59,6 +65,7 @@ const VendorItem = ({
       }
 
       setIsInvited(true);
+      setShowResend(true);
       setInvitationMessage("Invitation email sent successfully!");
       setTimeout(() => setInvitationMessage(null), 3000);
     } catch (error) {
@@ -118,7 +125,6 @@ const VendorItem = ({
               )}
               
               <div className="flex gap-4 text-sm">
-                
                 <span className="text-gray-600">
                   <span className="font-medium">Prizes:</span> {vendor.prizes?.length || 0}
                 </span>
@@ -146,37 +152,55 @@ const VendorItem = ({
                 </button>
               </div>
               
-              <button
-                onClick={handleSendInvitation}
-                disabled={isSendingInvitation || !vendor.email || isInvited}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
-                  isSendingInvitation
-                    ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                    : isInvited
-                    ? "bg-green-100 text-green-700 cursor-default"
-                    : !vendor.email
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                }`}
-                title={
-                  !vendor.email 
-                    ? "No email address available" 
-                    : isInvited 
-                    ? "Invitation already sent" 
-                    : "Send invitation email"
-                }
-              >
-                <FiMail size={16} />
-                <span>
-                  {isSendingInvitation 
-                    ? "Sending..." 
-                    : isInvited 
-                    ? "Invitation Sent" 
-                    : !vendor.email 
-                    ? "No Email" 
-                    : "Send Invite"}
-                </span>
-              </button>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={handleSendInvitation}
+                  disabled={isSendingInvitation || !vendor.email || isInvited}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
+                    isSendingInvitation
+                      ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                      : isInvited
+                      ? "bg-green-100 text-green-700 cursor-default"
+                      : !vendor.email
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  }`}
+                  title={
+                    !vendor.email 
+                      ? "No email address available" 
+                      : isInvited 
+                      ? "Invitation already sent" 
+                      : "Send invitation email"
+                  }
+                >
+                  <FiMail size={16} />
+                  <span>
+                    {isSendingInvitation 
+                      ? "Sending..." 
+                      : isInvited 
+                      ? "Invitation Sent" 
+                      : !vendor.email 
+                      ? "No Email" 
+                      : "Send Invite"}
+                  </span>
+                </button>
+                
+                {(showResend || vendor.invite) && (
+                  <button
+                    onClick={handleSendInvitation}
+                    disabled={isSendingInvitation}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
+                      isSendingInvitation
+                        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                    title="Resend invitation email"
+                  >
+                    <FiRefreshCw size={14} />
+                    <span>Resend</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           

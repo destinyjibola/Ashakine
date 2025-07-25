@@ -30,7 +30,7 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
       >
         <div className="flex items-center justify-center gap-2 mb-6">
           <Trophy className="w-4 h-4 text-yellow-500" />
-          <h2 className="md:text-3xl text-2xl font-bold text-center text-purple-700">
+          <h2 className="md:text-2xl text-xl font-bold text-center">
             Recent Winners
           </h2>
           <Trophy className="w-4 h-4 text-yellow-500" />
