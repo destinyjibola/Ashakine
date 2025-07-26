@@ -68,7 +68,7 @@ export default function AdminLayout({
   return (
     <div className="flex flex-col bg-white container-spacing">
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-20 py-6 h-[100px] container-spacing  bg-[#FFB60014] border-b border-[#FFB60030]">
+      <nav className="fixed top-0 left-0 right-0 z-20 py-6 h-[100px] container-spacing  bg-[#FFB60014] border-b border-[#e6af2230]">
       <div className="px-4 flex justify-between items-center ">
           <Link href="" className="hidden lg:flex items-center gap-3">
           <Image width={154} height={32} alt="spinly logo" src={Spinly.src} />

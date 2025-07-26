@@ -18,7 +18,7 @@ export interface Vendor {
   name: string;
   url: string;
   email?: string;
-  event?: string | Event; // Can be event ID or populated Event
+  event?: Event; // Can be event ID or populated Event
   logo: {
     url: string;
     public_id: string;
@@ -66,13 +66,14 @@ export interface NewEventData {
   name: string;
 }
 
+// In your types.ts file
 export interface NewPrizeData {
   prize: string;
   maxWins: number;
   winCount: number;
-  redeemInfo?: string;
+  redeemInfo: string;
   eventId: string;
-  vendorId?: string; // Add vendorId for associating prizes with vendors
+  vendorId?: string | null; // Change from string | undefined to string | null
 }
 
 export interface NewVendorData {

@@ -1,6 +1,6 @@
-import { Event, Vendor, Winner } from '@/types';
-import React from 'react';
-import Image from 'next/image';
+import { Event, Vendor, Winner } from "@/types";
+import React from "react";
+import Image from "next/image";
 
 const EventDetails = ({
   event,
@@ -17,7 +17,7 @@ const EventDetails = ({
       {event.logo?.url ? (
         <Image
           src={event.logo.url}
-          alt={event.logo.altText || 'Event Logo'}
+          alt={event.logo.altText || "Event Logo"}
           width={64}
           height={64}
           className="object-cover w-16 h-16 rounded-full border border-gray-200 transition-transform duration-300 hover:scale-105"
@@ -41,19 +41,27 @@ const EventDetails = ({
           <p className="text-sm text-gray-600 font-medium">Spins</p>
           <p className="text-lg font-semibold text-blue-700">{event.spinCount ?? 0}</p>
         </div> */}
-        <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
-          <p className="text-sm text-gray-600 font-medium">Vendors</p>
-          <p className="text-lg font-semibold text-blue-700">{vendors?.length ?? 0}</p>
-        </div>
+        {event.type === "Vendor" && (
+          <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
+            <p className="text-sm text-gray-600 font-medium">Vendors</p>
+            <p className="text-lg font-semibold text-blue-700">
+              {vendors?.length ?? 0}
+            </p>
+          </div>
+        )}
         <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
           <p className="text-sm text-gray-600 font-medium">Prizes</p>
-          <p className="text-lg font-semibold text-blue-700">{event.prizes?.length ?? 0}</p>
+          <p className="text-lg font-semibold text-blue-700">
+            {event.prizes?.length ?? 0}
+          </p>
         </div>
         {event.type === "Single" && (
           <>
             <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
               <p className="text-sm text-gray-600 font-medium">Winners</p>
-              <p className="text-lg font-semibold text-blue-700">{winners?.length ?? 0}</p>
+              <p className="text-lg font-semibold text-blue-700">
+                {winners?.length ?? 0}
+              </p>
             </div>
             <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
               <p className="text-sm text-gray-600 font-medium">Redeemed</p>

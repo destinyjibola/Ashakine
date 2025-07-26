@@ -26,17 +26,23 @@ const PrizeForm = ({
   prizeError: string | null;
   handleAddPrize: (e: React.FormEvent) => void;
   vendors: Vendor[];
-  selectedVendor: string;
-  setSelectedVendor: (value: string) => void;
+  selectedVendor: string | null;
+  setSelectedVendor: (value: string | null) => void;
   event: Event;
 }) => (
-  <form onSubmit={handleAddPrize} className="space-y-4 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+  <form
+    onSubmit={handleAddPrize}
+    className="space-y-4 bg-white rounded-lg p-6 shadow-sm border border-gray-200"
+  >
     <h2 className="text-lg font-medium text-gray-800">Add New Prize</h2>
-    
+
     <div className="space-y-4">
       {/* Prize Name */}
       <div>
-        <label htmlFor="prize" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="prize"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Prize Name *
         </label>
         <input
@@ -54,7 +60,10 @@ const PrizeForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Max Wins */}
         <div>
-          <label htmlFor="maxWins" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="maxWins"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Maximum Wins *
           </label>
           <div className="relative">
@@ -68,24 +77,30 @@ const PrizeForm = ({
               min="1"
               required
             />
-            {/* <span className="absolute right-3 top-2.5 text-gray-500 text-sm">times</span> */}
           </div>
         </div>
 
         {/* Vendor Selection (conditionally rendered) */}
         {event.type !== "Single" && (
           <div>
-            <label htmlFor="vendor" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="vendor"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Vendor *
             </label>
             <select
               id="vendor"
-              value={selectedVendor}
-              onChange={(e) => setSelectedVendor(e.target.value)}
+              value={selectedVendor || ""}
+              onChange={(e) =>
+                setSelectedVendor(e.target.value || null)
+              }
               className="w-full px-4 py-[10px] border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
-              <option value="" disabled>Select a vendor</option>
+              <option value="" disabled>
+                Select a vendor
+              </option>
               {vendors.map((vendor) => (
                 <option key={vendor._id} value={vendor._id}>
                   {vendor.name}
@@ -98,7 +113,10 @@ const PrizeForm = ({
 
       {/* Redeem Information */}
       <div>
-        <label htmlFor="redeemInfo" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="redeemInfo"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Redemption Instructions
         </label>
         <textarea

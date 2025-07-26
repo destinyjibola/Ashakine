@@ -35,7 +35,7 @@ export default function EventDetailsPage({
   const [newPrize, setNewPrize] = useState<string>("");
   const [newMaxWins, setNewMaxWins] = useState<number>(1);
   const [newRedeemInfo, setNewRedeemInfo] = useState<string>("");
-  const [selectedVendor, setSelectedVendor] = useState<string>("");
+  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
   const [newVendor, setNewVendor] = useState<{
     name: string;
     url: string;
@@ -386,7 +386,7 @@ export default function EventDetailsPage({
         winCount: 0,
         redeemInfo: newRedeemInfo,
         eventId: params.eventId,
-        vendorId: selectedVendor,
+        vendorId: selectedVendor || undefined,
       };
 
       const response = await fetch(
@@ -623,7 +623,7 @@ export default function EventDetailsPage({
   if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
   if (!event) return <div className="p-6 text-gray-800">Event not found</div>;
 
-     return (
+  return (
     <div className="relative flex flex-col max-w-6xl mx-auto bg-white">
       {qrError && (
         <div className="bg-red-100 border border-red-300 text-red-600 px-4 py-2 rounded-md mt-[176px]">
@@ -729,6 +729,8 @@ export default function EventDetailsPage({
               totalPages={totalPages}
               setCurrentPage={setCurrentPage}
               vendors={vendors}
+              selectedVendor={selectedVendor}
+              setSelectedVendor={setSelectedVendor}
             />
           </div>
         </div>
