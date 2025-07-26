@@ -4,7 +4,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Vendor } from "@/types";
 import { useAuth } from "@/hooks/AuthContext";
-import { FiTrash2, FiEdit, FiExternalLink, FiMail, FiRefreshCw } from "react-icons/fi";
+import {
+  FiTrash2,
+  FiEdit,
+  FiExternalLink,
+  FiMail,
+  FiRefreshCw,
+} from "react-icons/fi";
 
 interface VendorItemProps {
   vendor: Vendor;
@@ -19,7 +25,9 @@ const VendorItem = ({
 }: VendorItemProps) => {
   const { token, logout } = useAuth();
   const [isSendingInvitation, setIsSendingInvitation] = useState(false);
-  const [invitationMessage, setInvitationMessage] = useState<string | null>(null);
+  const [invitationMessage, setInvitationMessage] = useState<string | null>(
+    null
+  );
   const [invitationError, setInvitationError] = useState<string | null>(null);
   const [isInvited, setIsInvited] = useState(vendor.invite || false);
   const [showResend, setShowResend] = useState(vendor.invite || false);
@@ -69,7 +77,9 @@ const VendorItem = ({
       setInvitationMessage("Invitation email sent successfully!");
       setTimeout(() => setInvitationMessage(null), 3000);
     } catch (error) {
-      setInvitationError(error instanceof Error ? error.message : "An error occurred");
+      setInvitationError(
+        error instanceof Error ? error.message : "An error occurred"
+      );
       setTimeout(() => setInvitationError(null), 3000);
     } finally {
       setIsSendingInvitation(false);
@@ -97,18 +107,20 @@ const VendorItem = ({
             </div>
           )}
         </div>
-        
+
         {/* Vendor Details */}
         <div className="flex-1 w-full">
           <div className="flex flex-col md:flex-row justify-between gap-3">
             <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-gray-900">{vendor.name}</h3>
-              
+              <h3 className="font-semibold text-lg text-gray-900">
+                {vendor.name}
+              </h3>
+
               <div className="flex items-center gap-1 text-gray-600">
                 <FiMail className="flex-shrink-0" />
                 <span className="truncate">{vendor.email || "N/A"}</span>
               </div>
-              
+
               {vendor.url && (
                 <div className="flex items-center gap-1">
                   <FiExternalLink className="text-gray-400 flex-shrink-0" />
@@ -119,18 +131,22 @@ const VendorItem = ({
                     rel="noopener noreferrer"
                     title={vendor.url}
                   >
-                    {vendor.url.replace(/^https?:\/\//, '')}
+                    {vendor.url.replace(/^https?:\/\//, "").substring(0, 10)}
+                    {vendor.url.replace(/^https?:\/\//, "").length > 10
+                      ? "..."
+                      : ""}
                   </a>
                 </div>
               )}
-              
+
               <div className="flex gap-4 text-sm">
                 <span className="text-gray-600">
-                  <span className="font-medium">Prizes:</span> {vendor.prizes?.length || 0}
+                  <span className="font-medium">Prizes:</span>{" "}
+                  {vendor.prizes?.length || 0}
                 </span>
               </div>
             </div>
-            
+
             <div className="flex flex-col gap-2 min-w-[120px]">
               <div className="flex gap-2">
                 <button
@@ -141,7 +157,7 @@ const VendorItem = ({
                   <FiEdit size={16} />
                   <span>Edit</span>
                 </button>
-                
+
                 <button
                   onClick={() => handleDeleteVendor(vendor._id)}
                   className="flex items-center gap-1 px-3 py-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 text-sm"
@@ -151,7 +167,7 @@ const VendorItem = ({
                   <span>Delete</span>
                 </button>
               </div>
-              
+
               <div className="flex flex-col gap-1">
                 <button
                   onClick={handleSendInvitation}
@@ -166,25 +182,25 @@ const VendorItem = ({
                       : "bg-blue-100 text-blue-700 hover:bg-blue-200"
                   }`}
                   title={
-                    !vendor.email 
-                      ? "No email address available" 
-                      : isInvited 
-                      ? "Invitation already sent" 
+                    !vendor.email
+                      ? "No email address available"
+                      : isInvited
+                      ? "Invitation already sent"
                       : "Send invitation email"
                   }
                 >
                   <FiMail size={16} />
                   <span>
-                    {isSendingInvitation 
-                      ? "Sending..." 
-                      : isInvited 
-                      ? "Invitation Sent" 
-                      : !vendor.email 
-                      ? "No Email" 
+                    {isSendingInvitation
+                      ? "Sending..."
+                      : isInvited
+                      ? "Invitation Sent"
+                      : !vendor.email
+                      ? "No Email"
                       : "Send Invite"}
                   </span>
                 </button>
-                
+
                 {(showResend || vendor.invite) && (
                   <button
                     onClick={handleSendInvitation}
@@ -203,14 +219,18 @@ const VendorItem = ({
               </div>
             </div>
           </div>
-          
+
           {/* Status messages */}
           <div className="mt-2">
             {invitationMessage && (
-              <p className="text-green-600 text-sm animate-fade-in">{invitationMessage}</p>
+              <p className="text-green-600 text-sm animate-fade-in">
+                {invitationMessage}
+              </p>
             )}
             {invitationError && (
-              <p className="text-red-600 text-sm animate-fade-in">{invitationError}</p>
+              <p className="text-red-600 text-sm animate-fade-in">
+                {invitationError}
+              </p>
             )}
           </div>
         </div>
