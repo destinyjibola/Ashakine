@@ -157,8 +157,6 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-
-
   const handleSpinClick = async () => {
     if (mustSpin || isLoading) return;
 
@@ -181,7 +179,7 @@ function App() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(
             fakeSegments.some((s) => s.option === selectedPrize.option)
-              ? {prizeId: false} // No prizeId for false segments
+              ? { prizeId: false } // No prizeId for false segments
               : { prizeId: selectedPrize._id }
           ),
         }
@@ -356,67 +354,67 @@ function App() {
           isLoading={isLoading}
         />
 
-<button
-  onClick={handleSpinClick}
-  disabled={mustSpin || isLoading}
-  className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-    mustSpin || isLoading
-      ? "bg-gray-500 cursor-not-allowed"
-      : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
-  }`}
->
-  {isLoading ? (
-    <div className="flex flex-col items-center justify-center gap-1">
-      <svg
-        className="animate-spin h-6 w-6 text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
-      <span className="text-xs">Loading</span>
-    </div>
-  ) : mustSpin ? (
-    <div className="flex flex-col items-center justify-center gap-1">
-      <svg
-        className="animate-spin h-6 w-6 text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
-      <span className="text-xs">Spinning</span>
-    </div>
-  ) : (
-    <span className="animate-pulse">SPIN</span>
-  )}
-</button>
+        <button
+          onClick={handleSpinClick}
+          disabled={mustSpin || isLoading}
+          className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
+            mustSpin || isLoading
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
+          }`}
+        >
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center gap-1">
+              <svg
+                className="animate-spin h-6 w-6 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span className="text-xs">Loading</span>
+            </div>
+          ) : mustSpin ? (
+            <div className="flex flex-col items-center justify-center gap-1">
+              <svg
+                className="animate-spin h-6 w-6 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span className="text-xs">Spinning</span>
+            </div>
+          ) : (
+            <span className="animate-pulse">SPIN</span>
+          )}
+        </button>
       </div>
 
       <VendorSection

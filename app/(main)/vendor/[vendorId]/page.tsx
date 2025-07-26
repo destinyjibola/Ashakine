@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/hooks/AuthContext";
 import Modal from "@/components/Modal";
-
 import PrizeDetails from "@/components/PrizeDetails";
 import WinnersList from "@/components/WinnersList";
 import RedeemPrizeModal from "@/components/RedeemPrizeModal";
@@ -92,8 +91,17 @@ const VendorPage = () => {
       }
 
       const updatedWinner: Winner = await response.json();
+      // Debug log to inspect updatedWinner
+      console.log("Updated Winner:", updatedWinner);
+      if (!updatedWinner.prizeId) {
+        console.warn("Updated winner has no prizeId:", updatedWinner);
+      }
       setWinners(
-        winners.map((w) => (w._id === updatedWinner._id ? updatedWinner : w))
+        winners.map((w) =>
+          w._id === updatedWinner._id
+            ? { ...updatedWinner, prizeId: winner.prizeId } // Preserve prizeId
+            : w
+        )
       );
       setRedeemCode("");
       setIsRedeemModalOpen(false);
@@ -131,6 +139,7 @@ const VendorPage = () => {
         }
 
         const vendorData: Vendor = await vendorResponse.json();
+        console.log("Vendor Data:", vendorData); // Debug log
         setVendor(vendorData);
 
         // Fetch event details using event ID
@@ -165,6 +174,7 @@ const VendorPage = () => {
         }
 
         const eventData: Event = await eventResponse.json();
+        console.log("Event Data:", eventData); // Debug log
         setEvent(eventData);
 
         // Fetch winners using event ID
@@ -191,6 +201,7 @@ const VendorPage = () => {
         }
 
         const winnersData: Winner[] = await winnersResponse.json();
+        console.log("Winners Data:", winnersData); // Debug log
         // Filter winners to only include those with prizeId in vendor's prizes
         const vendorPrizeIds =
           vendorData.prizes?.map((prize) => prize._id) || [];
@@ -198,6 +209,7 @@ const VendorPage = () => {
           (winner) =>
             winner.prizeId && vendorPrizeIds.includes(winner.prizeId._id)
         );
+        console.log("Filtered Winners:", filteredWinners); // Debug log
         setWinners(filteredWinners);
       } catch (err) {
         setError(

@@ -10,7 +10,7 @@ interface LeaderboardProps {
 
 export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
   const getVendorName = (vendorId?: string) => {
-    if (!vendorId) return "Event Organizer";
+    if (!vendorId) return "";
     const vendor = vendors.find((v) => v._id === vendorId);
     return vendor ? vendor.name : "Unknown Vendor";
   };

@@ -306,7 +306,7 @@ export default function Overview() {
             <TableHead>Prize</TableHead>
             <TableHead>Date Won</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Action</TableHead>
+            {/* <TableHead>Action</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody className="">
@@ -327,7 +327,7 @@ export default function Overview() {
                     {winner.redeemed ? "Redeemed" : "Pending"}
                   </span>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Button
                     onClick={() => handleRedeemPrize(winner)}
                     disabled={winner.redeemed}
@@ -335,7 +335,7 @@ export default function Overview() {
                   >
                     {winner.redeemed ? "Redeemed" : "Mark as Redeem"}
                   </Button>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))
           ) : (
@@ -348,7 +348,7 @@ export default function Overview() {
         </TableBody>
       </Table>
 
-      <Dialog open={redeemModalOpen} onOpenChange={setRedeemModalOpen}>
+      {/* <Dialog open={redeemModalOpen} onOpenChange={setRedeemModalOpen}>
         <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>Redeem Prize</DialogTitle>
@@ -395,7 +395,7 @@ export default function Overview() {
             </div>
           </form>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }
