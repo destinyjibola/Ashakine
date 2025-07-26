@@ -18,8 +18,8 @@ export interface Vendor {
   name: string;
   url: string;
   email?: string;
-  event: string | Event; // Can be event ID or populated Event
-  logo?: {
+  event?: string | Event; // Can be event ID or populated Event
+  logo: {
     url: string;
     public_id: string;
     altText?: string;

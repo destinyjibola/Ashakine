@@ -19,7 +19,7 @@ const EventHeader = ({
   openQRCodeModal: () => void
   qrLoading: boolean
 }) => (
-  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4 border-b border-gray-200">
+  <div className="flex flex-col sm:flex-row justify-between items-start md:items-center sm:items-center gap-4 py-4 border-b border-gray-200">
     {/* Left side - Event title and back button */}
     <div className="flex items-center space-x-4">
       <button
@@ -29,15 +29,15 @@ const EventHeader = ({
         <span className="group-hover:-translate-x-0.5 transition-transform duration-200">←</span>
         <span className="ml-1">All Events</span>
       </button>
-      <h1 className="text-xl font-semibold text-gray-800 truncate max-w-xs sm:max-w-md">
-        {eventName}
-      </h1>
+ 
     </div>
 
     {/* Right side - Action buttons */}
-    <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
+    <div className="flex flex-row xs:flex-row gap-2 w-full sm:w-auto">
       <Link
         href={`/${eventId}`}
+        target="_blank"
+        rel="noopener noreferrer"
         className="flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm hover:shadow-md"
       >
         <FiRotateCw className="mr-2" size={16} />

@@ -11,7 +11,7 @@ import EventHeader from "@/components/EventHeader";
 import EventDetails from "@/components/EventDetails";
 import VendorForm from "@/components/VendorForm";
 import EditVendorModal from "@/components/EditVendorModal";
-
+import VendorItem from "@/components/VendorItem";
 import VendorsList from "@/components/VendorsList";
 import PrizeForm from "@/components/PrizeForm";
 import PrizeItem from "@/components/PrizeItem";
@@ -121,18 +121,24 @@ export default function EventDetailsPage({
     const fetchData = async () => {
       try {
         const [eventResponse, winnersResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
         ]);
 
         if (eventResponse.status === 401 || winnersResponse.status === 401) {
@@ -156,13 +162,15 @@ export default function EventDetailsPage({
         setEvent(eventData);
         setVendors(
           Array.isArray(eventData.vendors) &&
-          eventData.vendors.every((v) => typeof v !== "string")
+            eventData.vendors.every((v) => typeof v !== "string")
             ? eventData.vendors
             : []
         );
         setWinners(winnersData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
       } finally {
         setLoading(false);
       }
@@ -177,7 +185,11 @@ export default function EventDetailsPage({
     }
   }, [params.eventId, token, authLoading, router, logout]);
 
-  const handleAddVendor = async (e: React.FormEvent, logo: File | null, resetLogo: () => void) => {
+  const handleAddVendor = async (
+    e: React.FormEvent,
+    logo: File | null,
+    resetLogo: () => void
+  ) => {
     e.preventDefault();
     setAddVendorLoading(true);
     setAddVendorError(null);
@@ -222,7 +234,7 @@ export default function EventDetailsPage({
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log(errorData)
+        console.log(errorData);
         throw new Error(errorData.message || "Failed to add vendor");
       }
 
@@ -308,8 +320,8 @@ export default function EventDetailsPage({
 
   const handleDeleteVendor = async (vendorId: string) => {
     setAddVendorLoading(true);
-    setAddVendorError(null); 
-    
+    setAddVendorError(null);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
@@ -611,128 +623,132 @@ export default function EventDetailsPage({
   if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
   if (!event) return <div className="p-6 text-gray-800">Event not found</div>;
 
-  return (
-    <div className="flex flex-col gap-6 max-w-6xl mx-auto bg-white">
+     return (
+    <div className="relative flex flex-col max-w-6xl mx-auto bg-white">
       {qrError && (
-        <div className="bg-red-100 border border-red-300 text-red-600 px-4 py-2 rounded-md">
+        <div className="bg-red-100 border border-red-300 text-red-600 px-4 py-2 rounded-md mt-[176px]">
           {qrError}
         </div>
       )}
-      <EventHeader
-        eventName={event.name}
-        onBack={() => router.push("/admin/events")}
-        eventId={params.eventId}
-        copySpinWheelLink={copySpinWheelLink}
-        copied={copied}
-        openQRCodeModal={generateQRCodePDF}
-        qrLoading={qrLoading}
-      />
-      <EventDetails event={event} vendors={vendors} winners={winners} />
-      {event.type === "Vendor" && (
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Vendors ({vendors.length})
-          </h2>
-          <VendorForm
-            newVendor={newVendor}
-            setNewVendor={setNewVendor}
-            vendorError={addVendorError}
-            vendorLoading={addVendorLoading}
-            handleAddVendor={handleAddVendor}
-          />
-          <VendorsList
-            event={event}
-            vendors={vendors}
-            handleDeleteVendor={handleDeleteVendor}
+      <div className="fixed top-[100px] left-0 right-0 z-10 bg-white container-spacing mx-auto">
+        <EventHeader
+          eventName={event.name}
+          onBack={() => router.push("/admin/events")}
+          eventId={params.eventId}
+          copySpinWheelLink={copySpinWheelLink}
+          copied={copied}
+          openQRCodeModal={generateQRCodePDF}
+          qrLoading={qrLoading}
+        />
+      </div>
+      <div className="mt-[164px] flex flex-col gap-6">
+        <EventDetails event={event} vendors={vendors} winners={winners} />
+        {event.type === "Vendor" && (
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Vendors ({vendors.length})
+            </h2>
+            <VendorForm
+              newVendor={newVendor}
+              setNewVendor={setNewVendor}
+              vendorError={addVendorError}
+              vendorLoading={addVendorLoading}
+              handleAddVendor={handleAddVendor}
+            />
+            <VendorsList
+              event={event}
+              vendors={vendors}
+              handleDeleteVendor={handleDeleteVendor}
+              setEditingVendor={setEditingVendor}
+            />
+          </div>
+        )}
+        {editingVendor && (
+          <EditVendorModal
+            isOpen={editingVendor !== null}
+            onClose={() => setEditingVendor(null)}
+            vendor={editingVendor}
+            vendorError={editVendorError}
+            vendorLoading={editVendorLoading}
+            handleUpdateVendor={handleUpdateVendor}
             setEditingVendor={setEditingVendor}
           />
-        </div>
-      )}
-      {editingVendor && (
-        <EditVendorModal
-          isOpen={editingVendor !== null}
-          onClose={() => setEditingVendor(null)}
-          vendor={editingVendor}
-          vendorError={editVendorError}
-          vendorLoading={editVendorLoading}
-          handleUpdateVendor={handleUpdateVendor}
-          setEditingVendor={setEditingVendor}
-        />
-      )}
-      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <div className="flex flex-col gap-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Prizes ({event.prizes.length})
-            </h2>
-            {event.type === "Single" && (
-              <button
-                onClick={() => setIsRedeemModalOpen(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
-              >
-                Redeem Prize
-              </button>
-            )}
-          </div>
-          {event.type === "Vendor" && vendors.length === 0 ? (
-            <div className="bg-gray-100 rounded-lg p-8 text-center border border-gray-300">
-              <p className="text-gray-500">
-                Please add a vendor before adding prizes.
-              </p>
+        )}
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Prizes ({event.prizes.length})
+              </h2>
+              {event.type === "Single" && (
+                <button
+                  onClick={() => setIsRedeemModalOpen(true)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
+                >
+                  Redeem Prize
+                </button>
+              )}
             </div>
-          ) : (
-            <PrizeForm
+            {event.type === "Vendor" && vendors.length === 0 ? (
+              <div className="bg-gray-100 rounded-lg p-8 text-center border border-gray-300">
+                <p className="text-gray-500">
+                  Please add a vendor before adding prizes.
+                </p>
+              </div>
+            ) : (
+              <PrizeForm
+                event={event}
+                newPrize={newPrize}
+                setNewPrize={setNewPrize}
+                newMaxWins={newMaxWins}
+                setNewMaxWins={setNewMaxWins}
+                newRedeemInfo={newRedeemInfo}
+                setNewRedeemInfo={setNewRedeemInfo}
+                prizeLoading={prizeLoading}
+                prizeError={prizeError}
+                handleAddPrize={handleAddPrize}
+                vendors={vendors}
+                selectedVendor={selectedVendor}
+                setSelectedVendor={setSelectedVendor}
+              />
+            )}
+            <PrizesList
               event={event}
-              newPrize={newPrize}
-              setNewPrize={setNewPrize}
-              newMaxWins={newMaxWins}
-              setNewMaxWins={setNewMaxWins}
-              newRedeemInfo={newRedeemInfo}
-              setNewRedeemInfo={setNewRedeemInfo}
-              prizeLoading={prizeLoading}
-              prizeError={prizeError}
-              handleAddPrize={handleAddPrize}
+              currentPrizes={currentPrizes}
+              editingPrizeId={editingPrizeId}
+              editPrizeName={editPrizeName}
+              setEditPrizeName={setEditPrizeName}
+              editMaxWins={editMaxWins}
+              setEditMaxWins={setEditMaxWins}
+              editRedeemInfo={editRedeemInfo}
+              setEditRedeemInfo={setEditRedeemInfo}
+              handleEditPrize={handleEditPrize}
+              handleDeletePrize={handleDeletePrize}
+              setEditingPrizeId={setEditingPrizeId}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              setCurrentPage={setCurrentPage}
               vendors={vendors}
-              selectedVendor={selectedVendor}
-              setSelectedVendor={setSelectedVendor}
             />
-          )}
-          <PrizesList
-            event={event}
-            currentPrizes={currentPrizes}
-            editingPrizeId={editingPrizeId}
-            editPrizeName={editPrizeName}
-            setEditPrizeName={setEditPrizeName}
-            editMaxWins={editMaxWins}
-            setEditMaxWins={setEditMaxWins}
-            editRedeemInfo={editRedeemInfo}
-            setEditRedeemInfo={setEditRedeemInfo}
-            handleEditPrize={handleEditPrize}
-            handleDeletePrize={handleDeletePrize}
-            setEditingPrizeId={setEditingPrizeId}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            setCurrentPage={setCurrentPage}
-            vendors={vendors}
-          />
+          </div>
         </div>
+        {event.type === "Single" && <WinnersList winners={winners} />}
+        <RedeemPrizeModal
+          isOpen={isRedeemModalOpen}
+          onClose={() => setIsRedeemModalOpen(false)}
+          redeemCode={redeemCode}
+          setRedeemCode={setRedeemCode}
+          redeemError={redeemError}
+          handleRedeemPrize={handleRedeemPrize}
+        />
+        <QRCodePreviewModal
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+          qrCodeDataUrl={qrCodeDataUrl}
+          eventName={event.name}
+          downloadPDF={downloadPDF}
+        />
       </div>
-      {event.type === "Single" && <WinnersList winners={winners} />}
-      <RedeemPrizeModal
-        isOpen={isRedeemModalOpen}
-        onClose={() => setIsRedeemModalOpen(false)}
-        redeemCode={redeemCode}
-        setRedeemCode={setRedeemCode}
-        redeemError={redeemError}
-        handleRedeemPrize={handleRedeemPrize}
-      />
-      <QRCodePreviewModal
-        isOpen={isQRModalOpen}
-        onClose={() => setIsQRModalOpen(false)}
-        qrCodeDataUrl={qrCodeDataUrl}
-        eventName={event.name}
-        downloadPDF={downloadPDF}
-      />
     </div>
   );
 }

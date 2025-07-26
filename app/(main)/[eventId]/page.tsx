@@ -24,9 +24,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const fakeSegments: PrizeData[] = [
   { option: "Oops!", segColor: "#444444", emoji: "😢" },
   { option: "Try Again", segColor: "#555555", emoji: "😞" },
-  // { option: "Come Back Later", segColor: "#666666", emoji: "😴" },
-  // { option: "Keep Trying", segColor: "#777777", emoji: "😅" },
-  // { option: "Just an Inch", segColor: "#888888", emoji: "😬" },
+  { option: "Come Back Later", segColor: "#666666", emoji: "😴" },
+  { option: "Keep Trying", segColor: "#777777", emoji: "😅" },
+  { option: "Just an Inch", segColor: "#888888", emoji: "😬" },
 ];
 
 function getRandomColor(): string {
@@ -157,6 +157,8 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+
+
   const handleSpinClick = async () => {
     if (mustSpin || isLoading) return;
 
@@ -170,19 +172,25 @@ function App() {
     const newPrizeNumber = Math.floor(Math.random() * data.length);
     const selectedPrize = data[newPrizeNumber];
 
-    if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/events/${event?._id}/check-and-record-prize`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prizeId: selectedPrize._id }),
-          }
-        );
-        if (!response.ok) throw new Error("Failed to check and record prize");
-        const result = await response.json();
+    try {
+      // Always send a request to increment spinCount, with or without prizeId
+      const response = await fetch(
+        `${API_BASE_URL}/api/events/${event?._id}/check-and-record-prize`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            fakeSegments.some((s) => s.option === selectedPrize.option)
+              ? {prizeId: false} // No prizeId for false segments
+              : { prizeId: selectedPrize._id }
+          ),
+        }
+      );
+      if (!response.ok) throw new Error("Failed to check and record prize");
+      const result = await response.json();
 
+      if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
+        // Handle winning spins
         if (!result.available) {
           const loseIndex = data.findIndex((p) =>
             fakeSegments.some((s) => s.option === p.option)
@@ -204,23 +212,89 @@ function App() {
           setPrizeNumber(newPrizeNumber);
           setWonPrize(selectedPrize);
         }
-      } catch (error) {
-        setError(
-          error instanceof Error ? error.message : "Failed to record prize"
-        );
-        const loseIndex = data.findIndex((p) =>
-          fakeSegments.some((s) => s.option === p.option)
-        );
-        setPrizeNumber(loseIndex);
-        setWonPrize(data[loseIndex]);
+      } else {
+        // Handle non-winning spins
+        setPrizeNumber(newPrizeNumber);
+        setWonPrize(selectedPrize);
       }
-    } else {
-      setPrizeNumber(newPrizeNumber);
-      setWonPrize(selectedPrize);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to record prize"
+      );
+      const loseIndex = data.findIndex((p) =>
+        fakeSegments.some((s) => s.option === p.option)
+      );
+      setPrizeNumber(loseIndex);
+      setWonPrize(data[loseIndex]);
     }
 
     setMustSpin(true);
   };
+
+  // const handleSpinClick = async () => {
+  //   if (mustSpin || isLoading) return;
+
+  //   setPrizeNumber(0);
+  //   setWonPrize(null);
+  //   setShowConfetti(false);
+  //   setIsModalOpen(false);
+  //   setIsRedeemModalOpen(false);
+  //   setWinnerCode(null);
+
+  //   const newPrizeNumber = Math.floor(Math.random() * data.length);
+  //   const selectedPrize = data[newPrizeNumber];
+
+  //   if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
+  //     try {
+  //       const response = await fetch(
+  //         `${API_BASE_URL}/api/events/${event?._id}/check-and-record-prize`,
+  //         {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({ prizeId: selectedPrize._id }),
+  //         }
+  //       );
+  //       if (!response.ok) throw new Error("Failed to check and record prize");
+  //       const result = await response.json();
+
+  //       if (!result.available) {
+  //         const loseIndex = data.findIndex((p) =>
+  //           fakeSegments.some((s) => s.option === p.option)
+  //         );
+  //         setPrizeNumber(loseIndex);
+  //         setWonPrize(data[loseIndex]);
+  //       } else {
+  //         const code = generateRandomCode();
+  //         setWinnerCode(code);
+  //         await fetch(`${API_BASE_URL}/api/winners`, {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             code,
+  //             prizeId: selectedPrize._id,
+  //             eventId,
+  //           }),
+  //         });
+  //         setPrizeNumber(newPrizeNumber);
+  //         setWonPrize(selectedPrize);
+  //       }
+  //     } catch (error) {
+  //       setError(
+  //         error instanceof Error ? error.message : "Failed to record prize"
+  //       );
+  //       const loseIndex = data.findIndex((p) =>
+  //         fakeSegments.some((s) => s.option === p.option)
+  //       );
+  //       setPrizeNumber(loseIndex);
+  //       setWonPrize(data[loseIndex]);
+  //     }
+  //   } else {
+  //     setPrizeNumber(newPrizeNumber);
+  //     setWonPrize(selectedPrize);
+  //   }
+
+  //   setMustSpin(true);
+  // };
 
   const onStopSpinning = () => {
     setMustSpin(false);

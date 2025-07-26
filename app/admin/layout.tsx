@@ -63,14 +63,14 @@ export default function AdminLayout({
   const navItems = [
     { href: "/admin", label: "Home" },
     { href: "/admin/events", label: "My Spinwheels" },
-    // { href: "/admin/prizes", label: "Prizes" },
   ];
 
   return (
     <div className="flex flex-col bg-white container-spacing">
       {/* Navbar */}
-      <nav className="py-6 h-[100px] px-4 flex justify-between items-center z-10 relative bg-[#FFB60014] border-b border-[#FFB60030]">
-        <Link href="" className="hidden lg:flex items-center gap-3">
+      <nav className="fixed top-0 left-0 right-0 z-20 py-6 h-[100px] container-spacing  bg-[#FFB60014] border-b border-[#FFB60030]">
+      <div className="px-4 flex justify-between items-center ">
+          <Link href="" className="hidden lg:flex items-center gap-3">
           <Image width={154} height={32} alt="spinly logo" src={Spinly.src} />
         </Link>
 
@@ -140,11 +140,12 @@ export default function AdminLayout({
             )}
           </div>
         )}
+      </div>
       </nav>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && isMobile && (
-        <div className="md:hidden bg-white border-t border-[#FFB60030]">
+        <div className="md:hidden fixed top-[100px] left-0 right-0 z-10 bg-white border-t border-[#FFB60030]">
           <div className="flex flex-col p-2">
             {navItems.map((item) => (
               <Link
@@ -165,7 +166,7 @@ export default function AdminLayout({
       )}
 
       {/* Main Content */}
-      <main className="flex-1 pt-8 overflow-hidden">{children}</main>
+      <main className="flex-1 pt-[100px] overflow-hidden">{children}</main>
     </div>
   );
 }
