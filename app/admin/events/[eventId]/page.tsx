@@ -643,10 +643,10 @@ export default function EventDetailsPage({
       </div>
       <div className="mt-[164px] flex flex-col gap-6">
         <EventDetails event={event} vendors={vendors} winners={winners} />
-        {event.type === "Vendor" && (
+        {/* {event.type === "Vendor" && ( */}
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Vendors ({vendors.length})
+              Partners & Sponsors ({vendors.length})
             </h2>
             <VendorForm
               newVendor={newVendor}
@@ -662,7 +662,7 @@ export default function EventDetailsPage({
               setEditingVendor={setEditingVendor}
             />
           </div>
-        )}
+        {/* )} */}
         {editingVendor && (
           <EditVendorModal
             isOpen={editingVendor !== null}

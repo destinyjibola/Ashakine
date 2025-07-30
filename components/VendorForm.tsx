@@ -89,7 +89,7 @@ const VendorForm = ({
       aria-labelledby="add-vendor-form-title"
     >
       <h2 id="add-vendor-form-title" className="text-lg font-medium text-gray-800 mb-4">
-        Add New Vendor
+        Add New Partners
       </h2>
 
       <div className="space-y-2">
@@ -142,7 +142,7 @@ const VendorForm = ({
             htmlFor="vendorUrl"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Website URL *
+            Website/social media url *
           </label>
           <Controller
             name="url"
@@ -185,7 +185,7 @@ const VendorForm = ({
             htmlFor="vendorEmail"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Contact Email
+           Email
           </label>
           <Controller
             name="email"
@@ -363,7 +363,7 @@ const VendorForm = ({
                 Adding Vendor...
               </>
             ) : (
-              "Add Vendor"
+              "Add"
             )}
           </button>
         </div>

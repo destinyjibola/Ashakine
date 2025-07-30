@@ -14,31 +14,32 @@ const VendorsList = ({
   handleDeleteVendor: (vendorId: string) => void;
   setEditingVendor: (vendor: Vendor | null) => void;
 }) => (
-  <>
+  <div className="mt-4">
     {!event ? (
-      <div className="bg-gray-100 rounded-lg p-8 text-center border border-gray-300">
+      <div className="bg-gray-100 rounded-xl p-8 text-center border border-gray-300">
         <p className="text-gray-500">Loading event...</p>
       </div>
     ) : vendors.length === 0 ? (
-      <div className="bg-gray-100 rounded-lg p-8 text-center border border-gray-300">
-        <p className="text-gray-500">No vendors added yet</p>
+      <div className="bg-gray-100 rounded-xl p-8 text-center border border-gray-300">
+        <p className="text-gray-500">No partners added yet</p>
       </div>
     ) : (
-      <div className="mt-6">
-        <h2 className="mb-4">Vendors</h2>
-        <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Partners</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {vendors.map((vendor) => (
             <VendorItem
               key={vendor._id}
               vendor={vendor}
+              eventType={event.type}
               handleDeleteVendor={handleDeleteVendor}
-              setEditingVendor={setEditingVendor} 
+              setEditingVendor={setEditingVendor}
             />
           ))}
         </div>
       </div>
     )}
-  </>
+  </div>
 );
 
 export default VendorsList;

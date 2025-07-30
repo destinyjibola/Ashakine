@@ -35,20 +35,20 @@ const EventDetails = ({
 
     {/* Stats Section */}
     <div className="bg-gray-50 rounded-lg p-5">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Event Stats</h2>
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Spinwheel Stats</h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
           <p className="text-sm text-gray-600 font-medium">Spins</p>
           <p className="text-lg font-semibold text-blue-700">{event.spinCount ?? 0}</p>
         </div> */}
-        {event.type === "Vendor" && (
+        {/* {event.type === "Vendor" && ( */}
           <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
             <p className="text-sm text-gray-600 font-medium">Vendors</p>
             <p className="text-lg font-semibold text-blue-700">
               {vendors?.length ?? 0}
             </p>
           </div>
-        )}
+        {/* )} */}
         <div className="bg-white p-3 rounded-lg border border-gray-100 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
           <p className="text-sm text-gray-600 font-medium">Prizes</p>
           <p className="text-lg font-semibold text-blue-700">

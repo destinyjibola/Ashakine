@@ -78,8 +78,18 @@ interface Overview {
 const formatDate = (date: string, formatStr = "MMM d, yyyy") => {
   const d = new Date(date);
   const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   const day = d.getDate();
@@ -203,9 +213,10 @@ export default function Overview() {
     }
   };
 
-  const filteredWinners = overview?.recentWinners?.filter((winner) =>
-    winner.code.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredWinners =
+    overview?.recentWinners?.filter((winner) =>
+      winner.code.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   if (authLoading) return <div className="p-6">Loading...</div>;
   if (loading)
@@ -306,7 +317,7 @@ export default function Overview() {
             <TableHead>Prize</TableHead>
             <TableHead>Date Won</TableHead>
             <TableHead>Status</TableHead>
-            {/* <TableHead>Action</TableHead> */}
+            <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="">
@@ -327,28 +338,32 @@ export default function Overview() {
                     {winner.redeemed ? "Redeemed" : "Pending"}
                   </span>
                 </TableCell>
-                {/* <TableCell>
+                <TableCell>
                   <Button
                     onClick={() => handleRedeemPrize(winner)}
                     disabled={winner.redeemed}
-                    className={winner.redeemed ? "bg-gray-400" : "bg-primarys-100"}
+                    className={
+                      winner.redeemed ? "bg-gray-400" : "bg-primarys-100"
+                    }
                   >
                     {winner.redeemed ? "Redeemed" : "Mark as Redeem"}
                   </Button>
-                </TableCell> */}
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
               <TableCell colSpan={5} className="text-center">
-                {searchTerm ? "No matching winners found" : "No winners available"}
+                {searchTerm
+                  ? "No matching winners found"
+                  : "No winners available"}
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
 
-      {/* <Dialog open={redeemModalOpen} onOpenChange={setRedeemModalOpen}>
+      <Dialog open={redeemModalOpen} onOpenChange={setRedeemModalOpen}>
         <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>Redeem Prize</DialogTitle>
@@ -370,7 +385,9 @@ export default function Overview() {
               </div>
               <div>
                 <p className="font-medium">Prize:</p>
-                <p className="text-gray-700">{currentWinner?.prizeId?.prize || "No prize"}</p>
+                <p className="text-gray-700">
+                  {currentWinner?.prizeId?.prize || "No prize"}
+                </p>
               </div>
 
               {redeemError && (
@@ -395,7 +412,7 @@ export default function Overview() {
             </div>
           </form>
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
     </div>
   );
 }

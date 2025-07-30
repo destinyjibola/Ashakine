@@ -99,10 +99,10 @@ const PrizesList = ({
     : currentPrizes;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Event Prizes</h2>
-        <DropdownMenu>
+        <h2 className="text-xl font-bold text-gray-800">Spinwheel Prizes</h2>
+     {event?.type === "Vendor" &&    <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
@@ -127,7 +127,7 @@ const PrizesList = ({
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu>}
       </div>
 
       {!event ? (

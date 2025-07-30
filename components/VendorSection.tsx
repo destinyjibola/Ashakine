@@ -17,7 +17,7 @@ export default function VendorSection({
   isLoading,
   error,
 }: VendorSectionProps) {
-  if (isLoading || error || eventType !== "Vendor" || vendors.length === 0) {
+  if (isLoading || error || vendors.length === 0) {
     return null;
   }
 

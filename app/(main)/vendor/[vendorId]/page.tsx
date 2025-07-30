@@ -6,6 +6,7 @@ import Modal from "@/components/Modal";
 import PrizeDetails from "@/components/PrizeDetails";
 import WinnersList from "@/components/WinnersList";
 import RedeemPrizeModal from "@/components/RedeemPrizeModal";
+import PrizeWonModal from "@/components/PrizeWonModal"; // Added import
 import { Event, Prize, Vendor, Winner } from "@/types";
 import VendorDetails from "@/components/VendorDetail";
 
@@ -19,6 +20,8 @@ const VendorPage = () => {
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
   const [redeemCode, setRedeemCode] = useState<string>("");
   const [redeemError, setRedeemError] = useState<string | null>(null);
+  const [isPrizeWonModalOpen, setIsPrizeWonModalOpen] = useState<boolean>(false); // Added state
+  const [redeemedWinner, setRedeemedWinner] = useState<Winner | null>(null); // Added state
   const router = useRouter();
   const params = useParams();
   const vendorId = params?.vendorId as string;
@@ -91,20 +94,18 @@ const VendorPage = () => {
       }
 
       const updatedWinner: Winner = await response.json();
-      // Debug log to inspect updatedWinner
-      console.log("Updated Winner:", updatedWinner);
+      console.log("Updated Winner:", updatedWinner); // Debug log
       if (!updatedWinner.prizeId) {
         console.warn("Updated winner has no prizeId:", updatedWinner);
       }
+      const newWinner = { ...updatedWinner, prizeId: winner.prizeId }; // Preserve prizeId
       setWinners(
-        winners.map((w) =>
-          w._id === updatedWinner._id
-            ? { ...updatedWinner, prizeId: winner.prizeId } // Preserve prizeId
-            : w
-        )
+        winners.map((w) => (w._id === newWinner._id ? newWinner : w))
       );
       setRedeemCode("");
       setIsRedeemModalOpen(false);
+      setRedeemedWinner(newWinner); // Set winner for modal
+      setIsPrizeWonModalOpen(true); // Open PrizeWonModal
     } catch (err) {
       setRedeemError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -259,6 +260,11 @@ const VendorPage = () => {
         setRedeemCode={setRedeemCode}
         redeemError={redeemError}
         handleRedeemPrize={handleRedeemPrize}
+      />
+      <PrizeWonModal
+        isOpen={isPrizeWonModalOpen}
+        onClose={() => setIsPrizeWonModalOpen(false)}
+        winner={redeemedWinner}
       />
     </div>
   );
