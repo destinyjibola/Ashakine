@@ -1,4 +1,3 @@
- 
 "use client";
 import { useState } from "react";
 import { Event } from "@/types";
@@ -95,8 +94,8 @@ const EventStatus = ({
   };
 
   // Display times in user's local timezone with timezone name
-  const formatDateTime = (date: string | null): string => {
-    if (!date) return "N/A";
+  const formatDateTime = (date: string | null | undefined): string => {
+    if (date == null) return "N/A"; // Handles null or undefined
     try {
       const parsed = new Date(date);
       if (isNaN(parsed.getTime())) return "Invalid Date";
