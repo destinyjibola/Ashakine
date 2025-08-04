@@ -25,7 +25,7 @@ const PrizeItem = ({
   handleEditPrize: (e: React.FormEvent, prizeId: string) => void;
   handleDeletePrize: (prizeId: string) => void;
   setEditingPrizeId: (value: string | null) => void;
-  vendors: Vendor[];
+  vendors: Vendor[] | null;
 }) => (
   <div className="group relative bg-white rounded-xl border border-gray-200 hover:border-blue-400/50 hover:shadow-md transition-all duration-300 overflow-hidden">
     {editingPrizeId === prize._id ? (
@@ -121,7 +121,7 @@ const PrizeItem = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                   <span className="text-sm font-medium text-gray-600">
-                    {vendors.find((v) => v._id === prize.vendor)?.name || "Unknown"}
+                    {vendors?.find((v) => v._id === prize.vendor)?.name || "Unknown"}
                   </span>
                 </div>
               )}

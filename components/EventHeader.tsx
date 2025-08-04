@@ -1,107 +1,204 @@
-import React from 'react'
-import { FiCopy, FiShare2, FiRotateCw, FiImage } from "react-icons/fi"
-import Link from "next/link"
+import { FiArrowLeft, FiCopy, FiShare2 } from "react-icons/fi";
+import Image from "next/image";
+import { Event, Vendor, Winner } from "@/types";
+
+interface EventHeaderProps {
+  event: Event;
+  vendors: Vendor[] | null;
+  winners: Winner[] | null;
+  onBack: () => void;
+  copySpinWheelLink: () => void;
+  copied: boolean;
+  openQRCodeModal: () => void;
+  qrLoading: boolean;
+}
 
 const EventHeader = ({
-  eventName,
+  event,
+  vendors,
+  winners,
   onBack,
-  eventId,
   copySpinWheelLink,
   copied,
   openQRCodeModal,
   qrLoading,
-}: {
-  eventName: string
-  onBack: () => void
-  eventId: string
-  copySpinWheelLink: () => void
-  copied: boolean
-  openQRCodeModal: () => void
-  qrLoading: boolean
-}) => (
-  <div className="flex flex-col sm:flex-row justify-between items-start md:items-center sm:items-center gap-4 py-4 border-b border-gray-200">
-    {/* Left side - Event title and back button */}
-    <div className="flex items-center space-x-4">
-      <button
-        onClick={onBack}
-        className="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200 group"
-      >
-        <span className="group-hover:-translate-x-0.5 transition-transform duration-200">←</span>
-        <span className="ml-1">All Events</span>
-      </button>
- 
-    </div>
-
-    {/* Right side - Action buttons */}
-    <div className="flex flex-row xs:flex-row gap-2 w-full sm:w-auto">
-      <Link
-        href={`/${eventId}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm hover:shadow-md"
-      >
-        <FiRotateCw className="mr-2" size={16} />
-        View Spin Wheel
-      </Link>
-
-      <div className="flex gap-2">
-        {/* Copy Link Button */}
-        <button
-          onClick={copySpinWheelLink}
-          className="flex items-center justify-center px-3 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-md text-sm font-medium transition-colors shadow-sm hover:shadow-md relative group"
-          aria-label="Copy spin wheel link"
-        >
-          {copied ? (
-            <FiShare2 className="text-green-500" size={16} />
-          ) : (
-            <FiCopy className="text-gray-600" size={16} />
-          )}
-          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {copied ? "Copied!" : "Copy Link"}
-          </span>
-        </button>
-
-        {/* QR Code Button */}
-        <button
-          onClick={openQRCodeModal}
-          disabled={qrLoading}
-          className="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-md text-sm font-medium transition-colors shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Generate QR code"
-        >
-          {qrLoading ? (
-            <>
-              <svg
-                className="animate-spin mr-2 h-4 w-4 text-gray-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+}: EventHeaderProps) => {
+  return (
+    <div className="bg-white px-6 py-4 border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto">
+        {/* Desktop Layout (md and up) */}
+        <div className="hidden md:block">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={onBack}
+              className="flex items-center group text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <FiArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
+              <span className="font-medium">Back to Events</span>
+            </button>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={copySpinWheelLink}
+                className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                  copied
+                    ? "bg-green-100 text-green-800 shadow-inner"
+                    : "bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm"
+                }`}
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Generating...
-            </>
-          ) : (
-            <>
-              <FiImage className="mr-2" size={16} />
-              QR Code
-            </>
-          )}
-        </button>
+                <FiCopy className="h-4 w-4 mr-2" />
+                {copied ? "Copied!" : "Copy Link"}
+              </button>
+              <button
+                onClick={openQRCodeModal}
+                disabled={qrLoading}
+                className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                  qrLoading
+                    ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-50 text-gray-700 hover:bg-gray-100 shadow-sm"
+                }`}
+              >
+                <FiShare2 className="h-4 w-4 mr-2" />
+                {qrLoading ? "Generating..." : "Share QR"}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              {event.logo?.url ? (
+                <div className="mr-4 relative group">
+                  <div className="absolute inset-0 rounded-full bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <Image
+                    src={event.logo.url}
+                    alt={event.logo.altText || "Event Logo"}
+                    width={48}
+                    height={48}
+                    className="rounded-full border-2 border-gray-200 group-hover:border-blue-200 transition-all duration-300"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center mr-4 group hover:border-blue-200 transition-colors duration-300">
+                  <span className="text-xs text-gray-400 group-hover:text-gray-600">No Logo</span>
+                </div>
+              )}
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                  {event.name}
+                </h1>
+                <p className="text-sm text-gray-500">{event.type}</p>
+              </div>
+            </div>
+
+            <div className="flex space-x-6">
+              {[
+                { label: "Vendors", value: vendors?.length ?? 0 },
+                { label: "Prizes", value: event.prizes?.length ?? 0 },
+                ...(event.type === "Single" ? [
+                  { label: "Winners", value: winners?.length ?? 0 },
+                  { label: "Redeemed", value: winners?.filter((w) => w.redeemed).length ?? 0 }
+                ] : [])
+              ].map((stat, index) => (
+                <div key={index} className="text-center group">
+                  <p className="text-sm text-gray-500 group-hover:text-blue-500 transition-colors">
+                    {stat.label}
+                  </p>
+                  <p className="text-lg font-semibold text-blue-600 group-hover:text-blue-700 transition-colors">
+                    {stat.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout (sm and down) */}
+        <div className="md:hidden">
+          {/* Back button - always first */}
+          <button
+            onClick={onBack}
+            className="flex items-center group text-gray-600 hover:text-gray-800 transition-colors mb-4"
+          >
+            <FiArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
+            <span className="font-medium">Back to Events</span>
+          </button>
+
+          {/* Event Info - logo, name, type */}
+          <div className="flex items-center mb-4">
+            {event.logo?.url ? (
+              <div className="mr-4 relative group">
+                <Image
+                  src={event.logo.url}
+                  alt={event.logo.altText || "Event Logo"}
+                  width={48}
+                  height={48}
+                  className="rounded-full border-2 border-gray-200 group-hover:border-blue-200 transition-colors duration-300"
+                />
+              </div>
+            ) : (
+              <div className="w-12 h-12 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center mr-4 group hover:border-blue-200 transition-colors duration-300">
+                <span className="text-xs text-gray-400 group-hover:text-gray-600">No Logo</span>
+              </div>
+            )}
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                {event.name}
+              </h1>
+              <p className="text-sm text-gray-500">{event.type}</p>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex flex-wrap gap-x-6 gap-y-3 mb-4">
+            {[
+              { label: "Vendors", value: vendors?.length ?? 0 },
+              { label: "Prizes", value: event.prizes?.length ?? 0 },
+              ...(event.type === "Single" ? [
+                { label: "Winners", value: winners?.length ?? 0 },
+                { label: "Redeemed", value: winners?.filter((w) => w.redeemed).length ?? 0 }
+              ] : [])
+            ].map((stat, index) => (
+              <div key={index} className="text-center group min-w-[60px]">
+                <p className="text-sm text-gray-500 group-hover:text-blue-500 transition-colors">
+                  {stat.label}
+                </p>
+                <p className="text-lg font-semibold text-blue-600 group-hover:text-blue-700 transition-colors">
+                  {stat.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex space-x-3">
+            <button
+              onClick={copySpinWheelLink}
+              className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                copied
+                  ? "bg-green-100 text-green-800 shadow-inner"
+                  : "bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm"
+              }`}
+            >
+              <FiCopy className="h-4 w-4 mr-2" />
+              {copied ? "Copied!" : "Copy Link"}
+            </button>
+            <button
+              onClick={openQRCodeModal}
+              disabled={qrLoading}
+              className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                qrLoading
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-50 text-gray-700 hover:bg-gray-100 shadow-sm"
+              }`}
+            >
+              <FiShare2 className="h-4 w-4 mr-2" />
+              {qrLoading ? "Generating..." : "Share QR"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-)
+  );
+};
 
-export default EventHeader
+export default EventHeader;

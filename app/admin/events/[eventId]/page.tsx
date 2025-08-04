@@ -1,25 +1,22 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Event, NewPrizeData, Winner, Vendor } from "@/types";
+import { Event, NewPrizeData, Winner, Vendor, Product } from "@/types";
 import { useAuth } from "@/hooks/AuthContext";
-import { FiCopy, FiShare2, FiRotateCw, FiImage } from "react-icons/fi";
-import Link from "next/link";
-import QRCode from "qrcode";
-import jsPDF from "jspdf";
+import { FiCopy, FiShare2 } from "react-icons/fi";
 import EventHeader from "@/components/EventHeader";
 import EventDetails from "@/components/EventDetails";
 import VendorForm from "@/components/VendorForm";
 import EditVendorModal from "@/components/EditVendorModal";
-import VendorItem from "@/components/VendorItem";
 import VendorsList from "@/components/VendorsList";
 import PrizeForm from "@/components/PrizeForm";
-import PrizeItem from "@/components/PrizeItem";
 import PrizesList from "@/components/PrizesList";
-import WinnersList from "@/components/WinnersList";
-import RedeemPrizeModal from "@/components/RedeemPrizeModal";
+import ProductForm, { ProductFormData } from "@/components/ProductForm";
+import ProductsList from "@/components/ProductsList";
 import QRCodePreviewModal from "@/components/QRCodePreviewModal";
-import { createSearchParamsBailoutProxy } from "next/dist/client/components/searchparams-bailout-proxy";
+import EventStatus from "@/components/EventStatus";
+import QRCode from "qrcode";
+import jsPDF from "jspdf";
 
 export default function EventDetailsPage({
   params,
@@ -28,8 +25,9 @@ export default function EventDetailsPage({
 }) {
   const { token, loading: authLoading, logout } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [winners, setWinners] = useState<Winner[]>([]);
+  const [vendors, setVendors] = useState<Vendor[] | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [winners, setWinners] = useState<Winner[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [newPrize, setNewPrize] = useState<string>("");
@@ -56,15 +54,17 @@ export default function EventDetailsPage({
   const [addVendorError, setAddVendorError] = useState<string | null>(null);
   const [editVendorLoading, setEditVendorLoading] = useState<boolean>(false);
   const [editVendorError, setEditVendorError] = useState<string | null>(null);
-  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
-  const [redeemCode, setRedeemCode] = useState<string>("");
-  const [redeemError, setRedeemError] = useState<string | null>(null);
+  const [addProductLoading, setAddProductLoading] = useState<boolean>(false);
+  const [addProductError, setAddProductError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [qrLoading, setQrLoading] = useState(false);
   const [qrError, setQrError] = useState<string | null>(null);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [eventStatusLoading, setEventStatusLoading] = useState<boolean>(false);
+  const [eventStatusError, setEventStatusError] = useState<string | null>(null);
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<string>("prizes");
 
   const [currentPage, setCurrentPage] = useState(1);
   const prizesPerPage = 5;
@@ -78,7 +78,8 @@ export default function EventDetailsPage({
     : 0;
 
   const copySpinWheelLink = () => {
-    const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
+    // const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
+    const spinWheelUrl = `${window.location.origin}/${event?._id}`;
     navigator.clipboard.writeText(spinWheelUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -117,73 +118,123 @@ export default function EventDetailsPage({
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [eventResponse, winnersResponse] = await Promise.all([
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          ),
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          ),
-        ]);
-
-        if (eventResponse.status === 401 || winnersResponse.status === 401) {
-          logout();
-          setError("Session expired. Please log in again.");
-          router.push("/login");
-          return;
+  const handleToggleActive = async (isActive: boolean) => {
+    setEventStatusLoading(true);
+    setEventStatusError(null);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ isActive }),
         }
+      );
 
-        if (!eventResponse.ok) {
-          const errorData = await eventResponse.json();
-          throw new Error(errorData.message || "Failed to fetch event");
-        }
-        if (!winnersResponse.ok) {
-          const errorData = await winnersResponse.json();
-          throw new Error(errorData.message || "Failed to fetch winners");
-        }
-
-        const eventData: Event = await eventResponse.json();
-        const winnersData: Winner[] = await winnersResponse.json();
-        setEvent(eventData);
-        setVendors(
-          Array.isArray(eventData.vendors) &&
-            eventData.vendors.every((v) => typeof v !== "string")
-            ? eventData.vendors
-            : []
-        );
-        setWinners(winnersData);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred"
-        );
-      } finally {
-        setLoading(false);
+      if (response.status === 401) {
+        logout();
+        setEventStatusError("Session expired. Please log in again.");
+        router.push("/login");
+        return;
       }
-    };
 
-    if (!authLoading && token) {
-      fetchData();
-    } else if (!authLoading && !token) {
-      setError("No authentication token available");
-      setLoading(false);
-      router.push("/login");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update event status");
+      }
+
+      const updatedEvent: Event = await response.json();
+      setEvent(updatedEvent);
+    } catch (err) {
+      setEventStatusError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setEventStatusLoading(false);
     }
-  }, [params.eventId, token, authLoading, router, logout]);
+  };
+
+  const handleSetTimer = async (startTime: string, endTime: string) => {
+    setEventStatusLoading(true);
+    setEventStatusError(null);
+    console.log(startTime, endTime)
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ startTime, endTime, isActive: false }),
+        }
+      );
+
+      if (response.status === 401) {
+        logout();
+        setEventStatusError("Session expired. Please log in again.");
+        router.push("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to set event timer");
+      }
+
+      const updatedEvent: Event = await response.json();
+      setEvent(updatedEvent);
+    } catch (err) {
+      setEventStatusError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setEventStatusLoading(false);
+    }
+  };
+
+  const handleClearTimer = async () => {
+    setEventStatusLoading(true);
+    setEventStatusError(null);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ startTime: null, endTime: null }),
+        }
+      );
+
+      if (response.status === 401) {
+        logout();
+        setEventStatusError("Session expired. Please log in again.");
+        router.push("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to clear event timer");
+      }
+
+      const updatedEvent: Event = await response.json();
+      setEvent(updatedEvent);
+    } catch (err) {
+      setEventStatusError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setEventStatusLoading(false);
+    }
+  };
 
   const handleAddVendor = async (
     e: React.FormEvent,
@@ -234,12 +285,11 @@ export default function EventDetailsPage({
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log(errorData);
         throw new Error(errorData.message || "Failed to add vendor");
       }
 
       const newVendorData: Vendor = await response.json();
-      setVendors([...vendors, newVendorData]);
+      setVendors(vendors ? [...vendors, newVendorData] : [newVendorData]);
       setNewVendor({ name: "", url: "", email: "" });
       resetLogo();
     } catch (err) {
@@ -279,8 +329,6 @@ export default function EventDetailsPage({
         image: logoBase64,
       };
 
-      console.log("Sending vendorData:", vendorData); // Debug log
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
         {
@@ -306,9 +354,13 @@ export default function EventDetailsPage({
       }
 
       const updatedVendor: Vendor = await response.json();
-      setVendors(vendors.map((v) => (v._id === vendorId ? updatedVendor : v)));
+      setVendors(
+        vendors
+          ? vendors.map((v) => (v._id === vendorId ? updatedVendor : v))
+          : [updatedVendor]
+      );
       resetLogo();
-      setEditingVendor(null); // Close modal after successful update
+      setEditingVendor(null);
     } catch (err) {
       setEditVendorError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -343,7 +395,9 @@ export default function EventDetailsPage({
         throw new Error(errorData.message || "Failed to delete vendor");
       }
 
-      setVendors(vendors.filter((vendor) => vendor._id !== vendorId));
+      setVendors(
+        vendors ? vendors.filter((vendor) => vendor._id !== vendorId) : null
+      );
       const updatedResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
         {
@@ -423,11 +477,11 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("//login");
+        router.push("/login");
         return;
       }
 
-      if (!updatedResponse.ok) {
+      if (!response.ok) {
         const errorData = await updatedResponse.json();
         throw new Error(errorData.message || "Failed to fetch updated event");
       }
@@ -437,7 +491,7 @@ export default function EventDetailsPage({
       setNewPrize("");
       setNewMaxWins(1);
       setNewRedeemInfo("");
-      setSelectedVendor("");
+      setSelectedVendor(null);
     } catch (err) {
       setPrizeError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -472,7 +526,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("//login");
         return;
       }
 
@@ -495,7 +549,7 @@ export default function EventDetailsPage({
         return;
       }
 
-      if (!updatedResponse.ok) {
+      if (!response.ok) {
         const errorData = await updatedResponse.json();
         throw new Error(errorData.message || "Failed to fetch updated event");
       }
@@ -531,7 +585,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("//login");
+        router.push("/login");
         return;
       }
 
@@ -550,11 +604,11 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("//login");
+        router.push("/login");
         return;
       }
 
-      if (!updatedResponse.ok) {
+      if (!response.ok) {
         const errorData = await updatedResponse.json();
         throw new Error(errorData.message || "Failed to fetch updated event");
       }
@@ -570,187 +624,453 @@ export default function EventDetailsPage({
     }
   };
 
-  const handleRedeemPrize = async (e: React.FormEvent) => {
+  const handleAddProduct = async (
+    e: React.FormEvent,
+    data: ProductFormData,
+    image: File | null,
+    resetImage: () => void
+  ) => {
     e.preventDefault();
-    setRedeemError(null);
+    setAddProductLoading(true);
+    setAddProductError(null);
 
     try {
-      const winner = winners.find((w) => w.code === redeemCode);
-      if (!winner) {
-        throw new Error("Invalid redemption code");
+      let imageBase64: string | null = null;
+      if (image) {
+        const reader = new FileReader();
+        imageBase64 = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(image);
+        });
       }
 
+      const productData = {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        formerPrice: data.formerPrice,
+        discount: data.discount ? parseInt(data.discount) : 0,
+        phoneNumber: data.phoneNumber,
+        image: imageBase64,
+        eventId: params.eventId,
+      };
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/winners/${winner._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/products`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ redeemed: true }),
+          body: JSON.stringify(productData),
         }
       );
 
       if (response.status === 401) {
         logout();
-        setRedeemError("Session expired. Please log in again.");
-        router.push("//login");
+        setAddProductError("Session expired. Please log in again.");
+        router.push("/login");
         return;
       }
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to redeem prize");
+        throw new Error(errorData.message || "Failed to add product");
       }
 
-      const updatedWinner = await response.json();
-      setWinners(
-        winners.map((w) => (w._id === updatedWinner._id ? updatedWinner : w))
-      );
-      setRedeemCode("");
-      setIsRedeemModalOpen(false);
+      const createdProduct: Product = await response.json();
+      setProducts([...products, createdProduct]);
+      resetImage();
     } catch (err) {
-      setRedeemError(
+      setAddProductError(
         err instanceof Error ? err.message : "An unknown error occurred"
       );
+    } finally {
+      setAddProductLoading(false);
     }
   };
+
+  const handleDeleteProduct = async (productId: string) => {
+    setAddProductLoading(true);
+    setAddProductError(null);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 401) {
+        logout();
+        setAddProductError("Session expired. Please log in again.");
+        router.push("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete product");
+      }
+
+      setProducts(products.filter((product) => product._id !== productId));
+    } catch (err) {
+      setAddProductError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setAddProductLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [eventResponse, winnersResponse, productsResponse] =
+          await Promise.all([
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            ),
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            ),
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}/products`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            ),
+          ]);
+
+        if (
+          eventResponse.status === 401 ||
+          winnersResponse.status === 401 ||
+          productsResponse.status === 401
+        ) {
+          logout();
+          setError("Session expired. Please log in again.");
+          router.push("/login");
+          return;
+        }
+
+        if (!eventResponse.ok) {
+          const errorData = await eventResponse.json();
+          throw new Error(
+            errorData.message ||
+              `Failed to fetch event (Status: ${eventResponse.status})`
+          );
+        }
+        if (!winnersResponse.ok) {
+          const errorData = await winnersResponse.json();
+          throw new Error(
+            errorData.message ||
+              `Failed to fetch winners (Status: ${winnersResponse.status})`
+          );
+        }
+        if (!productsResponse.ok) {
+          const errorData = await productsResponse.json();
+          throw new Error(
+            errorData.message ||
+              `Failed to fetch products (Status: ${productsResponse.status})`
+          );
+        }
+
+        const eventData: Event = await eventResponse.json();
+        const winnersData: Winner[] = await winnersResponse.json();
+        const productsData: Product[] = await productsResponse.json();
+        setEvent(eventData);
+        setVendors(
+          Array.isArray(eventData.vendors) &&
+            eventData.vendors.every((v) => typeof v !== "string")
+            ? eventData.vendors
+            : null
+        );
+        setProducts(productsData);
+        setWinners(winnersData);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!authLoading && token) {
+      fetchData();
+    } else if (!authLoading && !token) {
+      setError("No authentication token available");
+      setLoading(false);
+      router.push("/login");
+    }
+  }, [params.eventId, token, authLoading, router, logout]);
 
   if (authLoading) return <div className="p-6 text-gray-800">Loading...</div>;
   if (loading)
     return <div className="p-6 text-gray-800">Loading event details...</div>;
   if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
   if (!event) return <div className="p-6 text-gray-800">Event not found</div>;
-
   return (
-    <div className="relative flex flex-col max-w-6xl mx-auto bg-white">
-      {qrError && (
-        <div className="bg-red-100 border border-red-300 text-red-600 px-4 py-2 rounded-md mt-[176px]">
-          {qrError}
-        </div>
-      )}
-      <div className="fixed top-[100px] left-0 right-0 z-10 bg-white container-spacing mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed header */}
+      <div className="fixed top-[100px] left-0 right-0 z-20 bg-white shadow-sm">
         <EventHeader
-          eventName={event.name}
+          event={event}
+          vendors={vendors}
+          winners={winners}
           onBack={() => router.push("/admin/events")}
-          eventId={params.eventId}
           copySpinWheelLink={copySpinWheelLink}
           copied={copied}
           openQRCodeModal={generateQRCodePDF}
           qrLoading={qrLoading}
         />
       </div>
-      <div className="mt-[164px] flex flex-col gap-6">
-        <EventDetails event={event} vendors={vendors} winners={winners} />
-        {/* {event.type === "Vendor" && ( */}
-          <div className="bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Partners & Sponsors ({vendors.length})
-            </h2>
-            <VendorForm
-              newVendor={newVendor}
-              setNewVendor={setNewVendor}
-              vendorError={addVendorError}
-              vendorLoading={addVendorLoading}
-              handleAddVendor={handleAddVendor}
-            />
-            <VendorsList
-              event={event}
-              vendors={vendors}
-              handleDeleteVendor={handleDeleteVendor}
-              setEditingVendor={setEditingVendor}
-            />
-          </div>
-        {/* )} */}
-        {editingVendor && (
-          <EditVendorModal
-            isOpen={editingVendor !== null}
-            onClose={() => setEditingVendor(null)}
-            vendor={editingVendor}
-            vendorError={editVendorError}
-            vendorLoading={editVendorLoading}
-            handleUpdateVendor={handleUpdateVendor}
-            setEditingVendor={setEditingVendor}
-          />
-        )}
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Prizes ({event.prizes.length})
-              </h2>
-              {event.type === "Single" && (
-                <button
-                  onClick={() => setIsRedeemModalOpen(true)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
-                >
-                  Redeem Prize
-                </button>
-              )}
-            </div>
-            {event.type === "Vendor" && vendors.length === 0 ? (
-              <div className="bg-gray-100 rounded-lg p-8 text-center border border-gray-300">
-                <p className="text-gray-500">
-                  Please add a vendor before adding prizes.
-                </p>
+
+      {/* Main content */}
+      <div className="pt-24 pb-8 px-4 max-w-7xl mx-auto">
+        {/* Error messages */}
+        {(qrError || eventStatusError) && (
+          <div className="mb-6">
+            {qrError && (
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                {qrError}
               </div>
-            ) : (
-              <PrizeForm
-                event={event}
-                newPrize={newPrize}
-                setNewPrize={setNewPrize}
-                newMaxWins={newMaxWins}
-                setNewMaxWins={setNewMaxWins}
-                newRedeemInfo={newRedeemInfo}
-                setNewRedeemInfo={setNewRedeemInfo}
-                prizeLoading={prizeLoading}
-                prizeError={prizeError}
-                handleAddPrize={handleAddPrize}
-                vendors={vendors}
-                selectedVendor={selectedVendor}
-                setSelectedVendor={setSelectedVendor}
-              />
             )}
-            <PrizesList
-              event={event}
-              currentPrizes={currentPrizes}
-              editingPrizeId={editingPrizeId}
-              editPrizeName={editPrizeName}
-              setEditPrizeName={setEditPrizeName}
-              editMaxWins={editMaxWins}
-              setEditMaxWins={setEditMaxWins}
-              editRedeemInfo={editRedeemInfo}
-              setEditRedeemInfo={setEditRedeemInfo}
-              handleEditPrize={handleEditPrize}
-              handleDeletePrize={handleDeletePrize}
-              setEditingPrizeId={setEditingPrizeId}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              setCurrentPage={setCurrentPage}
-              vendors={vendors}
-              selectedVendor={selectedVendor}
-              setSelectedVendor={setSelectedVendor}
-            />
+            {eventStatusError && (
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                {eventStatusError}
+              </div>
+            )}
+          </div>
+        )}
+ 
+        {/* Tabbed interface */}
+        <div className="bg-white rounded-xl shadow-sm mt-[10rem] md:mt-[5rem] border border-gray-200 overflow-hidden">
+          {/* Tab navigation */}
+          <div className="border-b border-gray-200">
+            <nav className="flex overflow-x-auto">
+                   <button
+                className={`px-6 py-4 font-medium text-sm whitespace-nowrap ${
+                  activeTab === "activate"
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                onClick={() => setActiveTab("activate")}
+              >
+                Activate Spinwheel
+              </button>
+              <button
+                className={`px-6 py-4 font-medium text-sm whitespace-nowrap ${
+                  activeTab === "prizes"
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                onClick={() => setActiveTab("prizes")}
+              >
+                Prizes ({event.prizes.length})
+              </button>
+              <button
+                className={`px-6 py-4 font-medium text-sm whitespace-nowrap ${
+                  activeTab === "partners"
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                onClick={() => setActiveTab("partners")}
+              >
+                Partners ({vendors?.length ?? 0})
+              </button>
+              <button
+                className={`px-6 py-4 font-medium text-sm whitespace-nowrap ${
+                  activeTab === "products"
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                onClick={() => setActiveTab("products")}
+              >
+                Products ({products.length})
+              </button>
+         
+            </nav>
+          </div>
+
+          {/* Tab content */}
+          <div className="p-6">
+            {activeTab === "prizes" && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Prize Management
+                  </h2>
+                  {event.prizes.length > 0 && (
+                    <div className="text-sm text-gray-500">
+                      Showing {currentPrizes.length} of {event.prizes.length}{" "}
+                      prizes
+                    </div>
+                  )}
+                </div>
+
+                {event.type === "Vendor" &&
+                (!vendors || vendors.length === 0) ? (
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                    <p className="text-yellow-700">
+                      Please add a vendor before adding prizes.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <PrizeForm
+                      event={event}
+                      newPrize={newPrize}
+                      setNewPrize={setNewPrize}
+                      newMaxWins={newMaxWins}
+                      setNewMaxWins={setNewMaxWins}
+                      newRedeemInfo={newRedeemInfo}
+                      setNewRedeemInfo={setNewRedeemInfo}
+                      prizeLoading={prizeLoading}
+                      prizeError={prizeError}
+                      handleAddPrize={handleAddPrize}
+                      selectedVendor={selectedVendor}
+                      setSelectedVendor={setSelectedVendor}
+                    />
+                  </div>
+                )}
+
+                <PrizesList
+                  event={event}
+                  currentPrizes={currentPrizes}
+                  editingPrizeId={editingPrizeId}
+                  editPrizeName={editPrizeName}
+                  setEditPrizeName={setEditPrizeName}
+                  editMaxWins={editMaxWins}
+                  setEditMaxWins={setEditMaxWins}
+                  editRedeemInfo={editRedeemInfo}
+                  setEditRedeemInfo={setEditRedeemInfo}
+                  handleEditPrize={handleEditPrize}
+                  handleDeletePrize={handleDeletePrize}
+                  setEditingPrizeId={setEditingPrizeId}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  setCurrentPage={setCurrentPage}
+                  vendors={vendors}
+                  selectedVendor={selectedVendor}
+                  setSelectedVendor={setSelectedVendor}
+                />
+              </div>
+            )}
+
+            {activeTab === "partners" && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Partners & Sponsors
+                </h2>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <VendorForm
+                    newVendor={newVendor}
+                    setNewVendor={setNewVendor}
+                    vendorError={addVendorError}
+                    vendorLoading={addVendorLoading}
+                    handleAddVendor={handleAddVendor}
+                  />
+                </div>
+                <VendorsList
+                  event={event}
+                  vendors={vendors}
+                  handleDeleteVendor={handleDeleteVendor}
+                  setEditingVendor={setEditingVendor}
+                />
+              </div>
+            )}
+
+            {activeTab === "products" && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Product Management
+                </h2>
+                {event.type === "Vendor" &&
+                (!vendors || vendors.length === 0) ? (
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                    <p className="text-yellow-700">
+                      Please add a vendor before adding products.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <ProductForm
+                      eventId={params.eventId}
+                      productError={addProductError}
+                      productLoading={addProductLoading}
+                      handleAddProduct={handleAddProduct}
+                    />
+                  </div>
+                )}
+                <ProductsList
+                  event={event}
+                  products={products}
+                  handleDeleteProduct={handleDeleteProduct}
+                  setEditingProduct={() => {}}
+                />
+              </div>
+            )}
+
+            {activeTab === "activate" && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Spinwheel Activation
+                </h2>
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <EventStatus
+                    event={event}
+                    handleToggleActive={handleToggleActive}
+                    handleSetTimer={handleSetTimer}
+                    handleClearTimer={handleClearTimer}
+                    eventStatusLoading={eventStatusLoading}
+                    eventStatusError={eventStatusError}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        {event.type === "Single" && <WinnersList winners={winners} />}
-        <RedeemPrizeModal
-          isOpen={isRedeemModalOpen}
-          onClose={() => setIsRedeemModalOpen(false)}
-          redeemCode={redeemCode}
-          setRedeemCode={setRedeemCode}
-          redeemError={redeemError}
-          handleRedeemPrize={handleRedeemPrize}
-        />
-        <QRCodePreviewModal
-          isOpen={isQRModalOpen}
-          onClose={() => setIsQRModalOpen(false)}
-          qrCodeDataUrl={qrCodeDataUrl}
-          eventName={event.name}
-          downloadPDF={downloadPDF}
-        />
       </div>
+
+      {/* Modals */}
+      {editingVendor && (
+        <EditVendorModal
+          isOpen={editingVendor !== null}
+          onClose={() => setEditingVendor(null)}
+          vendor={editingVendor}
+          vendorError={editVendorError}
+          vendorLoading={editVendorLoading}
+          handleUpdateVendor={handleUpdateVendor}
+          setEditingVendor={setEditingVendor}
+        />
+      )}
+      <QRCodePreviewModal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        qrCodeDataUrl={qrCodeDataUrl}
+        eventName={event.name}
+        downloadPDF={downloadPDF}
+      />
     </div>
   );
 }

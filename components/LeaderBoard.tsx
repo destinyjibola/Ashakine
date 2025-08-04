@@ -21,19 +21,21 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
     return vendor?.logo?.url || null;
   };
 
+  // Check if any winner has a vendorId
+  const hasAnyVendor =
+    winners?.some((winner) => !!winner.prizeId?.vendor) || false;
+
   if (!winners || winners.length === 0) {
     return (
-      <div 
-        className="mt-12 w-full max-w-5xl" 
-        role="region" 
+      <div
+        className="mt-12 w-full max-w-5xl"
+        role="region"
         aria-label="Recent Winners"
       >
         <div className="flex items-center justify-center gap-2 mb-6">
-          <Trophy className="w-4 h-4 text-yellow-500" />
-          <h2 className="md:text-2xl text-xl font-bold text-center">
+          <h2 className="md:text-2xl text-xl font-bold text-center mb-6">
             Recent Winners
           </h2>
-          <Trophy className="w-4 h-4 text-yellow-500" />
         </div>
         <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-purple-100">
           <div className="flex flex-col items-center justify-center">
@@ -49,29 +51,32 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
   }
 
   return (
-    <div 
-      className="mt-12 w-full max-w-5xl" 
-      role="region" 
+    <div
+      className="mt-12 w-full max-w-5xl"
+      role="region"
       aria-label="Recent Winners"
     >
       <div className="flex items-center justify-center gap-2 mb-6">
-        <Trophy className="w-8 h-8 text-yellow-500" />
-        <h2 className="text-3xl font-bold text-center text-purple-700">
+        <h2 className="md:text-2xl text-xl font-bold text-center mb-6">
           Recent Winners
         </h2>
-        <Trophy className="w-8 h-8 text-yellow-500" />
       </div>
-      
+
       <div className="bg-white rounded-xl shadow-lg p-6 border border-purple-100">
-        <div className="grid grid-cols-12 gap-4 mb-4 px-4 font-semibold text-purple-800">
+        <div
+          className={`grid ${
+            hasAnyVendor ? "grid-cols-12" : "grid-cols-8"
+          } gap-4 mb-4 px-4 font-semibold text-purple-800`}
+        >
           <div className="col-span-5">Prize</div>
-          <div className="col-span-4">Vendor</div>
+          {hasAnyVendor && <div className="col-span-4">Vendor</div>}
           <div className="col-span-3">Date</div>
         </div>
-        
+
         <ul className="space-y-4">
           {winners.map((winner) => {
-            const vendorLogo = getVendorLogo(winner.prizeId?.vendor);
+            const vendorId = winner.prizeId?.vendor;
+            const vendorLogo = getVendorLogo(vendorId);
             const date = new Date(winner.createdAt);
             const formattedDate = date.toLocaleDateString("en-US", {
               month: "short",
@@ -86,10 +91,16 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
             return (
               <li
                 key={winner._id}
-                className="grid grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-purple-50 transition-colors"
+                className={`grid ${
+                  hasAnyVendor ? "grid-cols-12" : "grid-cols-8"
+                } gap-4 items-center p-4 rounded-lg hover:bg-purple-50 transition-colors`}
               >
                 <div className="col-span-5 flex items-center gap-3">
-                  <Gift className={`w-5 h-5 ${winner.redeemed ? "text-green-500" : "text-purple-500"}`} />
+                  <Gift
+                    className={`w-5 h-5 ${
+                      winner.redeemed ? "text-green-500" : "text-purple-500"
+                    }`}
+                  />
                   <span className="font-medium text-gray-800">
                     {winner.prizeId?.prize}
                   </span>
@@ -100,28 +111,30 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
                     </span>
                   )}
                 </div>
-                
-                <div className="col-span-4 flex items-center gap-3">
-                  {vendorLogo ? (
-                    <Image
-                      src={vendorLogo}
-                      alt={getVendorName(winner.prizeId?.vendor)}
-                      width={24}
-                      height={24}
-                      className="w-6 h-6 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center">
-                      <span className="text-xs font-medium text-purple-600">
-                        {getVendorName(winner.prizeId?.vendor).charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                  <span className="text-sm text-gray-600">
-                    {getVendorName(winner.prizeId?.vendor)}
-                  </span>
-                </div>
-                
+
+                {hasAnyVendor && (
+                  <div className="col-span-4 flex items-center gap-3">
+                    {vendorLogo ? (
+                      <Image
+                        src={vendorLogo}
+                        alt={getVendorName(vendorId)}
+                        width={24}
+                        height={24}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center">
+                        <span className="text-xs font-medium text-purple-600">
+                          {getVendorName(vendorId).charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                    <span className="text-sm text-gray-600">
+                      {getVendorName(vendorId)}
+                    </span>
+                  </div>
+                )}
+
                 <div className="col-span-3 flex items-center gap-2 text-sm text-gray-500">
                   <Clock className="w-4 h-4" />
                   <span>{formattedDate}</span>
@@ -131,7 +144,7 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
             );
           })}
         </ul>
-        
+
         {winners.length > 5 && (
           <div className="mt-4 text-center">
             <button className="text-purple-600 hover:text-purple-800 text-sm font-medium">

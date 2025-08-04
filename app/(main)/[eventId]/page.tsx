@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import React from "react";
 import Confetti from "react-confetti";
 import { useParams } from "next/navigation";
 import ImageSlider from "@/components/ImageSlider";
@@ -8,16 +9,10 @@ import VendorSection from "@/components/VendorSection";
 import Leaderboard from "@/components/LeaderBoard";
 import WonPrizeModal from "@/components/WonPrizeModal";
 import RedeemModal from "@/components/RedeemModal";
-import {
-  PrizeData,
-  Prize,
-  WinnerData,
-  WindowSize,
-  Vendor,
-  Event,
-  Winner,
-} from "@/types";
 import EventHeaders from "@/components/EventHeaders";
+import EventCountdown from "@/components/EventCountdown";
+import ProductOffering from "@/components/ProductOffering";
+import { PrizeData, Prize, Vendor, Event, Winner, WindowSize, Product } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -29,14 +24,10 @@ const fakeSegments: PrizeData[] = [
   { option: "Just an Inch", segColor: "#888888", emoji: "😬" },
 ];
 
-function getRandomColor(): string {
-  const letters = "0123456789ABCDEF";
-  return (
-    "#" +
-    Array.from({ length: 6 })
-      .map(() => letters[Math.floor(Math.random() * 16)])
-      .join("")
-  );
+function getStableColor(id: string): string {
+  const colors = ["#FF6F61", "#6B5B95", "#88B04B", "#F7CAC9", "#92A8D1"];
+  const index = id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return colors[index % colors.length];
 }
 
 function generateRandomCode(): string {
@@ -55,37 +46,31 @@ function shuffleArray(array: PrizeData[]): PrizeData[] {
   return newArray;
 }
 
-function App() {
-  const params = useParams();
-  const eventId = params?.eventId as string;
+function isEventActive(event: Event | null, currentTime: Date): boolean {
+  if (!event) return false;
+  if (event.isActive) return true;
+  if (event.startTime && event.endTime) {
+    const start = new Date(event.startTime);
+    const end = new Date(event.endTime);
+    return (
+      currentTime.getTime() >= start.getTime() &&
+      currentTime.getTime() <= end.getTime()
+    );
+  }
+  return false;
+}
+
+const useEventData = (eventId: string) => {
   const [data, setData] = useState<PrizeData[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [event, setEvent] = useState<Event>();
-  const [mustSpin, setMustSpin] = useState<boolean>(false);
-  const [prizeNumber, setPrizeNumber] = useState<number>(0);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
-  const [wonPrize, setWonPrize] = useState<PrizeData | null>(null);
-  const [winnerCode, setWinnerCode] = useState<string | null>(null);
-  const [showConfetti, setShowConfetti] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   const [recentWinners, setRecentWinners] = useState<Winner[]>([]);
-  const [windowSize, setWindowSize] = useState<WindowSize>({
-    width: typeof window !== "undefined" ? window.innerWidth : 0,
-    height: typeof window !== "undefined" ? window.innerHeight : 0,
-  });
-  const [appSound, setAppSound] = useState<HTMLAudioElement | null>(null);
-  const [bSound, setBSound] = useState<HTMLAudioElement | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setAppSound(new Audio("/audio/applause.mp3"));
-      setBSound(new Audio("/audio/boo.mp3"));
-    }
-  }, []);
-
-  useEffect(() => {
+    let isMounted = true;
     const fetchEventData = async () => {
       try {
         setIsLoading(true);
@@ -100,11 +85,6 @@ function App() {
         if (!eventResponse.ok)
           throw new Error(`HTTP error! status: ${eventResponse.status}`);
         const eventData = await eventResponse.json();
-        setEvent(eventData);
-
-        if (eventData.vendors && Array.isArray(eventData.vendors)) {
-          setVendors(eventData.vendors);
-        }
 
         const prizeResponse = await fetch(
           `${API_BASE_URL}/api/spinwheel/${eventId}`
@@ -113,6 +93,16 @@ function App() {
           throw new Error(`HTTP error! status: ${prizeResponse.status}`);
         const prizeData = await prizeResponse.json();
 
+        const productResponse = await fetch(
+          `${API_BASE_URL}/api/eventproduct/${eventId}`,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (!productResponse.ok)
+          throw new Error(`HTTP error! status: ${productResponse.status}`);
+        const productData = await productResponse.json();
+
         if (!prizeData.prizes || !Array.isArray(prizeData.prizes)) {
           throw new Error("Invalid prizes data");
         }
@@ -120,14 +110,12 @@ function App() {
         const realPrizes: PrizeData[] = prizeData.prizes.map((p: Prize) => ({
           _id: p._id,
           option: p.prize,
-          segColor: getRandomColor(),
+          segColor: getStableColor(p._id),
           emoji: "🎁",
           redeemInfo:
             p.redeemInfo ||
             "Please contact the event organizer to redeem your prize.",
         }));
-
-        setData(shuffleArray([...realPrizes, ...fakeSegments]));
 
         const winnersResponse = await fetch(
           `${API_BASE_URL}/api/winners/${eventId}`
@@ -135,60 +123,175 @@ function App() {
         if (!winnersResponse.ok)
           throw new Error(`HTTP error! status: ${winnersResponse.status}`);
         const winnersData = await winnersResponse.json();
-        setRecentWinners(
-          winnersData.filter((winner: Winner) => winner.prizeId).slice(0, 5)
-        );
+
+        if (isMounted) {
+          setEvent(eventData);
+          setVendors(
+            eventData.vendors && Array.isArray(eventData.vendors)
+              ? eventData.vendors
+              : []
+          );
+          setData(shuffleArray([...realPrizes, ...fakeSegments]));
+          setRecentWinners(
+            winnersData.filter((winner: Winner) => winner.prizeId).slice(0, 5)
+          );
+          setProducts(productData);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load data");
-        setData(fakeSegments);
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Failed to load data");
+          setData(fakeSegments);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchEventData();
+    return () => {
+      isMounted = false;
+    };
   }, [eventId]);
 
+  return { data, vendors, event, recentWinners, products, isLoading, error, setError };
+};
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = { error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("Error caught in ErrorBoundary:", error, info);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="text-center p-4 text-red-500 bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
+          <p className="mb-4">{this.state.error.message}</p>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+            onClick={() => this.setState({ error: null })}
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function App() {
+  const params = useParams();
+  const eventId = typeof params?.eventId === "string" ? params.eventId : null;
+  const { data, vendors, event, recentWinners, products, isLoading, error, setError } =
+    useEventData(eventId || "");
+  const [mustSpin, setMustSpin] = useState(false);
+  const [prizeNumber, setPrizeNumber] = useState(0);
+  const [modals, setModals] = useState({ wonPrize: false, redeem: false });
+  const [wonPrize, setWonPrize] = useState<PrizeData | null>(null);
+  const [winnerCode, setWinnerCode] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowSize, setWindowSize] = useState<WindowSize>({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  const [appSound, setAppSound] = useState<HTMLAudioElement | null>(null);
+  const [bSound, setBSound] = useState<HTMLAudioElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
   useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    if (typeof window !== "undefined") {
+      const audio1 = new Audio("/audio/applause.mp3");
+      const audio2 = new Audio("/audio/boo.mp3");
+      setAppSound(audio1);
+      setBSound(audio2);
+      return () => {
+        audio1.pause();
+        audio2.pause();
+      };
+    }
   }, []);
 
-  const handleSpinClick = async () => {
-    if (mustSpin || isLoading) return;
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+      }, 100);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  const memoizedData = useMemo(() => data, [data]);
+
+  const playSound = useCallback((audio: HTMLAudioElement | null) => {
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.play().catch((err) => console.error("Audio playback failed:", err));
+    }
+  }, []);
+
+  const handleSpinClick = useCallback(async () => {
+    if (
+      mustSpin ||
+      isLoading ||
+      !eventId ||
+      !event ||
+      !isEventActive(event, currentTime)
+    )
+      return;
 
     setPrizeNumber(0);
     setWonPrize(null);
     setShowConfetti(false);
-    setIsModalOpen(false);
-    setIsRedeemModalOpen(false);
+    setModals({ wonPrize: false, redeem: false });
     setWinnerCode(null);
 
     const newPrizeNumber = Math.floor(Math.random() * data.length);
     const selectedPrize = data[newPrizeNumber];
 
     try {
-      // Always send a request to increment spinCount, with or without prizeId
       const response = await fetch(
-        `${API_BASE_URL}/api/events/${event?._id}/check-and-record-prize`,
+        `${API_BASE_URL}/api/events/${event._id}/check-and-record-prize`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(
             fakeSegments.some((s) => s.option === selectedPrize.option)
-              ? { prizeId: false } // No prizeId for false segments
+              ? { prizeId: false }
               : { prizeId: selectedPrize._id }
           ),
         }
       );
-      if (!response.ok) throw new Error("Failed to check and record prize");
+      if (!response.ok) {
+        throw new Error("Failed to check and record prize");
+      }
       const result = await response.json();
 
       if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
-        // Handle winning spins
         if (!result.available) {
           const loseIndex = data.findIndex((p) =>
             fakeSegments.some((s) => s.option === p.option)
@@ -211,14 +314,11 @@ function App() {
           setWonPrize(selectedPrize);
         }
       } else {
-        // Handle non-winning spins
         setPrizeNumber(newPrizeNumber);
         setWonPrize(selectedPrize);
       }
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to record prize"
-      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to record prize");
       const loseIndex = data.findIndex((p) =>
         fakeSegments.some((s) => s.option === p.option)
       );
@@ -227,87 +327,30 @@ function App() {
     }
 
     setMustSpin(true);
-  };
+  }, [mustSpin, isLoading, eventId, event, data, setError, currentTime]);
 
-  // const handleSpinClick = async () => {
-  //   if (mustSpin || isLoading) return;
-
-  //   setPrizeNumber(0);
-  //   setWonPrize(null);
-  //   setShowConfetti(false);
-  //   setIsModalOpen(false);
-  //   setIsRedeemModalOpen(false);
-  //   setWinnerCode(null);
-
-  //   const newPrizeNumber = Math.floor(Math.random() * data.length);
-  //   const selectedPrize = data[newPrizeNumber];
-
-  //   if (!fakeSegments.some((s) => s.option === selectedPrize.option)) {
-  //     try {
-  //       const response = await fetch(
-  //         `${API_BASE_URL}/api/events/${event?._id}/check-and-record-prize`,
-  //         {
-  //           method: "POST",
-  //           headers: { "Content-Type": "application/json" },
-  //           body: JSON.stringify({ prizeId: selectedPrize._id }),
-  //         }
-  //       );
-  //       if (!response.ok) throw new Error("Failed to check and record prize");
-  //       const result = await response.json();
-
-  //       if (!result.available) {
-  //         const loseIndex = data.findIndex((p) =>
-  //           fakeSegments.some((s) => s.option === p.option)
-  //         );
-  //         setPrizeNumber(loseIndex);
-  //         setWonPrize(data[loseIndex]);
-  //       } else {
-  //         const code = generateRandomCode();
-  //         setWinnerCode(code);
-  //         await fetch(`${API_BASE_URL}/api/winners`, {
-  //           method: "POST",
-  //           headers: { "Content-Type": "application/json" },
-  //           body: JSON.stringify({
-  //             code,
-  //             prizeId: selectedPrize._id,
-  //             eventId,
-  //           }),
-  //         });
-  //         setPrizeNumber(newPrizeNumber);
-  //         setWonPrize(selectedPrize);
-  //       }
-  //     } catch (error) {
-  //       setError(
-  //         error instanceof Error ? error.message : "Failed to record prize"
-  //       );
-  //       const loseIndex = data.findIndex((p) =>
-  //         fakeSegments.some((s) => s.option === p.option)
-  //       );
-  //       setPrizeNumber(loseIndex);
-  //       setWonPrize(data[loseIndex]);
-  //     }
-  //   } else {
-  //     setPrizeNumber(newPrizeNumber);
-  //     setWonPrize(selectedPrize);
-  //   }
-
-  //   setMustSpin(true);
-  // };
-
-  const onStopSpinning = () => {
+  const onStopSpinning = useCallback(() => {
     setMustSpin(false);
     const prize = data[prizeNumber];
     setWonPrize(prize);
     if (!fakeSegments.some((fake) => fake.option === prize.option)) {
       setShowConfetti(true);
-      appSound?.play();
-      setIsRedeemModalOpen(true);
-      setTimeout(() => setShowConfetti(false), 5000);
+      playSound(appSound);
+      setModals((prev) => ({ ...prev, redeem: true }));
+      setTimeout(() => setShowConfetti(false), 3000);
     } else {
-      bSound?.play();
-      setIsModalOpen(true);
+      playSound(bSound);
+      setModals((prev) => ({ ...prev, wonPrize: true }));
     }
+  }, [data, prizeNumber, playSound, appSound, bSound]);
+
+  const handleRefresh = () => {
+    window.location.reload();
   };
+
+  if (!eventId) {
+    return <div className="text-red-500 text-center">Invalid event ID</div>;
+  }
 
   return (
     <div className="flex bg-gray-100 flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -316,7 +359,7 @@ function App() {
           width={windowSize.width}
           height={windowSize.height}
           recycle={false}
-          numberOfPieces={500}
+          numberOfPieces={200}
           gravity={0.2}
         />
       )}
@@ -332,14 +375,17 @@ function App() {
       )}
 
       {error && !isLoading && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50">
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-40">
           {error}
         </div>
       )}
 
-      <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
-      </div>
+      <EventCountdown
+        event={event}
+        isLoading={isLoading}
+        onCurrentTimeChange={setCurrentTime}
+        onRefresh={handleRefresh}
+      />
 
       <EventHeaders event={event} />
 
@@ -349,16 +395,25 @@ function App() {
         <SpinWheel
           mustSpin={mustSpin}
           prizeNumber={prizeNumber}
-          data={data}
+          data={memoizedData}
           onStopSpinning={onStopSpinning}
           isLoading={isLoading}
         />
 
         <button
           onClick={handleSpinClick}
-          disabled={mustSpin || isLoading}
+          disabled={mustSpin || isLoading || !isEventActive(event, currentTime)}
+          aria-label={
+            isLoading
+              ? "Loading"
+              : mustSpin
+              ? "Spinning"
+              : !isEventActive(event, currentTime)
+              ? "Spin wheel inactive"
+              : "Spin the wheel"
+          }
           className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-            mustSpin || isLoading
+            mustSpin || isLoading || !isEventActive(event, currentTime)
               ? "bg-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
           }`}
@@ -424,19 +479,27 @@ function App() {
         error={error}
       />
 
+      <ProductOffering
+        products={products}
+        isLoading={isLoading}
+        error={error}
+      />
+
       <Leaderboard winners={recentWinners} vendors={vendors} />
 
       <WonPrizeModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={modals.wonPrize}
+        onClose={() => setModals((prev) => ({ ...prev, wonPrize: false }))}
         wonPrize={wonPrize}
         handleSpinClick={handleSpinClick}
-        setIsRedeemModalOpen={setIsRedeemModalOpen}
+        setIsRedeemModalOpen={() =>
+          setModals((prev) => ({ ...prev, redeem: true }))
+        }
       />
 
       <RedeemModal
-        isOpen={isRedeemModalOpen}
-        onClose={() => setIsRedeemModalOpen(false)}
+        isOpen={modals.redeem}
+        onClose={() => setModals((prev) => ({ ...prev, redeem: false }))}
         winnerCode={winnerCode}
         wonPrize={wonPrize}
         handleSpinClick={handleSpinClick}
@@ -445,4 +508,12 @@ function App() {
   );
 }
 
-export default App;
+function WrappedApp() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}
+
+export default WrappedApp;

@@ -90,7 +90,7 @@ const PrizesList = ({
   currentPage: number;
   totalPages: number;
   setCurrentPage: (page: number) => void;
-  vendors: Vendor[];
+  vendors: Vendor[] | null;
   selectedVendor: string | null;
   setSelectedVendor: (vendorId: string | null) => void;
 }) => {
@@ -102,32 +102,34 @@ const PrizesList = ({
     <div className="space-y-6 mt-8">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-800">Spinwheel Prizes</h2>
-     {event?.type === "Vendor" &&    <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              {selectedVendor
-                ? vendors.find((v) => v._id === selectedVendor)?.name || "Vendor"
-                : "Filter by vendor"}
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Filter by vendor</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setSelectedVendor(null)}>
-              All vendors
-            </DropdownMenuItem>
-            {vendors.map((vendor) => (
-              <DropdownMenuItem
-                key={vendor._id}
-                onClick={() => setSelectedVendor(vendor._id)}
-              >
-                {vendor.name}
+        {event?.type === "Vendor" && vendors && vendors.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                {selectedVendor
+                  ? vendors.find((v) => v._id === selectedVendor)?.name || "Vendor"
+                  : "Filter by vendor"}
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Filter by vendor</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSelectedVendor(null)}>
+                All vendors
               </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>}
+              {vendors.map((vendor) => (
+                <DropdownMenuItem
+                  key={vendor._id}
+                  onClick={() => setSelectedVendor(vendor._id)}
+                >
+                  {vendor.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {!event ? (

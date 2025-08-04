@@ -3,12 +3,12 @@ import { Event } from "@/types";
 import Image from "next/image";
 
 interface EventHeaderProps {
-  event?: Event;
+  event?: Event | null; // Updated to allow null
 }
 
 function EventHeaders({ event }: EventHeaderProps) {
   return (
-    <header className="w-auto  mx-auto mb-6 md:p-2 p-1  rounded-full flex items-center justify-center space-x-2">
+    <header className="w-auto mx-auto mb-6 md:p-2 p-1 rounded-full flex items-center justify-center space-x-2">
       {event?.logo?.url ? (
         <Image
           src={event.logo.url}

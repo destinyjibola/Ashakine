@@ -1,4 +1,3 @@
-// types.ts
 export interface Prize {
   _id: string;
   prize: string;
@@ -38,12 +37,12 @@ export interface Event {
   user: string;
   slug: string;
   spinCount: number;
-  images: string[];
-  spinLog: string[];
+  spinLog: { date: string; count: number }[];
+  lastSpinDate?: string;
   createdAt: string;
   updatedAt: string;
   __v: number;
-  vendors?: string[] | Vendor[];
+  vendors?: string[] | Vendor[] | null;
   totalWins?: number;
   redeemedCount?: number;
   logo?: {
@@ -51,13 +50,29 @@ export interface Event {
     public_id: string;
     altText?: string;
   };
+  isActive: boolean;
+  startTime?: string | null;
+  endTime?: string | null;
+}
+
+export interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  phoneNumber: string;
+  formerPrice: string;
+  price: string;
+  discount: number;
+  image?: { url: string; public_id: string; altText?: string };
+  vendor: string | { _id: string; name: string };
+  event: string | Event;
 }
 
 export interface Winner {
   _id: string;
   code: string;
-  prizeId: Prize | null; // Allow null for prizeId
-  eventId: string | null; // Allow null for eventId to match API response
+  prizeId: Prize | null;
+  eventId: string | null;
   redeemed: boolean;
   createdAt: string;
 }
@@ -66,14 +81,13 @@ export interface NewEventData {
   name: string;
 }
 
-// In your types.ts file
 export interface NewPrizeData {
   prize: string;
   maxWins: number;
   winCount: number;
   redeemInfo: string;
   eventId: string;
-  vendorId?: string | null; // Change from string | undefined to string | null
+  vendorId?: string | null;
 }
 
 export interface NewVendorData {
@@ -105,6 +119,15 @@ export interface WindowSize {
 export interface ImageItem {
   src: any;
   alt: string;
-  title: string
+  title: string;
+}
 
+export interface ProductFormData {
+  name: string;
+  description: string;
+  price: string;
+  formerPrice: string;
+  discount: string;
+  phoneNumber: string;
+  vendorId: string;
 }
