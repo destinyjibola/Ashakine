@@ -85,7 +85,7 @@ const VendorForm = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4"
+      className="space-y-4 md:px-6 py-6 px-3 bg-white rounded-xl shadow-sm border border-gray-100"
       aria-labelledby="add-vendor-form-title"
     >
       <h2 id="add-vendor-form-title" className="text-lg font-medium text-gray-800 mb-4">

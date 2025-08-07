@@ -32,9 +32,9 @@ const PrizeForm = ({
 }) => (
   <form
     onSubmit={handleAddPrize}
-    className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+    className="space-y-6 md:px-6 py-6 px-3 bg-white rounded-xl shadow-sm border border-gray-100"
   >
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="space-y-1">
         <h2 className="text-2xl font-semibold text-gray-900">Add New Prize</h2>

@@ -166,7 +166,7 @@ export default function AdminLayout({
       )}
 
       {/* Main Content */}
-      <main className="flex-1 pt-[100px] overflow-hidden">{children}</main>
+      <main className="flex-1 pt-[150px] overflow-hidden">{children}</main>
     </div>
   );
 }

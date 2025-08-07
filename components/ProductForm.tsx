@@ -90,7 +90,7 @@ const ProductForm = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 p-6 bg-white rounded-xl shadow-sm border border-gray-100"
+      className="space-y-6 md:px-6 py-6 px-3 bg-white rounded-xl shadow-sm border border-gray-100"
       aria-labelledby="add-product-form-title"
     >
       <div className="space-y-1">

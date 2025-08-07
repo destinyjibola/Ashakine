@@ -846,7 +846,7 @@ export default function EventDetailsPage({
       </div>
 
       {/* Main content */}
-      <div className="pt-24 pb-8 px-4 max-w-7xl mx-auto">
+      <div className="pt-24 pb-8 px-1 max-w-7xl mx-auto">
         {/* Error messages */}
         {(qrError || eventStatusError) && (
           <div className="mb-6">
@@ -913,11 +913,11 @@ export default function EventDetailsPage({
           </div>
 
           {/* Tab content */}
-          <div className="p-6">
+          <div className="md:p-6 p-3">
             {activeTab === "prizes" && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-xl font-semibold text-gray-900 mt-2 ">
                     Prize Management
                   </h2>
                   {event.prizes.length > 0 && (
@@ -936,7 +936,7 @@ export default function EventDetailsPage({
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-gray-50 rounded-lg">
                     <PrizeForm
                       event={event}
                       newPrize={newPrize}
@@ -979,10 +979,10 @@ export default function EventDetailsPage({
 
             {activeTab === "partners" && (
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Partners & Sponsors
+                <h2 className="text-xl mt-2 font-semibold text-gray-900">
+                  Partners & Sponsors 
                 </h2>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="rounded-lg">
                   <VendorForm
                     newVendor={newVendor}
                     setNewVendor={setNewVendor}
@@ -1002,7 +1002,7 @@ export default function EventDetailsPage({
 
             {activeTab === "products" && (
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl mt-2 font-semibold text-gray-900">
                   Product Management
                 </h2>
                 {event.type === "Vendor" &&
@@ -1013,7 +1013,7 @@ export default function EventDetailsPage({
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="rounded-lg">
                     <ProductForm
                       eventId={params.eventId}
                       productError={addProductError}
