@@ -147,7 +147,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
             placeholder="Enter spinwheel name"
           />
         </div>
-        <div>
+        {/* <div>
           <label
             htmlFor="eventType"
             className="block text-sm font-medium text-gray-700 mb-1"
@@ -163,7 +163,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               <SelectItem value="Vendor">Vendor</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
         <div>
           <label
             htmlFor="eventLogo"
@@ -345,7 +345,7 @@ export default function EventsPage() {
             },
             body: JSON.stringify({
               name: newEventName,
-              type: newEventType,
+              type: "Single",
               logo: logoBase64,
             }),
           }

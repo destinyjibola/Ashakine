@@ -137,7 +137,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEventStatusError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -177,7 +177,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEventStatusError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -216,7 +216,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEventStatusError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -279,7 +279,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setAddVendorError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -344,7 +344,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEditVendorError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -386,7 +386,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setAddVendorError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -408,7 +408,7 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setAddVendorError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -458,7 +458,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -477,7 +477,7 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -526,7 +526,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("//login");
+        router.push("auth/login");
         return;
       }
 
@@ -545,7 +545,7 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -585,7 +585,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -604,7 +604,7 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -707,7 +707,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setAddProductError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("auth/login");
         return;
       }
 
@@ -767,7 +767,7 @@ export default function EventDetailsPage({
         ) {
           logout();
           setError("Session expired. Please log in again.");
-          router.push("/login");
+          router.push("/auth/login");
           return;
         }
 
@@ -820,7 +820,7 @@ export default function EventDetailsPage({
     } else if (!authLoading && !token) {
       setError("No authentication token available");
       setLoading(false);
-      router.push("/login");
+      router.push("auth/login");
     }
   }, [params.eventId, token, authLoading, router, logout]);
 
@@ -832,7 +832,7 @@ export default function EventDetailsPage({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Fixed header */}
-      <div className="fixed top-[100px] left-0 right-0 z-20 bg-white shadow-sm">
+      <div className="fixed top-[100px] left-0 right-0 z-10 bg-white shadow-sm">
         <EventHeader
           event={event}
           vendors={vendors}
