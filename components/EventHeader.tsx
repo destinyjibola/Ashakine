@@ -34,7 +34,7 @@ const EventHeader = ({
               className="flex items-center group text-gray-600 hover:text-gray-800 transition-colors"
             >
               <FiArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
-              <span className="font-medium">Back to Events</span>
+              <span className="font-medium">All spinwheels</span>
             </button>
             
             <div className="flex space-x-3">
