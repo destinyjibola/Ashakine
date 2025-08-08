@@ -24,7 +24,7 @@ const EventHeader = ({
   qrLoading,
 }: EventHeaderProps) => {
   return (
-    <div className="bg-white px-6 py-4 border-b border-gray-200 shadow-sm">
+    <div className="px-6 py-4 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto">
         {/* Desktop Layout (md and up) */}
         <div className="hidden md:block">
@@ -36,7 +36,7 @@ const EventHeader = ({
               <FiArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
               <span className="font-medium">All spinwheels</span>
             </button>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={copySpinWheelLink}
@@ -79,7 +79,9 @@ const EventHeader = ({
                 </div>
               ) : (
                 <div className="w-12 h-12 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center mr-4 group hover:border-blue-200 transition-colors duration-300">
-                  <span className="text-xs text-gray-400 group-hover:text-gray-600">No Logo</span>
+                  <span className="text-xs text-gray-400 group-hover:text-gray-600">
+                    No Logo
+                  </span>
                 </div>
               )}
               <div>
@@ -92,12 +94,17 @@ const EventHeader = ({
 
             <div className="flex space-x-6">
               {[
-                { label: "Vendors", value: vendors?.length ?? 0 },
+                { label: "Parners", value: vendors?.length ?? 0 },
                 { label: "Prizes", value: event.prizes?.length ?? 0 },
-                ...(event.type === "Single" ? [
-                  { label: "Winners", value: winners?.length ?? 0 },
-                  { label: "Redeemed", value: winners?.filter((w) => w.redeemed).length ?? 0 }
-                ] : [])
+                ...(event.type === "Single"
+                  ? [
+                      { label: "Winners", value: winners?.length ?? 0 },
+                      {
+                        label: "Redeemed",
+                        value: winners?.filter((w) => w.redeemed).length ?? 0,
+                      },
+                    ]
+                  : []),
               ].map((stat, index) => (
                 <div key={index} className="text-center group">
                   <p className="text-sm text-gray-500 group-hover:text-blue-500 transition-colors">
@@ -115,13 +122,15 @@ const EventHeader = ({
         {/* Mobile Layout (sm and down) */}
         <div className="md:hidden">
           {/* Back button - always first */}
-          <button
-            onClick={onBack}
-            className="flex items-center group text-gray-600 hover:text-gray-800 transition-colors mb-4"
-          >
-            <FiArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
-            <span className="font-medium">Back to Events</span>
-          </button>
+             {/* <button
+              onClick={onBack}
+              className="flex items-center group text-gray-600 hover:text-gray-800 transition-colors mb-4"
+            >
+              <FiArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
+              <span className="font-medium">Back to Events</span>
+            </button> */}
+           
+ 
 
           {/* Event Info - logo, name, type */}
           <div className="flex items-center mb-4">
@@ -137,7 +146,9 @@ const EventHeader = ({
               </div>
             ) : (
               <div className="w-12 h-12 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center mr-4 group hover:border-blue-200 transition-colors duration-300">
-                <span className="text-xs text-gray-400 group-hover:text-gray-600">No Logo</span>
+                <span className="text-xs text-gray-400 group-hover:text-gray-600">
+                  No Logo
+                </span>
               </div>
             )}
             <div>
@@ -149,14 +160,19 @@ const EventHeader = ({
           </div>
 
           {/* Stats */}
-          <div className="flex flex-wrap gap-x-6 gap-y-3 mb-4">
+          <div className="flex flex-row gap-x-2 mb-4">
             {[
-              { label: "Vendors", value: vendors?.length ?? 0 },
+              { label: "Partners", value: vendors?.length ?? 0 },
               { label: "Prizes", value: event.prizes?.length ?? 0 },
-              ...(event.type === "Single" ? [
-                { label: "Winners", value: winners?.length ?? 0 },
-                { label: "Redeemed", value: winners?.filter((w) => w.redeemed).length ?? 0 }
-              ] : [])
+              ...(event.type === "Single"
+                ? [
+                    { label: "Winners", value: winners?.length ?? 0 },
+                    {
+                      label: "Redeemed",
+                      value: winners?.filter((w) => w.redeemed).length ?? 0,
+                    },
+                  ]
+                : []),
             ].map((stat, index) => (
               <div key={index} className="text-center group min-w-[60px]">
                 <p className="text-sm text-gray-500 group-hover:text-blue-500 transition-colors">

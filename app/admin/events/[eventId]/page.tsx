@@ -832,7 +832,9 @@ export default function EventDetailsPage({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Fixed header */}
-      <div className="fixed top-[100px] left-0 right-0 z-10 bg-white shadow-sm">
+      {/* <div className="fixed top-[100px] left-0 right-0 z-10 bg-white shadow-sm"> */}
+      <div className="bg-white shadow-sm">
+
         <EventHeader
           event={event}
           vendors={vendors}
@@ -846,7 +848,7 @@ export default function EventDetailsPage({
       </div>
 
       {/* Main content */}
-      <div className="pt-24 pb-8 px-1 max-w-7xl mx-auto">
+      <div className=" pb-8 px-1 max-w-7xl mx-auto mt-[1rem]">
         {/* Error messages */}
         {(qrError || eventStatusError) && (
           <div className="mb-6">
@@ -864,7 +866,7 @@ export default function EventDetailsPage({
         )}
  
         {/* Tabbed interface */}
-        <div className="bg-white rounded-xl shadow-sm mt-[10rem] md:mt-[5rem] border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           {/* Tab navigation */}
           <div className="border-b border-gray-200">
             <nav className="flex overflow-x-auto">
