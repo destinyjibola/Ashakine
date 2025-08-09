@@ -130,4 +130,5 @@ export interface ProductFormData {
   discount: string;
   phoneNumber: string;
   vendorId: string;
+  image?: FileList;
 }

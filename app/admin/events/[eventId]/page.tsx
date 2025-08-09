@@ -13,10 +13,12 @@ import PrizeForm from "@/components/PrizeForm";
 import PrizesList from "@/components/PrizesList";
 import ProductForm, { ProductFormData } from "@/components/ProductForm";
 import ProductsList from "@/components/ProductsList";
+
 import QRCodePreviewModal from "@/components/QRCodePreviewModal";
 import EventStatus from "@/components/EventStatus";
 import QRCode from "qrcode";
 import jsPDF from "jspdf";
+import EditProductModal from "@/components/EditProductFormModal";
 
 export default function EventDetailsPage({
   params,
@@ -44,6 +46,7 @@ export default function EventDetailsPage({
     email: "",
   });
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingPrizeId, setEditingPrizeId] = useState<string | null>(null);
   const [editPrizeName, setEditPrizeName] = useState<string>("");
   const [editMaxWins, setEditMaxWins] = useState<number>(1);
@@ -56,17 +59,19 @@ export default function EventDetailsPage({
   const [editVendorError, setEditVendorError] = useState<string | null>(null);
   const [addProductLoading, setAddProductLoading] = useState<boolean>(false);
   const [addProductError, setAddProductError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [qrLoading, setQrLoading] = useState(false);
+  const [editProductLoading, setEditProductLoading] = useState<boolean>(false);
+  const [editProductError, setEditProductError] = useState<string | null>(null);
+  const [copied, setCopied] = useState<boolean>(false);
+  const [qrLoading, setQrLoading] = useState<boolean>(false);
   const [qrError, setQrError] = useState<string | null>(null);
-  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState<boolean>(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [eventStatusLoading, setEventStatusLoading] = useState<boolean>(false);
   const [eventStatusError, setEventStatusError] = useState<string | null>(null);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("prizes");
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const prizesPerPage = 5;
   const currentPrizes =
     event?.prizes?.slice(
@@ -78,7 +83,6 @@ export default function EventDetailsPage({
     : 0;
 
   const copySpinWheelLink = () => {
-    // const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
     const spinWheelUrl = `${window.location.origin}/${event?._id}`;
     navigator.clipboard.writeText(spinWheelUrl);
     setCopied(true);
@@ -137,7 +141,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEventStatusError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -160,7 +164,6 @@ export default function EventDetailsPage({
   const handleSetTimer = async (startTime: string, endTime: string) => {
     setEventStatusLoading(true);
     setEventStatusError(null);
-    console.log(startTime, endTime)
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
@@ -177,7 +180,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEventStatusError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -216,7 +219,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEventStatusError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -242,6 +245,7 @@ export default function EventDetailsPage({
     resetLogo: () => void
   ) => {
     e.preventDefault();
+    if (vendors && vendors.length >= 3) return;
     setAddVendorLoading(true);
     setAddVendorError(null);
 
@@ -279,7 +283,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setAddVendorError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -344,7 +348,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setEditVendorError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -371,6 +375,7 @@ export default function EventDetailsPage({
   };
 
   const handleDeleteVendor = async (vendorId: string) => {
+    if (!window.confirm("Are you sure you want to delete this vendor?")) return;
     setAddVendorLoading(true);
     setAddVendorError(null);
 
@@ -386,7 +391,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setAddVendorError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -408,7 +413,7 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setAddVendorError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -458,7 +463,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -477,11 +482,11 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
-      if (!response.ok) {
+      if (!updatedResponse.ok) {
         const errorData = await updatedResponse.json();
         throw new Error(errorData.message || "Failed to fetch updated event");
       }
@@ -526,7 +531,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -545,11 +550,11 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
-      if (!response.ok) {
+      if (!updatedResponse.ok) {
         const errorData = await updatedResponse.json();
         throw new Error(errorData.message || "Failed to fetch updated event");
       }
@@ -570,6 +575,7 @@ export default function EventDetailsPage({
   };
 
   const handleDeletePrize = async (prizeId: string) => {
+    if (!window.confirm("Are you sure you want to delete this prize?")) return;
     setPrizeLoading(true);
     setPrizeError(null);
 
@@ -585,7 +591,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -604,11 +610,11 @@ export default function EventDetailsPage({
       if (updatedResponse.status === 401) {
         logout();
         setPrizeError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
-      if (!response.ok) {
+      if (!updatedResponse.ok) {
         const errorData = await updatedResponse.json();
         throw new Error(errorData.message || "Failed to fetch updated event");
       }
@@ -631,6 +637,10 @@ export default function EventDetailsPage({
     resetImage: () => void
   ) => {
     e.preventDefault();
+    if (products.length >= 3) {
+      setAddProductError("Maximum of 3 products reached for this event");
+      return;
+    }
     setAddProductLoading(true);
     setAddProductError(null);
 
@@ -647,8 +657,8 @@ export default function EventDetailsPage({
       const productData = {
         name: data.name,
         description: data.description,
-        price: data.price,
-        formerPrice: data.formerPrice,
+        price: parseFloat(data.price),
+        formerPrice: parseFloat(data.formerPrice),
         discount: data.discount ? parseInt(data.discount) : 0,
         phoneNumber: data.phoneNumber,
         image: imageBase64,
@@ -670,7 +680,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setAddProductError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -691,7 +701,218 @@ export default function EventDetailsPage({
     }
   };
 
+
+  const handleUpdateProduct = async (
+    e: React.FormEvent,
+    productId: string,
+    data: ProductFormData,
+    image: File | null,
+    resetImage: () => void
+  ) => {
+    e.preventDefault();
+    setEditProductLoading(true);
+    setEditProductError(null);
+
+    try {
+      let imageBase64: string | null = null;
+      if (image) {
+        const reader = new FileReader();
+        imageBase64 = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(image);
+        });
+      }
+
+      const productData = {
+        name: data.name,
+        description: data.description,
+        price: data.price, // Keep as string to match ProductFormData and Product interface
+        formerPrice: data.formerPrice, // Keep as string
+        discount: data.discount ? parseInt(data.discount) : 0,
+        phoneNumber: data.phoneNumber,
+        image: imageBase64,
+      };
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(productData),
+        }
+      );
+
+      if (response.status === 401) {
+        logout();
+        setEditProductError("Session expired. Please log in again.");
+        router.push("/auth/login");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update product");
+      }
+
+      const updatedProduct: Product = await response.json();
+
+      // Validate the updated product
+      if (!updatedProduct._id || !updatedProduct.name) {
+        throw new Error("Invalid product data received from server");
+      }
+
+      // Ensure price and formerPrice are strings to match Product interface
+      const normalizedProduct: Product = {
+        ...updatedProduct,
+        price: String(updatedProduct.price),
+        formerPrice: String(updatedProduct.formerPrice),
+        image: updatedProduct.image || undefined,
+        vendor:
+          typeof updatedProduct.vendor === "string"
+            ? updatedProduct.vendor
+            : updatedProduct.vendor || "",
+        event:
+          typeof updatedProduct.event === "string"
+            ? updatedProduct.event
+            : updatedProduct.event || params.eventId,
+      };
+
+      // Update the products state
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
+          p._id === productId
+            ? {
+                ...p,
+                ...normalizedProduct,
+                image: normalizedProduct.image || p.image, // Preserve existing image if not updated
+                vendor: normalizedProduct.vendor || p.vendor, // Preserve existing vendor
+                event: normalizedProduct.event || p.event, // Preserve existing event
+              }
+            : p
+        )
+      );
+
+      // Optional: Refetch products to ensure consistency
+      try {
+        const productsResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}/products`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (productsResponse.status === 401) {
+          logout();
+          setEditProductError("Session expired. Please log in again.");
+          router.push("/auth/login");
+          return;
+        }
+
+        if (!productsResponse.ok) {
+          console.warn("Failed to refetch products, using local state");
+        } else {
+          const productsData: Product[] = await productsResponse.json();
+          setProducts(
+            productsData.map((p) => ({
+              ...p,
+              price: String(p.price),
+              formerPrice: String(p.formerPrice),
+            }))
+          );
+        }
+      } catch (refetchErr) {
+        console.warn("Refetch error:", refetchErr);
+      }
+
+      resetImage();
+      setEditingProduct(null);
+    } catch (err) {
+      setEditProductError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setEditProductLoading(false);
+    }
+  };
+
+  // const handleUpdateProduct = async (
+  //   e: React.FormEvent,
+  //   productId: string,
+  //   data: ProductFormData,
+  //   image: File | null,
+  //   resetImage: () => void
+  // ) => {
+  //   e.preventDefault();
+  //   setEditProductLoading(true);
+  //   setEditProductError(null);
+
+  //   try {
+  //     let imageBase64: string | null = null;
+  //     if (image) {
+  //       const reader = new FileReader();
+  //       imageBase64 = await new Promise<string>((resolve) => {
+  //         reader.onload = () => resolve(reader.result as string);
+  //         reader.readAsDataURL(image);
+  //       });
+  //     }
+
+  //     const productData = {
+  //       name: data.name,
+  //       description: data.description,
+  //       price: parseFloat(data.price),
+  //       formerPrice: parseFloat(data.formerPrice),
+  //       discount: data.discount ? parseInt(data.discount) : 0,
+  //       phoneNumber: data.phoneNumber,
+  //       image: imageBase64,
+  //     };
+
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         body: JSON.stringify(productData),
+  //       }
+  //     );
+
+  //     if (response.status === 401) {
+  //       logout();
+  //       setEditProductError("Session expired. Please log in again.");
+  //       router.push("/auth/login");
+  //       return;
+  //     }
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.message || "Failed to update product");
+  //     }
+
+  //     const updatedProduct: Product = await response.json();
+  //     setProducts(
+  //       products.map((p) => (p._id === productId ? updatedProduct : p))
+  //     );
+  //     resetImage();
+  //     setEditingProduct(null);
+  //   } catch (err) {
+  //     setEditProductError(
+  //       err instanceof Error ? err.message : "An unknown error occurred"
+  //     );
+  //   } finally {
+  //     setEditProductLoading(false);
+  //   }
+  // };
+
   const handleDeleteProduct = async (productId: string) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
     setAddProductLoading(true);
     setAddProductError(null);
 
@@ -707,7 +928,7 @@ export default function EventDetailsPage({
       if (response.status === 401) {
         logout();
         setAddProductError("Session expired. Please log in again.");
-        router.push("auth/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -820,7 +1041,7 @@ export default function EventDetailsPage({
     } else if (!authLoading && !token) {
       setError("No authentication token available");
       setLoading(false);
-      router.push("auth/login");
+      router.push("/auth/login");
     }
   }, [params.eventId, token, authLoading, router, logout]);
 
@@ -829,12 +1050,10 @@ export default function EventDetailsPage({
     return <div className="p-6 text-gray-800">Loading event details...</div>;
   if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
   if (!event) return <div className="p-6 text-gray-800">Event not found</div>;
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Fixed header */}
-      {/* <div className="fixed top-[100px] left-0 right-0 z-10 bg-white shadow-sm"> */}
       <div className="bg-white shadow-sm">
-
         <EventHeader
           event={event}
           vendors={vendors}
@@ -847,10 +1066,8 @@ export default function EventDetailsPage({
         />
       </div>
 
-      {/* Main content */}
-      <div className=" pb-8 px-1 max-w-7xl mx-auto mt-[1rem]">
-        {/* Error messages */}
-        {(qrError || eventStatusError) && (
+      <div className="pb-8 px-1 max-w-7xl mx-auto mt-[1rem]">
+        {(qrError || eventStatusError || addProductError || editProductError) && (
           <div className="mb-6">
             {qrError && (
               <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">
@@ -862,15 +1079,23 @@ export default function EventDetailsPage({
                 {eventStatusError}
               </div>
             )}
+            {addProductError && (
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                {addProductError}
+              </div>
+            )}
+            {editProductError && (
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                {editProductError}
+              </div>
+            )}
           </div>
         )}
- 
-        {/* Tabbed interface */}
+
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Tab navigation */}
           <div className="border-b border-gray-200">
             <nav className="flex overflow-x-auto">
-                   <button
+              <button
                 className={`px-6 py-4 font-medium text-sm whitespace-nowrap ${
                   activeTab === "activate"
                     ? "border-b-2 border-blue-600 text-blue-600"
@@ -910,28 +1135,24 @@ export default function EventDetailsPage({
               >
                 Products ({products.length})
               </button>
-         
             </nav>
           </div>
 
-          {/* Tab content */}
           <div className="md:p-6 p-3">
             {activeTab === "prizes" && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <h2 className="text-xl font-semibold text-gray-900 mt-2 ">
+                  <h2 className="text-xl font-semibold text-gray-900 mt-2">
                     Prize Management
                   </h2>
                   {event.prizes.length > 0 && (
                     <div className="text-sm text-gray-500">
-                      Showing {currentPrizes.length} of {event.prizes.length}{" "}
-                      prizes
+                      Showing {currentPrizes.length} of {event.prizes.length} prizes
                     </div>
                   )}
                 </div>
 
-                {event.type === "Vendor" &&
-                (!vendors || vendors.length === 0) ? (
+                {event.type === "Vendor" && (!vendors || vendors.length === 0) ? (
                   <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                     <p className="text-yellow-700">
                       Please add a vendor before adding prizes.
@@ -982,7 +1203,7 @@ export default function EventDetailsPage({
             {activeTab === "partners" && (
               <div className="space-y-6">
                 <h2 className="text-xl mt-2 font-semibold text-gray-900">
-                  Partners & Sponsors 
+                  Partners & Sponsors
                 </h2>
                 <div className="rounded-lg">
                   <VendorForm
@@ -991,6 +1212,7 @@ export default function EventDetailsPage({
                     vendorError={addVendorError}
                     vendorLoading={addVendorLoading}
                     handleAddVendor={handleAddVendor}
+                    vendorsCount={vendors?.length ?? 0}
                   />
                 </div>
                 <VendorsList
@@ -1007,8 +1229,7 @@ export default function EventDetailsPage({
                 <h2 className="text-xl mt-2 font-semibold text-gray-900">
                   Product Management
                 </h2>
-                {event.type === "Vendor" &&
-                (!vendors || vendors.length === 0) ? (
+                {event.type === "Vendor" && (!vendors || vendors.length === 0) ? (
                   <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                     <p className="text-yellow-700">
                       Please add a vendor before adding products.
@@ -1021,6 +1242,7 @@ export default function EventDetailsPage({
                       productError={addProductError}
                       productLoading={addProductLoading}
                       handleAddProduct={handleAddProduct}
+                      productsCount={products.length}
                     />
                   </div>
                 )}
@@ -1028,7 +1250,7 @@ export default function EventDetailsPage({
                   event={event}
                   products={products}
                   handleDeleteProduct={handleDeleteProduct}
-                  setEditingProduct={() => {}}
+                  setEditingProduct={setEditingProduct}
                 />
               </div>
             )}
@@ -1054,10 +1276,9 @@ export default function EventDetailsPage({
         </div>
       </div>
 
-      {/* Modals */}
       {editingVendor && (
         <EditVendorModal
-          isOpen={editingVendor !== null}
+          isOpen={!!editingVendor}
           onClose={() => setEditingVendor(null)}
           vendor={editingVendor}
           vendorError={editVendorError}
@@ -1066,6 +1287,19 @@ export default function EventDetailsPage({
           setEditingVendor={setEditingVendor}
         />
       )}
+
+      {editingProduct && (
+        <EditProductModal
+          isOpen={!!editingProduct}
+          onClose={() => setEditingProduct(null)}
+          product={editingProduct}
+          productError={editProductError}
+          productLoading={editProductLoading}
+          handleUpdateProduct={handleUpdateProduct}
+          setEditingProduct={setEditingProduct}
+        />
+      )}
+
       <QRCodePreviewModal
         isOpen={isQRModalOpen}
         onClose={() => setIsQRModalOpen(false)}

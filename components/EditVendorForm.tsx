@@ -183,7 +183,7 @@ const EditVendorForm = ({
         </div>
 
         {/* Vendor Email */}
-        <div>
+        {/* <div>
           <label
             htmlFor="vendorEmail"
             className="block text-sm font-medium text-gray-700 mb-1"
@@ -222,7 +222,7 @@ const EditVendorForm = ({
               {errors.email.message}
             </p>
           )}
-        </div>
+        </div> */}
 
         {/* Logo Upload */}
         <div>
