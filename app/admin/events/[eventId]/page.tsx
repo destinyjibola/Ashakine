@@ -576,7 +576,7 @@ export default function EventDetailsPage({
 
   const handleDeletePrize = async (prizeId: string) => {
     if (!window.confirm("Are you sure you want to delete this prize?")) return;
-    setPrizeLoading(true);
+    // setPrizeLoading(true);
     setPrizeError(null);
 
     try {
@@ -626,7 +626,7 @@ export default function EventDetailsPage({
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
-      setPrizeLoading(false);
+      // setPrizeLoading(false);
     }
   };
 
