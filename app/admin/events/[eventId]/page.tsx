@@ -376,7 +376,7 @@ export default function EventDetailsPage({
 
   const handleDeleteVendor = async (vendorId: string) => {
     if (!window.confirm("Are you sure you want to delete this vendor?")) return;
-    setAddVendorLoading(true);
+    // setAddVendorLoading(true);
     setAddVendorError(null);
 
     try {
@@ -429,7 +429,7 @@ export default function EventDetailsPage({
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
-      setAddVendorLoading(false);
+      // setAddVendorLoading(false);
     }
   };
 
@@ -913,7 +913,7 @@ export default function EventDetailsPage({
 
   const handleDeleteProduct = async (productId: string) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
-    setAddProductLoading(true);
+    // setAddProductLoading(true);
     setAddProductError(null);
 
     try {
@@ -943,7 +943,7 @@ export default function EventDetailsPage({
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
-      setAddProductLoading(false);
+      // setAddProductLoading(false);
     }
   };
 
