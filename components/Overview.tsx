@@ -229,8 +229,8 @@ export default function Overview() {
 
   return (
     <div className="">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold mb-[2rem]">Overview</h1>
+      <div className="flex items-center justify-between mb-[2rem] mt-[3rem]">
+        <h1 className="text-2xl font-bold">Overview</h1>
         <Link href={"/admin/events"}>
           <Button className="text-sm font-normal bg-primarys-100 text-white">
             Create spinwheel
