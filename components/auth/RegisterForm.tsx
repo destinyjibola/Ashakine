@@ -68,6 +68,7 @@ const RegisterForm = () => {
 
   return (
     <main className="flex h-[100vh] flex-col items-center justify-center bg-gray-500">
+      {JSON.stringify(error)}
       <CardWrapper
         headerLabel="Create an account"
         backButtonLabel="Already have an account?"
