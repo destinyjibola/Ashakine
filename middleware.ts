@@ -5,15 +5,15 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const publicPaths = ['/auth/login', '/auth/register'];
 
-  const role = request.cookies.get('user')?.value || null;
+  const usertoken = request.cookies.get('user')?.value || null;
 
   // Redirect logged-in users away from login/register pages
-  if (publicPaths.includes(path) && role) {
+  if (publicPaths.includes(path) && usertoken) {
     return NextResponse.redirect(new URL('/admin', request.nextUrl));
   }
 
-  // Protect all /admin routes
-  if (path.startsWith('/admin') && !role) {
+  // Redirect to login for any non-public route if usertoken is empty
+  if (!publicPaths.includes(path) && !usertoken) {
     return NextResponse.redirect(new URL('/auth/login', request.nextUrl));
   }
 

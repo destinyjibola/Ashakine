@@ -70,7 +70,7 @@ const ProductItem = ({
           <div className="flex items-baseline gap-2">
             {/* Current Price */}
             <span className="text-xl font-bold text-gray-900">
-              ${currentPrice.toFixed(2)}
+              ₦{currentPrice.toFixed(2)}
             </span>
             
             {/* Former Price with slash */}

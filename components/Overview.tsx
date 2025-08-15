@@ -129,7 +129,7 @@ export default function Overview() {
     if (!authLoading && token) {
       fetchOverviewData();
     }
-  }, [authLoading, token, router]);
+  }, []);
 
   const fetchOverviewData = async () => {
     try {
@@ -143,9 +143,15 @@ export default function Overview() {
       const data = await response.json();
       if (data.success) {
         setOverview(data.data || null);
-      } else {
-        setError("Failed to fetch overview data");
       }
+
+      if (response.status === 401) {
+        logout();
+        setRedeemError("Session expired. Please log in again.");
+        router.push("/auth/login");
+        return;
+      }
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching overview data:", error);
@@ -183,7 +189,7 @@ export default function Overview() {
       if (response.status === 401) {
         logout();
         setRedeemError("Session expired. Please log in again.");
-        router.push("/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -233,7 +239,7 @@ export default function Overview() {
         <h1 className="text-2xl font-bold">Overview</h1>
         <Link href={"/admin/events"}>
           <Button className="text-sm font-normal bg-primarys-100 text-white">
-            Create spinwheel
+            Manage spinwheel
           </Button>
         </Link>
       </div>

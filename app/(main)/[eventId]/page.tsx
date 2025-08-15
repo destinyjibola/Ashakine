@@ -353,7 +353,7 @@ function App() {
   }
 
   return (
-    <div className="flex bg-gray-100 flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {showConfetti && (
         <Confetti
           width={windowSize.width}

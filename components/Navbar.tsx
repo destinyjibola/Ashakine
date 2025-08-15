@@ -9,7 +9,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="w-full bg-[#FFB60099] border-b border-[#e6af2230] backdrop-blur-md sticky top-0 z-50">
+    <nav className="w-full bg-[#FFB600] border-b border-[#e6af2230] backdrop-blur-md sticky top-0 z-50">
       {/* Animated glow bar */}
       <div className="h-0.5 bg-gradient-to-r from-secondarycolor/0 via-secondarycolor to-secondarycolor/0 animate-pulse"></div>
 

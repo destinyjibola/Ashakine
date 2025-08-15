@@ -21,7 +21,7 @@ const VendorItem = ({
     if (window.confirm(`Are you sure you want to delete ${vendor.name}?`)) {
       handleDeleteVendor(vendor._id);
     }
-  };
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-row items-start justify-between space-y-4">

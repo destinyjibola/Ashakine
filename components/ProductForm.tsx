@@ -257,7 +257,7 @@ const ProductForm = ({
                   Price <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
                   <Controller
                     name="price"
                     control={control}
@@ -309,7 +309,7 @@ const ProductForm = ({
                   Former Price <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
                   <Controller
                     name="formerPrice"
                     control={control}

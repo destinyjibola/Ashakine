@@ -49,7 +49,7 @@ function ImageSlider() {
 
       {/* Mobile: Carousel */}
       <div
-        className="w-full h-[10rem] md:h-[12rem] relative overflow-hidden rounded-xl shadow-lg"
+        className="w-full h-[10rem] md:h-[12rem] relative overflow-hidden shadow-sm"
         role="region"
         aria-label="Image carousel"
       >
@@ -67,16 +67,16 @@ function ImageSlider() {
             <Image
               src={image.src}
               alt={image.alt}
-              className="h-full w-full rounded-xl"
+              className="h-full w-full"
               width={1000}
               height={500}
               style={{ objectFit: "cover" }}
               priority={index === 0}
             />
             {/* Caption Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-center py-4">
+            {/* <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-center py-4">
               <span className="text-base font-semibold">{image.title}</span>
-            </div>
+            </div> */}
           </div>
         ))}
         {/* Navigation Dots */}
