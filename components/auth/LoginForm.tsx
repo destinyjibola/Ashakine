@@ -60,12 +60,17 @@ const LoginForm = () => {
       }
     } catch (error: any) {
       setLoading(false);
-      if (error.response?.status === 403 && error.response?.data?.verificationSent) {
+      if (
+        error.response?.status === 403 &&
+        error.response?.data?.verificationSent
+      ) {
+        console.log(error)
         setSuccess(error.response.data.message);
         startTransition(() => {
           router.push(`/auth/verify-email/${values.email}`);
         });
       } else {
+        console.log(error)
         setError(error.response?.data?.message || "Something went wrong");
       }
     }
@@ -79,7 +84,7 @@ const LoginForm = () => {
     <main className="flex h-[100vh] flex-col items-center justify-center bg-gray-500">
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
-{JSON.stringify(error)}
+      {JSON.stringify(error)}
       {/* Login Form */}
       <div className="relative z-10">
         <CardWrapper
@@ -129,9 +134,15 @@ const LoginForm = () => {
                             type="button"
                             onClick={togglePasswordVisibility}
                             className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
                           >
-                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                            {showPassword ? (
+                              <FaEyeSlash size={20} />
+                            ) : (
+                              <FaEye size={20} />
+                            )}
                           </button>
                         </div>
                       </FormControl>
