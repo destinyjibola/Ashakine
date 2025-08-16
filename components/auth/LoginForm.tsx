@@ -22,6 +22,9 @@ import { useAuth } from "@/hooks/AuthContext";
 import Link from "next/link";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import react-icons
 
+
+const Url = process.env.NEXT_PUBLIC_API_URL
+
 const LoginForm = () => {
   const { setAuth } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -47,7 +50,7 @@ const LoginForm = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        `${Url}/api/auth/login`,
         values
       );
 
@@ -81,11 +84,11 @@ const LoginForm = () => {
   };
 
   return (
-    <main className="flex h-[100vh] flex-col items-center justify-center bg-gray-500">
+    <main className="flex h-[100vh] flex-col items-center justify-center bg-white">
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black/60"></div>
-      {JSON.stringify(process.env.NEXT_PUBLIC_API_URL)}
-      {JSON.stringify(error)}
+      {/* <div className="absolute inset-0 bg-black/60"></div> */}
+      {Url}
+      {/* {JSON.stringify(error)} */}
       {/* Login Form */}
       <div className="relative z-10">
         <CardWrapper
