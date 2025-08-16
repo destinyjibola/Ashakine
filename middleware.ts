@@ -4,6 +4,8 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const publicPaths = ['/auth/login', '/auth/register'];
+  const adminPaths = ['/admin/:path*'];
+  
 
   const usertoken = request.cookies.get('user')?.value || null;
 
@@ -13,7 +15,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Redirect to login for any non-public route if usertoken is empty
-  if (!publicPaths.includes(path) && !usertoken) {
+  if (adminPaths.includes(path) && !usertoken) {
     return NextResponse.redirect(new URL('/auth/login', request.nextUrl));
   }
 

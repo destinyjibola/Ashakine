@@ -70,8 +70,9 @@ export default function AdminLayout({
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-20 py-6 h-[100px] container-spacing  bg-[#FFB600] border-b border-[#e6af2230]">
         <div className="px-4 flex justify-between items-center ">
-          <Link href="" className="hidden lg:flex items-center gap-3">
-            <Image width={154} height={32} alt="spinly logo" src={Spinly.src} />
+          <Link href="/admin" className="hidden lg:flex items-center gap-3">
+            {/* <Image width={154} height={32} alt="spinly logo" src={Spinly.src} /> */}
+            <h2 className="text-3xl font-bold">Spinlly</h2>
           </Link>
 
           {/* Mobile menu button */}

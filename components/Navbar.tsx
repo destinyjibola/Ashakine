@@ -20,14 +20,15 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo - visible on all screens */}
           <Link href="/" className="flex items-center gap-3">
-            <Image
+            {/* <Image
               width={120}
               height={25}
               alt="Spinly logo"
               src={Spinly.src}
               className="w-auto h-6 md:h-8"
               priority
-            />
+            /> */}
+            <h2 className="text-3xl font-bold">Spinlly</h2>
           </Link>
 
           {/* Desktop Navigation */}

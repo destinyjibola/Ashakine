@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import BackButton from "./BackButton";
 import Header from "./Header";
+import { Button } from "../ui/button";
 // import Social from "./Social";
 
 interface CardWrapperProps {
@@ -26,13 +28,11 @@ const CardWrapper = ({
         <Header label={headerLabel} />
       </CardHeader>
       <CardContent>{children}</CardContent>
-      {/* {showSocial && (
-        <CardFooter>
-          <Social />
-        </CardFooter>
-      )} */}
-      <CardFooter>
+      <CardFooter className="flex flex-col space-y-1">
         <BackButton label={backButtonLabel} href={backButtonHref} />
+        <Button variant="link" className="font-normal w-full text-primarycolor" size="sm" asChild>
+          <Link href={"/"}>{"<<"}Go to homepage</Link>
+        </Button>
       </CardFooter>
     </Card>
   );
