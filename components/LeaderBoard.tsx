@@ -104,12 +104,12 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
                   <span className="font-medium text-gray-800">
                     {winner.prizeId?.prize}
                   </span>
-                  {winner.redeemed && (
+                  {/* {winner.redeemed && (
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1">
                       <CheckCircle className="w-3 h-3" />
                       Redeemed
                     </span>
-                  )}
+                  )} */}
                 </div>
 
                 {hasAnyVendor && (

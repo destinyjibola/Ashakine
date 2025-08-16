@@ -23,13 +23,13 @@ const QRCodePreviewModal = ({
           <img src={qrCodeDataUrl} alt="QR Code" className="w-40 h-40" />
           <p className="text-gray-800 text-sm">Scan and Spin to Win Prizes</p>
           <div className="flex justify-end gap-2">
-            <button
+            {/* <button
               type="button"
               onClick={onClose}
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition-colors duration-200"
             >
               Cancel
-            </button>
+            </button> */}
             <button
               type="button"
               onClick={downloadPDF}

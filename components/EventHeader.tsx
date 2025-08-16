@@ -1,5 +1,6 @@
 import { FiArrowLeft, FiCopy, FiShare2 } from "react-icons/fi";
 import Image from "next/image";
+import Link from "next/link";
 import { Event, Vendor, Winner } from "@/types";
 
 interface EventHeaderProps {
@@ -24,7 +25,7 @@ const EventHeader = ({
   qrLoading,
 }: EventHeaderProps) => {
   return (
-    <div className="px-6 py-4 border-b border-gray-200 shadow-sm">
+    <div className="px-4 py-4 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto">
         {/* Desktop Layout (md and up) */}
         <div className="hidden md:block">
@@ -38,6 +39,11 @@ const EventHeader = ({
             </button>
 
             <div className="flex space-x-3">
+              <Link href={`/${event._id}`} target="_blank">
+                <button className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm">
+                  Go to Spinwheel
+                </button>
+              </Link>
               <button
                 onClick={copySpinWheelLink}
                 className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
@@ -59,7 +65,7 @@ const EventHeader = ({
                 }`}
               >
                 <FiShare2 className="h-4 w-4 mr-2" />
-                {qrLoading ? "Generating..." : "Share QR"}
+                {qrLoading ? "Generating..." : "QR"}
               </button>
             </div>
           </div>
@@ -121,17 +127,6 @@ const EventHeader = ({
 
         {/* Mobile Layout (sm and down) */}
         <div className="md:hidden">
-          {/* Back button - always first */}
-             {/* <button
-              onClick={onBack}
-              className="flex items-center group text-gray-600 hover:text-gray-800 transition-colors mb-4"
-            >
-              <FiArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
-              <span className="font-medium">Back to Events</span>
-            </button> */}
-           
- 
-
           {/* Event Info - logo, name, type */}
           <div className="flex items-center mb-4">
             {event.logo?.url ? (
@@ -187,6 +182,11 @@ const EventHeader = ({
 
           {/* Action buttons */}
           <div className="flex space-x-3">
+            <Link href={`/${event._id}`} target="_blank">
+              <button className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm">
+                Go to Spinwheel
+              </button>
+            </Link>
             <button
               onClick={copySpinWheelLink}
               className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
@@ -208,7 +208,7 @@ const EventHeader = ({
               }`}
             >
               <FiShare2 className="h-4 w-4 mr-2" />
-              {qrLoading ? "Generating..." : "Share QR"}
+              {qrLoading ? "Generating..." : "QR"}
             </button>
           </div>
         </div>

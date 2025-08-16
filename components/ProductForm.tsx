@@ -25,7 +25,7 @@ interface ProductFormProps {
     image: File | null,
     resetImage: () => void
   ) => void;
-  productsCount?: number; // Added to track current number of products
+  productsCount?: number;
 }
 
 const ProductForm = ({
@@ -46,6 +46,7 @@ const ProductForm = ({
     formState: { errors, isValid },
     setValue,
     reset,
+    watch,
   } = useForm<ProductFormData>({
     defaultValues: {
       name: "",
@@ -58,6 +59,9 @@ const ProductForm = ({
     },
     mode: "onChange",
   });
+
+  // Watch the price field for real-time comparison
+  const priceValue = watch("price");
 
   const resetImage = useCallback(() => {
     setProductImage(null);
@@ -254,7 +258,7 @@ const ProductForm = ({
                   htmlFor="productPrice"
                   className="block text-sm font-medium text-gray-700 mb-1.5"
                 >
-                  Price <span className="text-red-500">*</span>
+                 Current Price <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
@@ -322,6 +326,12 @@ const ProductForm = ({
                       min: {
                         value: 0.01,
                         message: "Former price must be greater than 0",
+                      },
+                      validate: {
+                        greaterThanPrice: (value) =>
+                          !priceValue ||
+                          parseFloat(value) > parseFloat(priceValue) ||
+                          "Former price must be greater than current price",
                       },
                     }}
                     render={({ field }) => (
