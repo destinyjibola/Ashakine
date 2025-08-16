@@ -84,10 +84,9 @@ const LoginForm = () => {
   };
 
   return (
-    <main className="flex h-[100vh] flex-col items-center justify-center bg-white">
+    <main className="flex h-[100vh] flex-col items-center justify-center bg-gray-50">
       {/* Dark Overlay */}
-      {/* <div className="absolute inset-0 bg-black/60"></div> */}
-      {Url}
+      <div className="absolute inset-0 bg-black/60"></div>
       {/* {JSON.stringify(error)} */}
       {/* Login Form */}
       <div className="relative z-10">

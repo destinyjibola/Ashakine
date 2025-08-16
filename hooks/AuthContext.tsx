@@ -54,12 +54,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
-        router.refresh(); // Added router refresh
     Cookies.remove("user");
     Cookies.remove("token");
     setUser(null);
     setToken(null);
-    router.refresh(); // Added router refresh
+    router.push('/auth/login')
   };
 
   return (
