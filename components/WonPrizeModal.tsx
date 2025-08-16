@@ -7,7 +7,6 @@ interface WonPrizeModalProps {
   onClose: () => void;
   wonPrize: PrizeData | null;
   handleSpinClick: () => void;
-  setIsRedeemModalOpen: (value: boolean) => void;
 }
 
 function WonPrizeModal({
@@ -15,7 +14,6 @@ function WonPrizeModal({
   onClose,
   wonPrize,
   handleSpinClick,
-  setIsRedeemModalOpen,
 }: WonPrizeModalProps) {
   const fakeSegments: PrizeData[] = [
     { option: "Oops!", segColor: "#444444", emoji: "😢" },
@@ -28,7 +26,7 @@ function WonPrizeModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="text-center p-6 md:p-10">
-        {wonPrize && fakeSegments.some((fake) => fake.option === wonPrize.option) ? (
+        {wonPrize && fakeSegments.some((fake) => fake.option === wonPrize.option) && (
           <div className="space-y-6">
             <div className="text-7xl mb-4">😢</div>
             <h2 className="text-3xl font-bold text-red-500 mb-2">Oh no!</h2>
@@ -41,7 +39,7 @@ function WonPrizeModal({
             <p className="text-xl text-gray-600 mb-6">
               Do not worry, you can try again!
             </p>
-            <button
+            {/* <button
               onClick={() => {
                 onClose();
                 setTimeout(handleSpinClick, 300);
@@ -49,32 +47,7 @@ function WonPrizeModal({
               className="px-8 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-bold hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg"
             >
               Spin Again
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="text-7xl mb-4 animate-bounce">{wonPrize?.emoji}</div>
-            <h2 className="text-3xl font-bold text-purple-600 mb-2">
-              Congratulations! 🎉
-            </h2>
-            <div
-              className="text-4xl font-extrabold mb-6 animate-pulse"
-              style={{ color: wonPrize?.segColor }}
-            >
-              {wonPrize?.option}
-            </div>
-            <p className="text-xl text-gray-600 mb-6">
-              You have won an amazing prize!
-            </p>
-            <button
-              onClick={() => {
-                onClose();
-                setIsRedeemModalOpen(true);
-              }}
-              className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full font-bold hover:from-green-600 hover:to-teal-600 transition-all transform hover:scale-105 shadow-lg"
-            >
-              Redeem Prize
-            </button>
+            </button> */}
           </div>
         )}
       </div>

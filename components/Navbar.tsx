@@ -33,7 +33,7 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <Link href={user ? "/admin" : "/auth/register"}>
-              <button className="py-2 px-5 md:py-3 md:px-6 bg-gradient-to-r from-[#FFB600] to-[#FF9400] text-white rounded-full font-bold hover:opacity-90 transition-opacity shadow-lg hover:shadow-secondarycolor/30 text-sm md:text-base">
+              <button className="py-2 px-5 md:py-3 md:px-6 bg-gradient-to-r from-gray-200 to-white text-primarycolor rounded-full font-bold hover:opacity-90 transition-opacity shadow-lg hover:shadow-secondarycolor/30 text-sm md:text-base">
                 {user ? "Go to dashboard" : "Get started"}
               </button>
             </Link>

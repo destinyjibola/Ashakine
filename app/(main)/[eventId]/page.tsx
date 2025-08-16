@@ -215,6 +215,34 @@ function App() {
   const [appSound, setAppSound] = useState<HTMLAudioElement | null>(null);
   const [bSound, setBSound] = useState<HTMLAudioElement | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [isTimerActive, setIsTimerActive] = useState(false);
+
+  // Restore redeem modal state and timer from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem("redeemModalState");
+    if (savedState) {
+      const { winnerCode: savedCode, wonPrize: savedPrize, hasCopied } = JSON.parse(savedState);
+      if (savedCode && !hasCopied) {
+        setWinnerCode(savedCode);
+        setWonPrize(savedPrize);
+        setModals((prev) => ({ ...prev, redeem: true }));
+      }
+    }
+
+    const savedTimerState = localStorage.getItem(`spinTimerState_${eventId}`);
+    if (savedTimerState) {
+      const { timestamp, seconds } = JSON.parse(savedTimerState);
+      const elapsed = Math.floor((Date.now() - timestamp) / 1000);
+      const remainingSeconds = Math.max(0, seconds - elapsed);
+      if (remainingSeconds > 0) {
+        setTimerSeconds(remainingSeconds);
+        setIsTimerActive(true);
+      } else {
+        localStorage.removeItem(`spinTimerState_${eventId}`);
+      }
+    }
+  }, [eventId]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -244,6 +272,31 @@ function App() {
     };
   }, []);
 
+  // Timer logic with localStorage persistence
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isTimerActive && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            setIsTimerActive(false);
+            localStorage.removeItem(`spinTimerState_${eventId}`);
+            return 0;
+          }
+          const newSeconds = prev - 1;
+          localStorage.setItem(
+            `spinTimerState_${eventId}`,
+            JSON.stringify({ timestamp: Date.now(), seconds: newSeconds })
+          );
+          return newSeconds;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isTimerActive, timerSeconds, eventId]);
+
   const memoizedData = useMemo(() => data, [data]);
 
   const playSound = useCallback((audio: HTMLAudioElement | null) => {
@@ -259,8 +312,8 @@ function App() {
       mustSpin ||
       isLoading ||
       !eventId ||
-      !event ||
-      !isEventActive(event, currentTime)
+      !isEventActive(event, currentTime) ||
+      isTimerActive
     )
       return;
 
@@ -269,13 +322,19 @@ function App() {
     setShowConfetti(false);
     setModals({ wonPrize: false, redeem: false });
     setWinnerCode(null);
+    setIsTimerActive(true);
+    setTimerSeconds(60); // Start 1-minute timer
+    localStorage.setItem(
+      `spinTimerState_${eventId}`,
+      JSON.stringify({ timestamp: Date.now(), seconds: 60 })
+    );
 
     const newPrizeNumber = Math.floor(Math.random() * data.length);
     const selectedPrize = data[newPrizeNumber];
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/events/${event._id}/check-and-record-prize`,
+        `${API_BASE_URL}/api/events/${event?._id}/check-and-record-prize`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -327,7 +386,7 @@ function App() {
     }
 
     setMustSpin(true);
-  }, [mustSpin, isLoading, eventId, event, data, setError, currentTime]);
+  }, [mustSpin, isLoading, eventId, event, data, setError, currentTime, isTimerActive]);
 
   const onStopSpinning = useCallback(() => {
     setMustSpin(false);
@@ -337,7 +396,7 @@ function App() {
       setShowConfetti(true);
       playSound(appSound);
       setModals((prev) => ({ ...prev, redeem: true }));
-      setTimeout(() => setShowConfetti(false), 3000);
+      setTimeout(() => setShowConfetti(false), 5000); // Extended confetti duration
     } else {
       playSound(bSound);
       setModals((prev) => ({ ...prev, wonPrize: true }));
@@ -353,7 +412,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -391,85 +450,98 @@ function App() {
 
       <ImageSlider />
 
-      <div className="relative">
-        <SpinWheel
-          mustSpin={mustSpin}
-          prizeNumber={prizeNumber}
-          data={memoizedData}
-          onStopSpinning={onStopSpinning}
-          isLoading={isLoading}
-        />
+      <div className="text-center mb-4">
+        <p className="text-lg font-semibold text-gray-700">Spin to Win Exciting Prizes!</p>
+      </div>
 
-        <button
-          onClick={handleSpinClick}
-          disabled={mustSpin || isLoading || !isEventActive(event, currentTime)}
-          aria-label={
-            isLoading
-              ? "Loading"
-              : mustSpin
-              ? "Spinning"
-              : !isEventActive(event, currentTime)
-              ? "Spin wheel inactive"
-              : "Spin the wheel"
-          }
-          className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-            mustSpin || isLoading || !isEventActive(event, currentTime)
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
-          }`}
-        >
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center gap-1">
-              <svg
-                className="animate-spin h-6 w-6 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <span className="text-xs">Loading</span>
-            </div>
-          ) : mustSpin ? (
-            <div className="flex flex-col items-center justify-center gap-1">
-              <svg
-                className="animate-spin h-6 w-6 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <span className="text-xs">Spinning</span>
-            </div>
-          ) : (
-            <span className="animate-pulse">SPIN</span>
-          )}
-        </button>
+      <div className="relative flex flex-col items-center">
+        {isTimerActive && (
+          <div className="mb-4 text-xl font-bold text-purple-600">
+            Next spin in: {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
+          </div>
+        )}
+        <div className="relative">
+          <SpinWheel
+            mustSpin={mustSpin}
+            prizeNumber={prizeNumber}
+            data={memoizedData}
+            onStopSpinning={onStopSpinning}
+            isLoading={isLoading}
+          />
+
+          <button
+            onClick={handleSpinClick}
+            disabled={mustSpin || isLoading || !isEventActive(event, currentTime) || isTimerActive}
+            aria-label={
+              isLoading
+                ? "Loading"
+                : mustSpin
+                ? "Spinning"
+                : isTimerActive
+                ? "Waiting for timer"
+                : !isEventActive(event, currentTime)
+                ? "Spin wheel inactive"
+                : "Spin the wheel"
+            }
+            className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
+              mustSpin || isLoading || !isEventActive(event, currentTime) || isTimerActive
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
+            }`}
+          >
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center gap-1">
+                <svg
+                  className="animate-spin h-6 w-6 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="text-xs">Loading</span>
+              </div>
+            ) : mustSpin ? (
+              <div className="flex flex-col items-center justify-center gap-1">
+                <svg
+                  className="animate-spin h-6 w-6 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="text-xs">Spinning</span>
+              </div>
+            ) : (
+              <span className="animate-pulse">SPIN</span>
+            )}
+          </button>
+        </div>
       </div>
 
       <VendorSection
@@ -492,9 +564,6 @@ function App() {
         onClose={() => setModals((prev) => ({ ...prev, wonPrize: false }))}
         wonPrize={wonPrize}
         handleSpinClick={handleSpinClick}
-        setIsRedeemModalOpen={() =>
-          setModals((prev) => ({ ...prev, redeem: true }))
-        }
       />
 
       <RedeemModal
