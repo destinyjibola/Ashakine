@@ -41,7 +41,7 @@ const EventHeader = ({
             <div className="flex space-x-3">
               <Link href={`/${event._id}`} target="_blank">
                 <button className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm">
-                  Go to Spinwheel
+                    Go to Spinwheel
                 </button>
               </Link>
               <button
@@ -130,7 +130,7 @@ const EventHeader = ({
           {/* Event Info - logo, name, type */}
           <div className="flex items-center mb-4">
             {event.logo?.url ? (
-              <div className="mr-4 relative group">
+              <div className="mr-4 group">
                 <Image
                   src={event.logo.url}
                   alt={event.logo.altText || "Event Logo"}

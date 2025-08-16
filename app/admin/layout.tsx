@@ -146,7 +146,7 @@ export default function AdminLayout({
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && isMobile && (
-        <div className="md:hidden fixed top-[100px] left-0 right-0 z-[1000px] bg-white border-t border-[#FFB60030]">
+        <div className="md:hidden fixed top-[100px] left-0 right-0 z-[1000px] bg-gray-100 border-t border-[#FFB60030]">
           <div className="flex flex-col p-2">
             {navItems.map((item) => (
               <Link
