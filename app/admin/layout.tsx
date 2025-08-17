@@ -122,14 +122,14 @@ export default function AdminLayout({
               {/* Dropdown Menu */}
               {isUserDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-20 bg-white border border-gray-200">
-                  <Link
+                  {/* <Link
                     href="/admin/profile"
                     className="px-4 py-2.5 text-gray-700 hover:bg-[#FFB60014] hover:text-orange-600 flex items-center gap-2 transition-colors"
                     onClick={() => setIsUserDropdownOpen(false)}
                   >
                     <FiUser size={16} className="text-[#FF9400]" />
                     Profile
-                  </Link>
+                  </Link> */}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-[#FFB60014] hover:text-orange-600 flex items-center gap-2 transition-colors"

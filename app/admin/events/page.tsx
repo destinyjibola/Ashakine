@@ -407,7 +407,7 @@ export default function EventsPage() {
     );
 
   return (
-    <div className="p-4 sm:p-6 relative bg-white">
+    <div className="p-4 sm:p-6 bg-white">
       <div className="flex flex-row flex-wrap md:justify-between items-center mb-6 gap-4">
         <h1 className="text-xl sm:text-2xl font-bold">My Spinwheels</h1>
         <Button

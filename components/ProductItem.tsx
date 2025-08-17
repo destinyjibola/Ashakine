@@ -61,9 +61,9 @@ const ProductItem = ({
         
     
         {/* Description */}
-        {/* <p className="text-sm text-gray-600 mb-4 line-clamp-2" title={product.description}>
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2" title={product.description}>
           {product.description}
-        </p> */}
+        </p>
         
         {/* Price Section */}
         <div className="flex md:flex-row flex-col md:items-center items-start md:justify-between justify-start">

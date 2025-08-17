@@ -656,7 +656,7 @@ export default function EventDetailsPage({
 
       const productData = {
         name: data.name,
-        // description: data.description,
+        description: data.description,
         price: parseFloat(data.price),
         formerPrice: parseFloat(data.formerPrice),
         discount: data.discount ? parseInt(data.discount) : 0,
@@ -725,7 +725,7 @@ export default function EventDetailsPage({
 
       const productData = {
         name: data.name,
-        // description: data.description,
+        description: data.description,
         price: data.price, // Keep as string to match ProductFormData and Product interface
         formerPrice: data.formerPrice, // Keep as string
         discount: data.discount ? parseInt(data.discount) : 0,
