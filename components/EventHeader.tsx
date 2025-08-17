@@ -25,7 +25,7 @@ const EventHeader = ({
   qrLoading,
 }: EventHeaderProps) => {
   return (
-    <div className="px-4 py-4 border-b border-gray-200 shadow-sm">
+    <div className="px-2 md:px-4 py-4 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto">
         {/* Desktop Layout (md and up) */}
         <div className="hidden md:block">
@@ -40,13 +40,13 @@ const EventHeader = ({
 
             <div className="flex space-x-3">
               <Link href={`/${event?.slug}`} target="_blank">
-                <button className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm">
+                <button className="flex text-xs md:text-sm items-center px-3 py-1.5 rounded-md font-medium transition-all duration-200 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm">
                     Go to Spinwheel
                 </button>
               </Link>
               <button
                 onClick={copySpinWheelLink}
-                className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center text-xs md:text-sm px-3 py-1.5 rounded-md font-medium transition-all duration-200 ${
                   copied
                     ? "bg-green-100 text-green-800 shadow-inner"
                     : "bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm"
@@ -58,7 +58,7 @@ const EventHeader = ({
               <button
                 onClick={openQRCodeModal}
                 disabled={qrLoading}
-                className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center text-xs md:text-sm px-3 py-1.5 rounded-md font-medium transition-all duration-200 ${
                   qrLoading
                     ? "bg-gray-100 text-gray-500 cursor-not-allowed"
                     : "bg-gray-50 text-gray-700 hover:bg-gray-100 shadow-sm"

@@ -61,7 +61,7 @@ const QRCodePreviewModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="p-6 space-y-4 bg-white relative">
+      <div className="p-2 space-y-4 bg-white relative">
         <h2 className="text-xl font-semibold text-gray-900">QR Code Preview</h2>
         {qrCodeDataUrl ? (
           <div className="flex flex-col items-center space-y-4">
