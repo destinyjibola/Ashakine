@@ -253,14 +253,7 @@ const VendorPage = () => {
       />
       <PrizeDetails prizes={vendor.prizes || []} />
       <WinnersList winners={winners} />
-      <RedeemPrizeModal
-        isOpen={isRedeemModalOpen}
-        onClose={() => setIsRedeemModalOpen(false)}
-        redeemCode={redeemCode}
-        setRedeemCode={setRedeemCode}
-        redeemError={redeemError}
-        handleRedeemPrize={handleRedeemPrize}
-      />
+ 
       <PrizeWonModal
         isOpen={isPrizeWonModalOpen}
         onClose={() => setIsPrizeWonModalOpen(false)}
