@@ -1305,6 +1305,7 @@ export default function EventDetailsPage({
         onClose={() => setIsQRModalOpen(false)}
         qrCodeDataUrl={qrCodeDataUrl}
         eventName={event.name}
+        spinWheelUrl={event.slug ? `${window.location.origin}/${event.slug}` : window.location.origin}
         downloadPDF={downloadPDF}
       />
     </div>
