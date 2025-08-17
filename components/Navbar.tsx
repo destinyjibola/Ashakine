@@ -28,7 +28,7 @@ export default function Navbar() {
               className="w-auto h-6 md:h-8"
               priority
             /> */}
-            <h2 className="text-3xl font-bold">Spinly</h2>
+            <h2 className=" text-xl md:text-3xl font-bold">Spinly</h2>
           </Link>
 
           {/* Desktop Navigation */}

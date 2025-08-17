@@ -72,7 +72,7 @@ export default function AdminLayout({
         <div className="px-4 flex justify-between items-center ">
           <Link href="/admin" className="hidden lg:flex items-center gap-3">
             {/* <Image width={154} height={32} alt="spinly logo" src={Spinly.src} /> */}
-            <h2 className="text-3xl font-bold">Spinly</h2>
+            <h2 className="text-xl md:text-3xl font-bold">Spinly</h2>
           </Link>
 
           {/* Mobile menu button */}
