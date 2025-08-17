@@ -83,7 +83,7 @@ export default function EventDetailsPage({
     : 0;
 
   const copySpinWheelLink = () => {
-    const spinWheelUrl = `${window.location.origin}/${event?._id}`;
+    const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
     navigator.clipboard.writeText(spinWheelUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

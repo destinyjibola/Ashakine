@@ -145,13 +145,13 @@ export default function Leaderboard({ winners, vendors }: LeaderboardProps) {
           })}
         </ul>
 
-        {winners.length > 5 && (
+        {/* {winners.length > 5 && (
           <div className="mt-4 text-center">
             <button className="text-purple-600 hover:text-purple-800 text-sm font-medium">
               View All Winners →
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

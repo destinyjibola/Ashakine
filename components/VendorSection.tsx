@@ -71,7 +71,7 @@ const VendorCard = ({ vendor }: { vendor: Vendor }) => (
       )}
     </div>
 
-    <div className="text-center flex-grow flex flex-col">
+    <div className="text-center flex-grow flex flex-col"> 
       <h3 className="text-base sm:text-lg md:text-xl mt-2 sm:mt-4 mb-2 sm:mb-4 font-semibold text-gray-900">
         {vendor.name}
       </h3>
@@ -81,7 +81,7 @@ const VendorCard = ({ vendor }: { vendor: Vendor }) => (
           href={vendor.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-auto flex items-center justify-center px-2 sm:px-4 py-1 sm:py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium gap-1 sm:gap-2 text-xs sm:text-sm"
+          className="mt-auto flex items-center justify-center px-2 sm:px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium gap-1 sm:gap-2 text-xs sm:text-sm"
         >
           Visit <FiExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
         </a>
@@ -97,7 +97,7 @@ export default function VendorSection({
   error,
 }: VendorSectionProps) {
   return (
-    <section className="w-full max-w-6xl mx-auto py-8 sm:py-12 px-2 sm:px-4 lg:px-8">
+    <section className="w-full max-w-6xl mx-auto py-8 sm:py-12 sm:px-4 lg:px-8">
       <div className="text-center mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-center mb-4 sm:mb-6">
           Sponsors and Partners

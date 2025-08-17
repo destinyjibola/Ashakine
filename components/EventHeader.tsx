@@ -39,7 +39,7 @@ const EventHeader = ({
             </button>
 
             <div className="flex space-x-3">
-              <Link href={`/${event._id}`} target="_blank">
+              <Link href={`/${event?.slug}`} target="_blank">
                 <button className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm">
                     Go to Spinwheel
                 </button>

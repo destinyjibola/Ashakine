@@ -12,7 +12,15 @@ import RedeemModal from "@/components/RedeemModal";
 import EventHeaders from "@/components/EventHeaders";
 import EventCountdown from "@/components/EventCountdown";
 import ProductOffering from "@/components/ProductOffering";
-import { PrizeData, Prize, Vendor, Event, Winner, WindowSize, Product } from "@/types";
+import {
+  PrizeData,
+  Prize,
+  Vendor,
+  Event,
+  Winner,
+  WindowSize,
+  Product,
+} from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -60,7 +68,7 @@ function isEventActive(event: Event | null, currentTime: Date): boolean {
   return false;
 }
 
-const useEventData = (eventId: string) => {
+const useEventData = (eventId: string | null) => {
   const [data, setData] = useState<PrizeData[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
@@ -70,7 +78,16 @@ const useEventData = (eventId: string) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!eventId) {
+      setError("Invalid event ID");
+      setData(fakeSegments);
+      setIsLoading(false);
+      return;
+    }
+
     let isMounted = true;
+    const controller = new AbortController();
+
     const fetchEventData = async () => {
       try {
         setIsLoading(true);
@@ -80,31 +97,50 @@ const useEventData = (eventId: string) => {
           `${API_BASE_URL}/api/events/${eventId}`,
           {
             headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
           }
         );
-        if (!eventResponse.ok)
-          throw new Error(`HTTP error! status: ${eventResponse.status}`);
+        if (!eventResponse.ok) {
+          throw new Error(`Failed to fetch event: HTTP ${eventResponse.status}`);
+        }
         const eventData = await eventResponse.json();
+        if (!eventData._id) {
+          throw new Error("Event data missing _id");
+        }
 
-        const prizeResponse = await fetch(
-          `${API_BASE_URL}/api/spinwheel/${eventId}`
-        );
-        if (!prizeResponse.ok)
-          throw new Error(`HTTP error! status: ${prizeResponse.status}`);
-        const prizeData = await prizeResponse.json();
-
-        const productResponse = await fetch(
-          `${API_BASE_URL}/api/eventproduct/${eventId}`,
-          {
+        const [prizeResponse, productResponse, winnersResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/spinwheel/${eventData._id}`, {
+            signal: controller.signal,
+          }).catch(() => ({ ok: false, status: 500 }) as Response),
+          fetch(`${API_BASE_URL}/api/eventproduct/${eventData._id}`, {
             headers: { "Content-Type": "application/json" },
-          }
-        );
-        if (!productResponse.ok)
-          throw new Error(`HTTP error! status: ${productResponse.status}`);
-        const productData = await productResponse.json();
+            signal: controller.signal,
+          }).catch(() => ({ ok: false, status: 500 }) as Response),
+          fetch(`${API_BASE_URL}/api/winners/${eventData._id}`, {
+            signal: controller.signal,
+          }).catch(() => ({ ok: false, status: 500 }) as Response),
+        ]);
 
+        if (!prizeResponse.ok) {
+          throw new Error(`Failed to fetch prizes: HTTP ${prizeResponse.status}`);
+        }
+        const prizeData = await prizeResponse.json();
         if (!prizeData.prizes || !Array.isArray(prizeData.prizes)) {
           throw new Error("Invalid prizes data");
+        }
+
+        let productData: Product[] = [];
+        if (productResponse.ok) {
+          productData = await productResponse.json();
+        } else {
+          console.warn(`Failed to fetch products: HTTP ${productResponse.status}`);
+        }
+
+        let winnersData: Winner[] = [];
+        if (winnersResponse.ok) {
+          winnersData = await winnersResponse.json();
+        } else {
+          console.warn(`Failed to fetch winners: HTTP ${winnersResponse.status}`);
         }
 
         const realPrizes: PrizeData[] = prizeData.prizes.map((p: Prize) => ({
@@ -117,13 +153,6 @@ const useEventData = (eventId: string) => {
             "Please contact the event organizer to redeem your prize.",
         }));
 
-        const winnersResponse = await fetch(
-          `${API_BASE_URL}/api/winners/${eventId}`
-        );
-        if (!winnersResponse.ok)
-          throw new Error(`HTTP error! status: ${winnersResponse.status}`);
-        const winnersData = await winnersResponse.json();
-
         if (isMounted) {
           setEvent(eventData);
           setVendors(
@@ -132,14 +161,27 @@ const useEventData = (eventId: string) => {
               : []
           );
           setData(shuffleArray([...realPrizes, ...fakeSegments]));
-          setRecentWinners(
-            winnersData.filter((winner: Winner) => winner.prizeId).slice(0, 5)
+            setRecentWinners(
+            winnersData
+              .filter((winner: Winner) => winner.prizeId)
+              .sort((a: Winner, b: Winner) => 
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              )
+              .slice(0, 5)
           );
           setProducts(productData);
         }
       } catch (err) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : "Failed to load data");
+          // Type narrowing for err
+          if (err instanceof Error && err.name !== "AbortError") {
+            setError(err.message);
+          } else if (err instanceof Error && err.name === "AbortError") {
+            // Ignore AbortError
+            return;
+          } else {
+            setError("Failed to load data");
+          }
           setData(fakeSegments);
         }
       } finally {
@@ -148,14 +190,24 @@ const useEventData = (eventId: string) => {
     };
 
     fetchEventData();
+
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [eventId]);
 
-  return { data, vendors, event, recentWinners, products, isLoading, error, setError };
+  return {
+    data,
+    vendors,
+    event,
+    recentWinners,
+    products,
+    isLoading,
+    error,
+    setError,
+  };
 };
-
 interface ErrorBoundaryProps {
   children: React.ReactNode;
 }
@@ -200,8 +252,16 @@ class ErrorBoundary extends React.Component<
 function App() {
   const params = useParams();
   const eventId = typeof params?.eventId === "string" ? params.eventId : null;
-  const { data, vendors, event, recentWinners, products, isLoading, error, setError } =
-    useEventData(eventId || "");
+  const {
+    data,
+    vendors,
+    event,
+    recentWinners,
+    products,
+    isLoading,
+    error,
+    setError,
+  } = useEventData(eventId || "");
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [modals, setModals] = useState({ wonPrize: false, redeem: false });
@@ -222,7 +282,11 @@ function App() {
   useEffect(() => {
     const savedState = localStorage.getItem("redeemModalState");
     if (savedState) {
-      const { winnerCode: savedCode, wonPrize: savedPrize, hasCopied } = JSON.parse(savedState);
+      const {
+        winnerCode: savedCode,
+        wonPrize: savedPrize,
+        hasCopied,
+      } = JSON.parse(savedState);
       if (savedCode && !hasCopied) {
         setWinnerCode(savedCode);
         setWonPrize(savedPrize);
@@ -366,7 +430,7 @@ function App() {
             body: JSON.stringify({
               code,
               prizeId: selectedPrize._id,
-              eventId,
+              eventId: event?._id,
             }),
           });
           setPrizeNumber(newPrizeNumber);
@@ -386,7 +450,16 @@ function App() {
     }
 
     setMustSpin(true);
-  }, [mustSpin, isLoading, eventId, event, data, setError, currentTime, isTimerActive]);
+  }, [
+    mustSpin,
+    isLoading,
+    eventId,
+    event,
+    data,
+    setError,
+    currentTime,
+    isTimerActive,
+  ]);
 
   const onStopSpinning = useCallback(() => {
     setMustSpin(false);
@@ -412,7 +485,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="flex flex-col items-center justify-center px-2 relative overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -451,13 +524,16 @@ function App() {
       <ImageSlider />
 
       <div className="text-center mb-4">
-        <p className="text-lg font-semibold text-gray-700">Spin to Win Exciting Prizes!</p>
+        <p className="text-lg font-semibold text-gray-700">
+          Spin to Win Exciting Prizes!
+        </p>
       </div>
 
       <div className="relative flex flex-col items-center">
         {isTimerActive && (
           <div className="mb-4 text-xl font-bold text-purple-600">
-            Next spin in: {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
+            Next spin in: {Math.floor(timerSeconds / 60)}:
+            {(timerSeconds % 60).toString().padStart(2, "0")}
           </div>
         )}
         <div className="relative">
@@ -471,7 +547,12 @@ function App() {
 
           <button
             onClick={handleSpinClick}
-            disabled={mustSpin || isLoading || !isEventActive(event, currentTime) || isTimerActive}
+            disabled={
+              mustSpin ||
+              isLoading ||
+              !isEventActive(event, currentTime) ||
+              isTimerActive
+            }
             aria-label={
               isLoading
                 ? "Loading"
@@ -484,7 +565,10 @@ function App() {
                 : "Spin the wheel"
             }
             className={`absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 flex justify-center items-center text-white text-xl font-bold w-[70px] h-[70px] rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
-              mustSpin || isLoading || !isEventActive(event, currentTime) || isTimerActive
+              mustSpin ||
+              isLoading ||
+              !isEventActive(event, currentTime) ||
+              isTimerActive
                 ? "bg-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-lg"
             }`}

@@ -103,7 +103,7 @@ const ProductOffering: React.FC<ProductOfferingProps> = ({
   }
 
   return (
-    <section className="w-full max-w-6xl mx-auto py-8 sm:py-16 px-2 sm:px-4 lg:px-8">
+    <section className="w-full max-w-6xl mx-auto py-8 sm:py-16 sm:px-4 lg:px-8">
       <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-16">
         <h2 className="text-lg md:text-2xl font-bold text-center mb-4 sm:mb-6">
           Product Offerings
