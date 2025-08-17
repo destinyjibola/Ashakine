@@ -42,7 +42,7 @@ const EditProductForm = ({
   } = useForm<ProductFormData>({
     defaultValues: {
       name: product.name,
-      description: product.description,
+      // description: product.description,
       price: product.price.toString(),
       formerPrice: product.formerPrice.toString(),
       discount: product.discount?.toString() || "",
@@ -173,7 +173,7 @@ const EditProductForm = ({
       </div>
 
       {/* Product Description */}
-      <div>
+      {/* <div>
         <label
           htmlFor="productDescription"
           className="block text-sm font-medium text-gray-700 mb-1"
@@ -215,7 +215,7 @@ const EditProductForm = ({
             {errors.description.message}
           </p>
         )}
-      </div>
+      </div> */}
 
       {/* Price and Former Price and Discount */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
