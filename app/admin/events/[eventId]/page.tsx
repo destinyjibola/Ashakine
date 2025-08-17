@@ -93,7 +93,7 @@ export default function EventDetailsPage({
     setQrLoading(true);
     setQrError(null);
     try {
-      const spinWheelUrl = `${window.location.origin}/${params.eventId}`;
+      const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
       const qrDataUrl = await QRCode.toDataURL(spinWheelUrl, {
         width: 150,
         margin: 1,
