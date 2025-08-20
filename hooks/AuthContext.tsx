@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 
 type UserType = {
   _id: string;
@@ -10,6 +11,10 @@ type UserType = {
   email?: string;
   isAdmin: boolean;
 };
+
+interface DecodedToken {
+  exp: number;
+}
 
 type AuthContextType = {
   user: UserType | null;
@@ -33,18 +38,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (storedUser && storedToken) {
       try {
-        setUser(JSON.parse(storedUser));
-        setToken(storedToken);
+        const decoded: DecodedToken = jwtDecode(storedToken);
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        if (decoded.exp < currentTime) {
+          // Token is expired, log out
+          Cookies.remove("user");
+          Cookies.remove("token");
+          setUser(null);
+          setToken(null);
+          router.push("/auth/login");
+        } else {
+          setUser(JSON.parse(storedUser));
+          setToken(storedToken);
+        }
       } catch (error) {
-        console.error("Failed to parse user cookie:", error);
-        setUser(null);
-        setToken(null);
+        console.error("Failed to parse user or token:", error);
         Cookies.remove("user");
         Cookies.remove("token");
+        setUser(null);
+        setToken(null);
+        router.push("/auth/login");
       }
     }
     setLoading(false);
-  }, []);
+  }, [router]);
 
   const setAuth = (user: UserType, token: string) => {
     Cookies.set("user", JSON.stringify(user), { expires: 7 });
@@ -58,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     Cookies.remove("token");
     setUser(null);
     setToken(null);
-    router.push('/auth/login')
+    router.push("/auth/login");
   };
 
   return (

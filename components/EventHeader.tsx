@@ -80,7 +80,7 @@ const EventHeader = ({
                     alt={event.logo.altText || "Event Logo"}
                     width={48}
                     height={48}
-                    className="rounded-full border-2 border-gray-200 group-hover:border-blue-200 transition-all duration-300"
+                    className="rounded-full border-2 w-[45px] h-[45px] border-gray-200 group-hover:border-blue-200 transition-all duration-300"
                   />
                 </div>
               ) : (

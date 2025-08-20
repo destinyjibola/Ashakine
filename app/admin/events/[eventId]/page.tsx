@@ -1,5 +1,7 @@
+
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Event, NewPrizeData, Winner, Vendor, Product } from "@/types";
 import { useAuth } from "@/hooks/AuthContext";
@@ -13,7 +15,6 @@ import PrizeForm from "@/components/PrizeForm";
 import PrizesList from "@/components/PrizesList";
 import ProductForm, { ProductFormData } from "@/components/ProductForm";
 import ProductsList from "@/components/ProductsList";
-
 import QRCodePreviewModal from "@/components/QRCodePreviewModal";
 import EventStatus from "@/components/EventStatus";
 import QRCode from "qrcode";
@@ -82,18 +83,20 @@ export default function EventDetailsPage({
     ? Math.ceil(event.prizes.length / prizesPerPage)
     : 0;
 
-  const copySpinWheelLink = () => {
-    const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
+  const copySpinWheelLink = useCallback(() => {
+    if (!event) return;
+    const spinWheelUrl = `${window.location.origin}/${event.slug}`;
     navigator.clipboard.writeText(spinWheelUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
+  }, [event]);
 
-  const generateQRCodePDF = async () => {
+  const generateQRCodePDF = useCallback(async () => {
+    if (!event) return;
     setQrLoading(true);
     setQrError(null);
     try {
-      const spinWheelUrl = `${window.location.origin}/${event?.slug}`;
+      const spinWheelUrl = `${window.location.origin}/${event.slug}`;
       const qrDataUrl = await QRCode.toDataURL(spinWheelUrl, {
         width: 150,
         margin: 1,
@@ -105,9 +108,9 @@ export default function EventDetailsPage({
     } finally {
       setQrLoading(false);
     }
-  };
+  }, [event]);
 
-  const downloadPDF = () => {
+  const downloadPDF = useCallback(() => {
     if (qrCodeDataUrl && event) {
       const pdf = new jsPDF();
       pdf.setFont("Arial", "bold");
@@ -120,87 +123,93 @@ export default function EventDetailsPage({
       pdf.save(`${event.name}-spin-wheel-qr.pdf`);
       setIsQRModalOpen(false);
     }
-  };
+  }, [qrCodeDataUrl, event]);
 
-  const handleToggleActive = async (isActive: boolean) => {
-    setEventStatusLoading(true);
-    setEventStatusError(null);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ isActive }),
+  const handleToggleActive = useCallback(
+    async (isActive: boolean) => {
+      setEventStatusLoading(true);
+      setEventStatusError(null);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ isActive }),
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setEventStatusError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
         }
-      );
 
-      if (response.status === 401) {
-        logout();
-        setEventStatusError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update event status");
-      }
-
-      const updatedEvent: Event = await response.json();
-      setEvent(updatedEvent);
-    } catch (err) {
-      setEventStatusError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setEventStatusLoading(false);
-    }
-  };
-
-  const handleSetTimer = async (startTime: string, endTime: string) => {
-    setEventStatusLoading(true);
-    setEventStatusError(null);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ startTime, endTime, isActive: false }),
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to update event status: HTTP ${response.status}`);
         }
-      );
 
-      if (response.status === 401) {
-        logout();
-        setEventStatusError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
+        const updatedEvent: Event = await response.json();
+        setEvent(updatedEvent);
+      } catch (err) {
+        setEventStatusError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setEventStatusLoading(false);
       }
+    },
+    [token, logout, router, params.eventId]
+  );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to set event timer");
+  const handleSetTimer = useCallback(
+    async (startTime: string, endTime: string) => {
+      setEventStatusLoading(true);
+      setEventStatusError(null);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ startTime, endTime, isActive: false }),
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setEventStatusError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to set event timer: HTTP ${response.status}`);
+        }
+
+        const updatedEvent: Event = await response.json();
+        setEvent(updatedEvent);
+      } catch (err) {
+        setEventStatusError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setEventStatusLoading(false);
       }
+    },
+    [token, logout, router, params.eventId]
+  );
 
-      const updatedEvent: Event = await response.json();
-      setEvent(updatedEvent);
-    } catch (err) {
-      setEventStatusError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setEventStatusLoading(false);
-    }
-  };
-
-  const handleClearTimer = async () => {
+  const handleClearTimer = useCallback(async () => {
     setEventStatusLoading(true);
     setEventStatusError(null);
     try {
@@ -218,15 +227,15 @@ export default function EventDetailsPage({
 
       if (response.status === 401) {
         logout();
-        setEventStatusError("Session expired. Please log in again.");
-        router.push("/auth/login");
+        // setEventStatusError("Session expired. Please log in again.");
+        // router.push("/auth/login");
         return;
       }
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to clear event timer");
-      }
+        throw new Error(errorData.message || `Failed to clear event timer: HTTP ${response.status}`);
+        }
 
       const updatedEvent: Event = await response.json();
       setEvent(updatedEvent);
@@ -237,813 +246,799 @@ export default function EventDetailsPage({
     } finally {
       setEventStatusLoading(false);
     }
-  };
+  }, [token, logout, router, params.eventId]);
 
-  const handleAddVendor = async (
-    e: React.FormEvent,
-    logo: File | null,
-    resetLogo: () => void
-  ) => {
-    e.preventDefault();
-    if (vendors && vendors.length >= 3) return;
-    setAddVendorLoading(true);
-    setAddVendorError(null);
-
-    try {
-      if (!logo) {
-        throw new Error("Vendor logo is required");
-      }
-
-      const reader = new FileReader();
-      const logoBase64 = await new Promise<string>((resolve) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(logo);
-      });
-
-      const vendorData = {
-        name: newVendor.name,
-        url: newVendor.url,
-        email: newVendor.email,
-        logo: logoBase64,
-        eventId: params.eventId,
-      };
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/vendors`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(vendorData),
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setAddVendorError("Session expired. Please log in again.");
-        router.push("/auth/login");
+  const handleAddVendor = useCallback(
+    async (
+      e: React.FormEvent,
+      logo: File | null,
+      resetLogo: () => void
+    ) => {
+      e.preventDefault();
+      if (vendors && vendors.length >= 3) {
+        setAddVendorError("Maximum of 3 vendors reached for this event");
         return;
       }
+      setAddVendorLoading(true);
+      setAddVendorError(null);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add vendor");
-      }
+      try {
+        if (!logo) {
+          throw new Error("Vendor logo is required");
+        }
 
-      const newVendorData: Vendor = await response.json();
-      setVendors(vendors ? [...vendors, newVendorData] : [newVendorData]);
-      setNewVendor({ name: "", url: "", email: "" });
-      resetLogo();
-    } catch (err) {
-      setAddVendorError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setAddVendorLoading(false);
-    }
-  };
-
-  const handleUpdateVendor = async (
-    e: React.FormEvent,
-    vendorId: string,
-    data: { name: string; url: string; email?: string },
-    logo: File | null,
-    resetLogo: () => void
-  ) => {
-    e.preventDefault();
-    setEditVendorLoading(true);
-    setEditVendorError(null);
-
-    try {
-      let logoBase64: string | null = null;
-      if (logo) {
         const reader = new FileReader();
-        logoBase64 = await new Promise<string>((resolve) => {
+        const logoBase64 = await new Promise<string>((resolve) => {
           reader.onload = () => resolve(reader.result as string);
           reader.readAsDataURL(logo);
         });
-      }
 
-      const vendorData = {
-        name: data.name,
-        url: data.url,
-        email: data.email || undefined,
-        image: logoBase64,
-      };
+        const vendorData = {
+          name: newVendor.name,
+          url: newVendor.url,
+          email: newVendor.email,
+          logo: logoBase64,
+          eventId: params.eventId,
+        };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(vendorData),
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setEditVendorError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update vendor");
-      }
-
-      const updatedVendor: Vendor = await response.json();
-      setVendors(
-        vendors
-          ? vendors.map((v) => (v._id === vendorId ? updatedVendor : v))
-          : [updatedVendor]
-      );
-      resetLogo();
-      setEditingVendor(null);
-    } catch (err) {
-      setEditVendorError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setEditVendorLoading(false);
-    }
-  };
-
-  const handleDeleteVendor = async (vendorId: string) => {
-    if (!window.confirm("Are you sure you want to delete this vendor?")) return;
-    // setAddVendorLoading(true);
-    setAddVendorError(null);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setAddVendorError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete vendor");
-      }
-
-      setVendors(
-        vendors ? vendors.filter((vendor) => vendor._id !== vendorId) : null
-      );
-      const updatedResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (updatedResponse.status === 401) {
-        logout();
-        setAddVendorError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!updatedResponse.ok) {
-        const errorData = await updatedResponse.json();
-        throw new Error(errorData.message || "Failed to fetch updated event");
-      }
-
-      const updatedData: Event = await updatedResponse.json();
-      setEvent(updatedData);
-    } catch (err) {
-      setAddVendorError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      // setAddVendorLoading(false);
-    }
-  };
-
-  const handleAddPrize = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPrizeLoading(true);
-    setPrizeError(null);
-
-    try {
-      const prizeData: NewPrizeData = {
-        prize: newPrize,
-        maxWins: newMaxWins,
-        winCount: 0,
-        redeemInfo: newRedeemInfo,
-        eventId: params.eventId,
-        vendorId: selectedVendor || undefined,
-      };
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/prizes`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(prizeData),
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setPrizeError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add prize");
-      }
-
-      const updatedResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (updatedResponse.status === 401) {
-        logout();
-        setPrizeError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!updatedResponse.ok) {
-        const errorData = await updatedResponse.json();
-        throw new Error(errorData.message || "Failed to fetch updated event");
-      }
-
-      const updatedData: Event = await updatedResponse.json();
-      setEvent(updatedData);
-      setNewPrize("");
-      setNewMaxWins(1);
-      setNewRedeemInfo("");
-      setSelectedVendor(null);
-    } catch (err) {
-      setPrizeError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setPrizeLoading(false);
-    }
-  };
-
-  const handleEditPrize = async (e: React.FormEvent, prizeId: string) => {
-    e.preventDefault();
-    setPrizeLoading(true);
-    setPrizeError(null);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/prizes/${prizeId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            prize: editPrizeName,
-            maxWins: editMaxWins,
-            redeemInfo: editRedeemInfo,
-          }),
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setPrizeError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update prize");
-      }
-
-      const updatedResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (updatedResponse.status === 401) {
-        logout();
-        setPrizeError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!updatedResponse.ok) {
-        const errorData = await updatedResponse.json();
-        throw new Error(errorData.message || "Failed to fetch updated event");
-      }
-
-      const updatedData: Event = await updatedResponse.json();
-      setEvent(updatedData);
-      setEditingPrizeId(null);
-      setEditPrizeName("");
-      setEditMaxWins(1);
-      setEditRedeemInfo("");
-    } catch (err) {
-      setPrizeError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setPrizeLoading(false);
-    }
-  };
-
-  const handleDeletePrize = async (prizeId: string) => {
-    if (!window.confirm("Are you sure you want to delete this prize?")) return;
-    // setPrizeLoading(true);
-    setPrizeError(null);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/prizes/${prizeId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setPrizeError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete prize");
-      }
-
-      const updatedResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (updatedResponse.status === 401) {
-        logout();
-        setPrizeError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!updatedResponse.ok) {
-        const errorData = await updatedResponse.json();
-        throw new Error(errorData.message || "Failed to fetch updated event");
-      }
-
-      const updatedData: Event = await updatedResponse.json();
-      setEvent(updatedData);
-    } catch (err) {
-      setPrizeError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      // setPrizeLoading(false);
-    }
-  };
-
-  const handleAddProduct = async (
-    e: React.FormEvent,
-    data: ProductFormData,
-    image: File | null,
-    resetImage: () => void
-  ) => {
-    e.preventDefault();
-    if (products.length >= 3) {
-      setAddProductError("Maximum of 3 products reached for this event");
-      return;
-    }
-    setAddProductLoading(true);
-    setAddProductError(null);
-
-    try {
-      let imageBase64: string | null = null;
-      if (image) {
-        const reader = new FileReader();
-        imageBase64 = await new Promise<string>((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(image);
-        });
-      }
-
-      const productData = {
-        name: data.name,
-        description: data.description,
-        price: parseFloat(data.price),
-        formerPrice: parseFloat(data.formerPrice),
-        discount: data.discount ? parseInt(data.discount) : 0,
-        phoneNumber: data.phoneNumber,
-        image: imageBase64,
-        eventId: params.eventId,
-      };
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/products`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(productData),
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setAddProductError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add product");
-      }
-
-      const createdProduct: Product = await response.json();
-      setProducts([...products, createdProduct]);
-      resetImage();
-    } catch (err) {
-      setAddProductError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setAddProductLoading(false);
-    }
-  };
-
-
-  const handleUpdateProduct = async (
-    e: React.FormEvent,
-    productId: string,
-    data: ProductFormData,
-    image: File | null,
-    resetImage: () => void
-  ) => {
-    e.preventDefault();
-    setEditProductLoading(true);
-    setEditProductError(null);
-
-    try {
-      let imageBase64: string | null = null;
-      if (image) {
-        const reader = new FileReader();
-        imageBase64 = await new Promise<string>((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(image);
-        });
-      }
-
-      const productData = {
-        name: data.name,
-        description: data.description,
-        price: data.price, // Keep as string to match ProductFormData and Product interface
-        formerPrice: data.formerPrice, // Keep as string
-        discount: data.discount ? parseInt(data.discount) : 0,
-        phoneNumber: data.phoneNumber,
-        image: imageBase64,
-      };
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(productData),
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setEditProductError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update product");
-      }
-
-      const updatedProduct: Product = await response.json();
-
-      // Validate the updated product
-      if (!updatedProduct._id || !updatedProduct.name) {
-        throw new Error("Invalid product data received from server");
-      }
-
-      // Ensure price and formerPrice are strings to match Product interface
-      const normalizedProduct: Product = {
-        ...updatedProduct,
-        price: String(updatedProduct.price),
-        formerPrice: String(updatedProduct.formerPrice),
-        image: updatedProduct.image || undefined,
-        vendor:
-          typeof updatedProduct.vendor === "string"
-            ? updatedProduct.vendor
-            : updatedProduct.vendor || "",
-        event:
-          typeof updatedProduct.event === "string"
-            ? updatedProduct.event
-            : updatedProduct.event || params.eventId,
-      };
-
-      // Update the products state
-      setProducts((prevProducts) =>
-        prevProducts.map((p) =>
-          p._id === productId
-            ? {
-                ...p,
-                ...normalizedProduct,
-                image: normalizedProduct.image || p.image, // Preserve existing image if not updated
-                vendor: normalizedProduct.vendor || p.vendor, // Preserve existing vendor
-                event: normalizedProduct.event || p.event, // Preserve existing event
-              }
-            : p
-        )
-      );
-
-      // Optional: Refetch products to ensure consistency
-      try {
-        const productsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}/products`,
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/vendors`,
           {
+            method: "POST",
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify(vendorData),
           }
         );
 
-        if (productsResponse.status === 401) {
+        if (response.status === 401) {
           logout();
-          setEditProductError("Session expired. Please log in again.");
-          router.push("/auth/login");
+          // setAddVendorError("Session expired. Please log in again.");
+          // router.push("/auth/login");
           return;
         }
 
-        if (!productsResponse.ok) {
-          console.warn("Failed to refetch products, using local state");
-        } else {
-          const productsData: Product[] = await productsResponse.json();
-          setProducts(
-            productsData.map((p) => ({
-              ...p,
-              price: String(p.price),
-              formerPrice: String(p.formerPrice),
-            }))
-          );
-        }
-      } catch (refetchErr) {
-        console.warn("Refetch error:", refetchErr);
-      }
-
-      resetImage();
-      setEditingProduct(null);
-    } catch (err) {
-      setEditProductError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      setEditProductLoading(false);
-    }
-  };
-
-  // const handleUpdateProduct = async (
-  //   e: React.FormEvent,
-  //   productId: string,
-  //   data: ProductFormData,
-  //   image: File | null,
-  //   resetImage: () => void
-  // ) => {
-  //   e.preventDefault();
-  //   setEditProductLoading(true);
-  //   setEditProductError(null);
-
-  //   try {
-  //     let imageBase64: string | null = null;
-  //     if (image) {
-  //       const reader = new FileReader();
-  //       imageBase64 = await new Promise<string>((resolve) => {
-  //         reader.onload = () => resolve(reader.result as string);
-  //         reader.readAsDataURL(image);
-  //       });
-  //     }
-
-  //     const productData = {
-  //       name: data.name,
-  //       description: data.description,
-  //       price: parseFloat(data.price),
-  //       formerPrice: parseFloat(data.formerPrice),
-  //       discount: data.discount ? parseInt(data.discount) : 0,
-  //       phoneNumber: data.phoneNumber,
-  //       image: imageBase64,
-  //     };
-
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
-  //       {
-  //         method: "PUT",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: JSON.stringify(productData),
-  //       }
-  //     );
-
-  //     if (response.status === 401) {
-  //       logout();
-  //       setEditProductError("Session expired. Please log in again.");
-  //       router.push("/auth/login");
-  //       return;
-  //     }
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.message || "Failed to update product");
-  //     }
-
-  //     const updatedProduct: Product = await response.json();
-  //     setProducts(
-  //       products.map((p) => (p._id === productId ? updatedProduct : p))
-  //     );
-  //     resetImage();
-  //     setEditingProduct(null);
-  //   } catch (err) {
-  //     setEditProductError(
-  //       err instanceof Error ? err.message : "An unknown error occurred"
-  //     );
-  //   } finally {
-  //     setEditProductLoading(false);
-  //   }
-  // };
-
-  const handleDeleteProduct = async (productId: string) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-    // setAddProductLoading(true);
-    setAddProductError(null);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.status === 401) {
-        logout();
-        setAddProductError("Session expired. Please log in again.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete product");
-      }
-
-      setProducts(products.filter((product) => product._id !== productId));
-    } catch (err) {
-      setAddProductError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
-    } finally {
-      // setAddProductLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [eventResponse, winnersResponse, productsResponse] =
-          await Promise.all([
-            fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            ),
-            fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            ),
-            fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}/products`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            ),
-          ]);
-
-        if (
-          eventResponse.status === 401 ||
-          winnersResponse.status === 401 ||
-          productsResponse.status === 401
-        ) {
-          logout();
-          setError("Session expired. Please log in again.");
-          router.push("/auth/login");
-          return;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to add vendor: HTTP ${response.status}`);
         }
 
-        if (!eventResponse.ok) {
-          const errorData = await eventResponse.json();
-          throw new Error(
-            errorData.message ||
-              `Failed to fetch event (Status: ${eventResponse.status})`
-          );
-        }
-        if (!winnersResponse.ok) {
-          const errorData = await winnersResponse.json();
-          throw new Error(
-            errorData.message ||
-              `Failed to fetch winners (Status: ${winnersResponse.status})`
-          );
-        }
-        if (!productsResponse.ok) {
-          const errorData = await productsResponse.json();
-          throw new Error(
-            errorData.message ||
-              `Failed to fetch products (Status: ${productsResponse.status})`
-          );
-        }
-
-        const eventData: Event = await eventResponse.json();
-        const winnersData: Winner[] = await winnersResponse.json();
-        const productsData: Product[] = await productsResponse.json();
-        setEvent(eventData);
-        setVendors(
-          Array.isArray(eventData.vendors) &&
-            eventData.vendors.every((v) => typeof v !== "string")
-            ? eventData.vendors
-            : null
-        );
-        setProducts(productsData);
-        setWinners(winnersData);
+        const newVendorData: Vendor = await response.json();
+        setVendors(vendors ? [...vendors, newVendorData] : [newVendorData]);
+        setNewVendor({ name: "", url: "", email: "" });
+        resetLogo();
       } catch (err) {
-        console.error("Fetch error:", err);
-        setError(
+        setAddVendorError(
           err instanceof Error ? err.message : "An unknown error occurred"
         );
       } finally {
-        setLoading(false);
+        setAddVendorLoading(false);
       }
-    };
+    },
+    [vendors, newVendor, token, logout, router, params.eventId]
+  );
 
-    if (!authLoading && token) {
-      fetchData();
-    } else if (!authLoading && !token) {
-      setError("No authentication token available");
+  const handleUpdateVendor = useCallback(
+    async (
+      e: React.FormEvent,
+      vendorId: string,
+      data: { name: string; url: string; email?: string },
+      logo: File | null,
+      resetLogo: () => void
+    ) => {
+      e.preventDefault();
+      setEditVendorLoading(true);
+      setEditVendorError(null);
+
+      try {
+        let logoBase64: string | null = null;
+        if (logo) {
+          const reader = new FileReader();
+          logoBase64 = await new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(logo);
+          });
+        }
+
+        const vendorData = {
+          name: data.name,
+          url: data.url,
+          email: data.email || undefined,
+          image: logoBase64,
+        };
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(vendorData),
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setEditVendorError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to update vendor: HTTP ${response.status}`);
+        }
+
+        const updatedVendor: Vendor = await response.json();
+        setVendors(
+          vendors
+            ? vendors.map((v) => (v._id === vendorId ? updatedVendor : v))
+            : [updatedVendor]
+        );
+        resetLogo();
+        setEditingVendor(null);
+      } catch (err) {
+        setEditVendorError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setEditVendorLoading(false);
+      }
+    },
+    [vendors, token, logout, router]
+  );
+
+  const handleDeleteVendor = useCallback(
+    async (vendorId: string) => {
+      if (!window.confirm("Are you sure you want to delete this vendor?")) return;
+      setAddVendorLoading(true);
+      setAddVendorError(null);
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/vendors/${vendorId}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setAddVendorError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to delete vendor: HTTP ${response.status}`);
+        }
+
+        setVendors(
+          vendors ? vendors.filter((vendor) => vendor._id !== vendorId) : null
+        );
+
+        const updatedResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (updatedResponse.status === 401) {
+          logout();
+          // setAddVendorError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!updatedResponse.ok) {
+          const errorData = await updatedResponse.json();
+          throw new Error(errorData.message || `Failed to fetch updated event: HTTP ${updatedResponse.status}`);
+        }
+
+        const updatedData: Event = await updatedResponse.json();
+        setEvent(updatedData);
+      } catch (err) {
+        setAddVendorError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setAddVendorLoading(false);
+      }
+    },
+    [vendors, token, logout, router, params.eventId]
+  );
+
+  const handleAddPrize = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setPrizeLoading(true);
+      setPrizeError(null);
+
+      try {
+        const prizeData: NewPrizeData = {
+          prize: newPrize,
+          maxWins: newMaxWins,
+          winCount: 0,
+          redeemInfo: newRedeemInfo,
+          eventId: params.eventId,
+          vendorId: selectedVendor || undefined,
+        };
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/prizes`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(prizeData),
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setPrizeError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to add prize: HTTP ${response.status}`);
+        }
+
+        const updatedResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (updatedResponse.status === 401) {
+          logout();
+          // setPrizeError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!updatedResponse.ok) {
+          const errorData = await updatedResponse.json();
+          throw new Error(errorData.message || `Failed to fetch updated event: HTTP ${updatedResponse.status}`);
+        }
+
+        const updatedData: Event = await updatedResponse.json();
+        setEvent(updatedData);
+        setNewPrize("");
+        setNewMaxWins(1);
+        setNewRedeemInfo("");
+        setSelectedVendor(null);
+      } catch (err) {
+        setPrizeError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setPrizeLoading(false);
+      }
+    },
+    [
+      newPrize,
+      newMaxWins,
+      newRedeemInfo,
+      selectedVendor,
+      token,
+      logout,
+      router,
+      params.eventId,
+    ]
+  );
+
+  const handleEditPrize = useCallback(
+    async (e: React.FormEvent, prizeId: string) => {
+      e.preventDefault();
+      setPrizeLoading(true);
+      setPrizeError(null);
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/prizes/${prizeId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              prize: editPrizeName,
+              maxWins: editMaxWins,
+              redeemInfo: editRedeemInfo,
+            }),
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setPrizeError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to update prize: HTTP ${response.status}`);
+        }
+
+        const updatedResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (updatedResponse.status === 401) {
+          logout();
+          // setPrizeError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!updatedResponse.ok) {
+          const errorData = await updatedResponse.json();
+          throw new Error(errorData.message || `Failed to fetch updated event: HTTP ${updatedResponse.status}`);
+        }
+
+        const updatedData: Event = await updatedResponse.json();
+        setEvent(updatedData);
+        setEditingPrizeId(null);
+        setEditPrizeName("");
+        setEditMaxWins(1);
+        setEditRedeemInfo("");
+      } catch (err) {
+        setPrizeError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setPrizeLoading(false);
+      }
+    },
+    [
+      editPrizeName,
+      editMaxWins,
+      editRedeemInfo,
+      token,
+      logout,
+      router,
+      params.eventId,
+    ]
+  );
+
+  const handleDeletePrize = useCallback(
+    async (prizeId: string) => {
+      if (!window.confirm("Are you sure you want to delete this prize?")) return;
+      setPrizeLoading(true);
+      setPrizeError(null);
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/prizes/${prizeId}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setPrizeError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to delete prize: HTTP ${response.status}`);
+        }
+
+        const updatedResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (updatedResponse.status === 401) {
+          logout();
+          // setPrizeError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!updatedResponse.ok) {
+          const errorData = await updatedResponse.json();
+          throw new Error(errorData.message || `Failed to fetch updated event: HTTP ${updatedResponse.status}`);
+        }
+
+        const updatedData: Event = await updatedResponse.json();
+        setEvent(updatedData);
+      } catch (err) {
+        setPrizeError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setPrizeLoading(false);
+      }
+    },
+    [token, logout, router, params.eventId]
+  );
+
+  const handleAddProduct = useCallback(
+    async (
+      e: React.FormEvent,
+      data: ProductFormData,
+      image: File | null,
+      resetImage: () => void
+    ) => {
+      e.preventDefault();
+      if (products.length >= 3) {
+        setAddProductError("Maximum of 3 products reached for this event");
+        return;
+      }
+      setAddProductLoading(true);
+      setAddProductError(null);
+
+      try {
+        let imageBase64: string | null = null;
+        if (image) {
+          const reader = new FileReader();
+          imageBase64 = await new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(image);
+          });
+        }
+
+        const productData = {
+          name: data.name,
+          description: data.description,
+          price: parseFloat(data.price),
+          formerPrice: parseFloat(data.formerPrice),
+          discount: data.discount ? parseInt(data.discount) : 0,
+          phoneNumber: data.phoneNumber,
+          image: imageBase64,
+          eventId: params.eventId,
+        };
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/products`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(productData),
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setAddProductError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to add product: HTTP ${response.status}`);
+        }
+
+        const createdProduct: Product = await response.json();
+        setProducts([...products, createdProduct]);
+        resetImage();
+      } catch (err) {
+        setAddProductError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setAddProductLoading(false);
+      }
+    },
+    [products, token, logout, router, params.eventId]
+  );
+
+  const handleUpdateProduct = useCallback(
+    async (
+      e: React.FormEvent,
+      productId: string,
+      data: ProductFormData,
+      image: File | null,
+      resetImage: () => void
+    ) => {
+      e.preventDefault();
+      setEditProductLoading(true);
+      setEditProductError(null);
+
+      try {
+        let imageBase64: string | null = null;
+        if (image) {
+          const reader = new FileReader();
+          imageBase64 = await new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(image);
+          });
+        }
+
+        const productData = {
+          name: data.name,
+          description: data.description,
+          price: data.price, // Keep as string to match ProductFormData and Product interface
+          formerPrice: data.formerPrice, // Keep as string
+          discount: data.discount ? parseInt(data.discount) : 0,
+          phoneNumber: data.phoneNumber,
+          image: imageBase64,
+        };
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(productData),
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setEditProductError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to update product: HTTP ${response.status}`);
+        }
+
+        const updatedProduct: Product = await response.json();
+
+        // Validate the updated product
+        if (!updatedProduct._id || !updatedProduct.name) {
+          throw new Error("Invalid product data received from server");
+        }
+
+        // Ensure price and formerPrice are strings to match Product interface
+        const normalizedProduct: Product = {
+          ...updatedProduct,
+          price: String(updatedProduct.price),
+          formerPrice: String(updatedProduct.formerPrice),
+          image: updatedProduct.image || undefined,
+          vendor:
+            typeof updatedProduct.vendor === "string"
+              ? updatedProduct.vendor
+              : updatedProduct.vendor || "",
+          event:
+            typeof updatedProduct.event === "string"
+              ? updatedProduct.event
+              : updatedProduct.event || params.eventId,
+        };
+
+        // Update the products state
+        setProducts((prevProducts) =>
+          prevProducts.map((p) =>
+            p._id === productId
+              ? {
+                  ...p,
+                  ...normalizedProduct,
+                  image: normalizedProduct.image || p.image,
+                  vendor: normalizedProduct.vendor || p.vendor,
+                  event: normalizedProduct.event || p.event,
+                }
+              : p
+          )
+        );
+
+        // Optional: Refetch products to ensure consistency
+        try {
+          const productsResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}/products`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (productsResponse.status === 401) {
+            logout();
+            // setEditProductError("Session expired. Please log in again.");
+            // router.push("/auth/login");
+            return;
+          }
+
+          if (!productsResponse.ok) {
+            console.warn("Failed to refetch products, using local state");
+          } else {
+            const productsData: Product[] = await productsResponse.json();
+            setProducts(
+              productsData.map((p) => ({
+                ...p,
+                price: String(p.price),
+                formerPrice: String(p.formerPrice),
+              }))
+            );
+          }
+        } catch (refetchErr) {
+          console.warn("Refetch error:", refetchErr);
+        }
+
+        resetImage();
+        setEditingProduct(null);
+      } catch (err) {
+        setEditProductError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setEditProductLoading(false);
+      }
+    },
+    [products, token, logout, router, params.eventId]
+  );
+
+  const handleDeleteProduct = useCallback(
+    async (productId: string) => {
+      if (!window.confirm("Are you sure you want to delete this product?")) return;
+      setAddProductLoading(true);
+      setAddProductError(null);
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.status === 401) {
+          logout();
+          // setAddProductError("Session expired. Please log in again.");
+          // router.push("/auth/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to delete product: HTTP ${response.status}`);
+        }
+
+        setProducts(products.filter((product) => product._id !== productId));
+      } catch (err) {
+        setAddProductError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setAddProductLoading(false);
+      }
+    },
+    [products, token, logout, router]
+  );
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [eventResponse, winnersResponse, productsResponse] =
+        await Promise.all([
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/winners/${params.eventId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.eventId}/products`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
+        ]);
+
+      if (
+        eventResponse.status === 401 ||
+        winnersResponse.status === 401 ||
+        productsResponse.status === 401
+      ) {
+        logout();
+        // setError("Session expired. Please log in again.");
+        // router.push("/auth/login");
+        return;
+      }
+
+      if (!eventResponse.ok) {
+        const errorData = await eventResponse.json();
+        throw new Error(
+          errorData.message ||
+            `Failed to fetch event (Status: ${eventResponse.status})`
+        );
+      }
+      if (!winnersResponse.ok) {
+        const errorData = await winnersResponse.json();
+        throw new Error(
+          errorData.message ||
+            `Failed to fetch winners (Status: ${winnersResponse.status})`
+        );
+      }
+      if (!productsResponse.ok) {
+        const errorData = await productsResponse.json();
+        throw new Error(
+          errorData.message ||
+            `Failed to fetch products (Status: ${productsResponse.status})`
+        );
+      }
+
+      const eventData: Event = await eventResponse.json();
+      const winnersData: Winner[] = await winnersResponse.json();
+      const productsData: Product[] = await productsResponse.json();
+      setEvent(eventData);
+      setVendors(
+        Array.isArray(eventData.vendors) &&
+          eventData.vendors.every((v) => typeof v !== "string")
+          ? eventData.vendors
+          : null
+      );
+      setProducts(
+        productsData.map((p) => ({
+          ...p,
+          price: String(p.price),
+          formerPrice: String(p.formerPrice),
+        }))
+      );
+      setWinners(winnersData);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
       setLoading(false);
-      router.push("/auth/login");
     }
-  }, [params.eventId, token, authLoading, router, logout]);
+  }, [params.eventId, token, logout, router]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (token) {
+      fetchData();
+    } else {
+      // setError("No authentication token available");
+      setLoading(false);
+      // router.push("/auth/login");
+    }
+  }, [authLoading, token, fetchData, router]);
 
   if (authLoading) return <div className="p-6 text-gray-800">Loading...</div>;
   if (loading)

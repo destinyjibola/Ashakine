@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -118,20 +119,7 @@ export default function Overview() {
   const [redeemError, setRedeemError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    if (!authLoading && !token) {
-      setError("No authentication token available");
-      setLoading(false);
-      router.push("/auth/login");
-      return;
-    }
-
-    if (!authLoading && token) {
-      fetchOverviewData();
-    }
-  }, []);
-
-  const fetchOverviewData = async () => {
+  const fetchOverviewData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -140,25 +128,31 @@ export default function Overview() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const data = await response.json();
-      if (data.success) {
-        setOverview(data.data || null);
-      }
 
       if (response.status === 401) {
         logout();
-        setRedeemError("Session expired. Please log in again.");
+        setError("Session expired. Please log in again.");
         router.push("/auth/login");
         return;
       }
 
-      setLoading(false);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setOverview(data.data || null);
+      } else {
+        throw new Error(data.message || "Failed to fetch overview data");
+      }
     } catch (error) {
       console.error("Error fetching overview data:", error);
-      setError("Failed to load overview data");
+      setError(error instanceof Error ? error.message : "Failed to load overview data");
+    } finally {
       setLoading(false);
     }
-  };
+  }, [token, setLoading, setError, logout, router]);
 
   const handleRedeemPrize = async (winner: Winner) => {
     setCurrentWinner(winner);
@@ -218,6 +212,14 @@ export default function Overview() {
       );
     }
   };
+
+  useEffect(() => {
+    if (authLoading) return; // Wait for AuthContext to finish loading
+
+    if (token) {
+      fetchOverviewData();
+    }
+  }, [authLoading, token, fetchOverviewData]);
 
   const filteredWinners =
     overview?.recentWinners?.filter((winner) =>
